@@ -35,7 +35,7 @@
 </div>
 
 <div class="index-about">
-    <i> 望天之徊，即之云昏 </i>
+    <i> 望之天迴，即之云昏 </i>
 </div>
 
 <div class="index-container">
@@ -89,7 +89,7 @@
     </div>
     
         <div id="toc" class="toc-article">
-    
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vert-x部分概念"><span class="toc-text">Vert.x部分概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Vertx实例"><span class="toc-text">Vertx实例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Vertx创建"><span class="toc-text">Vertx创建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#配置Vertx"><span class="toc-text">配置Vertx</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Event-Loop"><span class="toc-text">Event Loop</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Handler"><span class="toc-text">Handler</span></a></li></ol></li></ol>
 </div>
     
 </div>
@@ -109,7 +109,7 @@
 </div>
 
         <div class="index-about-mobile">
-            <i> 望天之徊，即之云昏 </i>
+            <i> 望之天迴，即之云昏 </i>
         </div>
     </div>
     
@@ -141,7 +141,41 @@
 </span>
     </div>
     <div class="post-content ">
-        <p>Vert.x是Eclipes公司所研发的用于在JVM上构建响应式应用程序的工具包。</p>
+        <p>Vert.x是Eclipes公司所研发的用于在JVM上构建响应式应用程序的工具包。正如该描述所表示的一样，Vert.x并不是一个框架而是一个工具包。</p>
+<p>优点：</p>
+<ul>
+<li><strong>基于事件驱动且非阻塞。</strong></li>
+<li><strong>多语言支持。包括Java，JavaScript，Groovy，Ruby，Ceylon，Scala和Kotlin</strong></li>
+<li><strong>轻巧。Vert.x内核约为650KB</strong></li>
+<li><strong>非应用程序服务器。你可以将Vert.x运行在任何需要的地方。</strong></li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li><strong>难上手。异步编程跟一般的编程有许多不同。</strong></li>
+</ul>
+<p>让我们先来看一个简单的demo</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyVerticle</span> <span class="keyword">extends</span> <span class="title">AbstractVerticle</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        vertx.createHttpServer()</span><br><span class="line">                .requestHandler(req -&gt; &#123;</span><br><span class="line">                    req.response().end(<span class="string">"hello"</span>);</span><br><span class="line">                &#125;)</span><br><span class="line">                .listen(<span class="number">8080</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Start</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        Vertx vertx = Vertx.vertx();</span><br><span class="line"></span><br><span class="line">        vertx.deployVerticle(MyVerticle.class.getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在运行之后会在8080端口开启一个web服务，并且会返回<code>&quot;hello&quot;</code>字符。</p>
+<p>现在让我们从这个demo开始了解Vert.x。</p>
+<h2 id="Vert-x部分概念"><a href="#Vert-x部分概念" class="headerlink" title="Vert.x部分概念"></a>Vert.x部分概念</h2><p>这只是一个初步认识的文章，因此只会讲解几个常用的概念，更多的可以前往<a href="https://vertx.io/docs/" target="_blank" rel="noopener">官方文档</a>进行了解。当然也有翻译好的<a href="http://vertxchina.github.io/vertx-translation-chinese/" target="_blank" rel="noopener">中文文档</a>。</p>
+<h3 id="Vertx实例"><a href="#Vertx实例" class="headerlink" title="Vertx实例"></a>Vertx实例</h3><p>Vertx实例是Vertx的控制中心，如果我们没有vertx实例的话许多事情都做不了。它是一切事物的基础，包括创建客户端和服务器、获取事件总线的引用、设置定时器等等。<br></p>
+<h4 id="Vertx创建"><a href="#Vertx创建" class="headerlink" title="Vertx创建"></a>Vertx创建</h4><p>vertx实例的创建也是非常简单<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Vertx vertx = Vertx.vertx();</span><br></pre></td></tr></table></figure></p>
+<h4 id="配置Vertx"><a href="#配置Vertx" class="headerlink" title="配置Vertx"></a>配置Vertx</h4><p>我们也可以在创建vertx实例的时候指定配置项<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Vertx vertx = Vertx.vertx(<span class="keyword">new</span> VertxOptions().setWorkerPoolSize(<span class="number">40</span>));</span><br></pre></td></tr></table></figure></p>
+<p>VertxOptions有很多配置，包括集群、高可用、池大小等。可以在<a href="https://vertx.io/docs/apidocs/io/vertx/core/VertxOptions.html" target="_blank" rel="noopener">Javadoc</a>中了解相关细节。</p>
+<h3 id="Event-Loop"><a href="#Event-Loop" class="headerlink" title="Event Loop"></a>Event Loop</h3><p>Vertx使用被称之为Event Loop的线程调用我们的处理器，正如前面所说的Vertx是基于事件驱动的非阻塞工具。我们在将主要的业务逻辑通过Handler编写完成后，就是通过Event Loop进行调用。由于Vertx或我们的应用程序中没有阻塞块，因此Event Loop可以快速的将各个事件分发给对应的处理器，从而在短时间内处理大量的事件。</p>
+<blockquote>
+<p>据官方所说，一个Event Loop可以在短时间内处理上千个HTTP请求。</p>
+</blockquote>
+<p>一个Event Loop只能在任意时刻运行在一个核上，如果我们希望充分利用CPU资源的话，可以对Vertx进行相关配置，使得一个Vertx实例维护多个Event Loop线程，这种方式称之<strong>Multi-Reactor 模式</strong>，而维护一个Event Loop线程的方式称之为<strong>Reactor 模式</strong>。实现Multi-Reactor 模式也非常简单<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Start</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        Vertx vertx = Vertx.vertx(<span class="keyword">new</span> VertxOptions()</span><br><span class="line">                .setEventLoopPoolSize(Runtime.getRuntime().availableProcessors() + <span class="number">1</span>));</span><br><span class="line">        vertx.deployVerticle(FirstVerticle.class.getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>setEventLoopPoolSize(int)</code>方法即设置Event Loop线程个数。</p>
+<blockquote>
+<p>线程个数为处理器个数+1的原因是当一个线程出现问题时可以有一个备用线程可以及时补上。当然也可以直接设置为处理器的个数。</p>
+</blockquote>
+<h3 id="Handler"><a href="#Handler" class="headerlink" title="Handler"></a>Handler</h3><p>这是我们使用Vertx的时候接触最多的组件，几乎所有的业务逻辑都是编写在处理器中并让Event Loop进行调用。处理器用于处理各个相关的事件，并且是线程安全的，永远不会被并发执行。</p>
+<blockquote>
+<p>可以说我们整个应用程序的逻辑都是用一个又一个处理器所组成的。而连接各个处理器的就是事件。</p>
+</blockquote>
 
         
         <br />
