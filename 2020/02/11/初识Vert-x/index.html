@@ -176,6 +176,8 @@
 <blockquote>
 <p>可以说我们整个应用程序的逻辑都是用一个又一个处理器所组成的。而连接各个处理器的就是事件。</p>
 </blockquote>
+<p>通过前面的demo我们可以看到，程序的入口是一个继承了<code>AbstractVerticle</code>抽象类的对象，这样就使得我们所有的业务代码都处于Vertx的掌控之中，这样还有一个好处就是方便Vertx诊断你的代码执行时间，在Vertx中，如果你的某部分代码执行时间过长它会在日志中打印警告信息。就像下面这样<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">警告: Thread Thread[vert.x-eventloop-thread-0,5,main]=Thread[vert.x-eventloop-thread-0,5,main] has been blocked <span class="keyword">for</span> 2858 ms, time <span class="built_in">limit</span> is 2000 ms</span><br></pre></td></tr></table></figure></p>
+<p>在Vertx中方法或者说处理器的执行时间通常在2s以内属于正常范围。超过了它会给你警告方便我们排查优化。</p>
 
         
         <br />
