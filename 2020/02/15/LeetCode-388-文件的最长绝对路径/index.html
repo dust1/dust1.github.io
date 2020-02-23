@@ -131,6 +131,9 @@
         <a class="tag" href="/tags/#LeetCode算法题" title="LeetCode算法题">LeetCode算法题</a>
         <span>/</span>
         
+        <a class="tag" href="/tags/#算法" title="算法">算法</a>
+        <span>/</span>
+        
         
         </span>
         <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
@@ -168,6 +171,7 @@
 <p>创建数组用于保存对应层数时的绝对路径长度，将字符串根据 <code>\n</code> 进行分组，遍历数组判断当前字符串属于哪一层，如果文件名包含 <code>.</code> 则将上一层路径长度加上当前文件名长度去和当前最大的绝对路径长度进行比较并保留最大值。如果是文件夹则将当前路径长度存入。</p>
 </blockquote>
 <h2 id="解"><a href="#解" class="headerlink" title="解"></a>解</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">lengthLongestPath</span><span class="params">(String input)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> res = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span>[] sum = <span class="keyword">new</span> <span class="keyword">int</span>[input.length() + <span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (String s : input.split(<span class="string">"\n"</span>)) &#123;</span><br><span class="line">        <span class="comment">//层数，从1开始</span></span><br><span class="line">        <span class="keyword">int</span> level = s.lastIndexOf(<span class="string">"\t"</span>) + <span class="number">2</span>;</span><br><span class="line">        <span class="comment">//这行字符串的长度</span></span><br><span class="line">        <span class="keyword">int</span> len = s.length() - level + <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (s.contains(<span class="string">"."</span>)) &#123;</span><br><span class="line">            <span class="comment">//已经到达文件末尾</span></span><br><span class="line">            res = Math.max(res, sum[level - <span class="number">1</span>] + len);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            sum[level] = sum[level - <span class="number">1</span>] + len + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
         
         <br />
         <div id="comment-container">
