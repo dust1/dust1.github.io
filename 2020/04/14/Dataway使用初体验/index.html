@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        Dataway使用初体验 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#什么是Dataway？"><span class="toc-text">什么是Dataway？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用步骤"><span class="toc-text">使用步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-引入依赖"><span class="toc-text">1. 引入依赖</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-配置"><span class="toc-text">2. 配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#呈现结果"><span class="toc-text">呈现结果</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用心得"><span class="toc-text">使用心得</span></a></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        Dataway使用初体验
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2020-04-14 22:39:57</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#‘杂谈’" title="‘杂谈’">‘杂谈’</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p>今天意外找到了一个直接在ui上就能添加api接口的工具Dataway。感觉很有用于是按照demo操作了一下，下面记录一下步骤以及使用体会。</p>
+<h3 id="什么是Dataway？"><a href="#什么是Dataway？" class="headerlink" title="什么是Dataway？"></a>什么是Dataway？</h3><blockquote>
+<p>Dataway 是基于 DataQL 服务聚合能力，为应用提供的一个接口配置工具。使得使用者无需开发任何代码就配置一个满足需求的接口。 整个接口配置、测试、冒烟、发布。一站式都通过 Dataway 提供的 UI 界面完成。UI 会以 Jar 包方式提供并集成到应用中并和应用共享同一个 http 端口，应用无需单独为 Dataway 开辟新的管理端口。</p>
+</blockquote>
+<p>我就直接引用官方的介绍好了，简单的说就是一款通过UI进行接口配置开发的工具。</p>
+<p>最重要的一点<strong>可以直接嵌入项目</strong>，这就使得这个工具对老项目十分好用，我们可以不需要看老项目的代码，只需要找到老项目对应的表即可，不过这点就看人了吧，毕竟如果是未接触过的老项目，在没有文档的情况下看懂表结构跟看懂代码的难度差不多，不过还是表结构略胜一筹，毕竟表结构不需要各种代码逻辑。</p>
+<p>不过如果是那种自己编写并设计表结构的项目就明显是使用Dataway占优了（滑稽）。</p>
+<h3 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h3><h4 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1. 引入依赖"></a>1. 引入依赖</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>net.hasor<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hasor-spring<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.1.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>net.hasor<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hasor-dataway<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.1.3-fix20200414<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="2-配置"><a href="#2-配置" class="headerlink" title="2. 配置"></a>2. 配置</h4><p>我是在springboot中进行配置。如果是springmvc则需要通过XML进行配置</p>
+<p>基础配置：<br><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 是否启用 Dataway 功能（必选：默认false）</span></span><br><span class="line"><span class="attr">HASOR_DATAQL_DATAWAY</span>=<span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 是否开启 Dataway 后台管理界面（必选：默认false）</span></span><br><span class="line"><span class="attr">HASOR_DATAQL_DATAWAY_ADMIN</span>=<span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># dataway  API工作路径（可选，默认：/api/）</span></span><br><span class="line"><span class="attr">HASOR_DATAQL_DATAWAY_API_URL</span>=/api/</span><br><span class="line"></span><br><span class="line"><span class="comment"># dataway-ui 的工作路径（可选，默认：/interface-ui/）</span></span><br><span class="line"><span class="attr">HASOR_DATAQL_DATAWAY_UI_URL</span>=/interface-ui/</span><br><span class="line"></span><br><span class="line"><span class="comment"># SQL执行器方言设置（可选，建议设置）</span></span><br><span class="line"><span class="attr">HASOR_DATAQL_FX_PAGE_DIALECT</span>=mysql</span><br></pre></td></tr></table></figure></p>
+<p>数据源配置：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@DimModule</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExampleModule</span> <span class="keyword">implements</span> <span class="title">SpringModule</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> DataSource dataSource;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">loadModule</span><span class="params">(ApiBinder apiBinder)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        apiBinder.installModule(<span class="keyword">new</span> JdbcModule(Level.Full, <span class="keyword">this</span>.dataSource));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>开启Dataway<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableHasor</span>        <span class="comment">//开启Hasor</span></span><br><span class="line"><span class="meta">@EnableHasorWeb</span>     <span class="comment">//开启WebUI界面</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DatawayApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(DatawayApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="呈现结果"><a href="#呈现结果" class="headerlink" title="呈现结果"></a>呈现结果</h4><p>进入的界面如下：</p>
+<p><img src="/img/20200414/d01.png" alt=""></p>
+<p>从左到右从上到下分别是<strong>接口列表</strong>、<strong>接口参数</strong>、<strong>接口返回值</strong>。</p>
+<p>点击上方的<strong>New</strong>进入添加接口页面：</p>
+<p><img src="/img/20200414/d02.png" alt=""></p>
+<p>图1-1中左上方的部分属于设置接口url、请求方式以及接口备注。</p>
+<p><img src="/img/20200414/d03.png" alt="1-1"></p>
+<p>当前只有四种请求方式：分别是GET、POST、PUT、DELETE</p>
+<p>图1-2中区域2属于该接口执行的sql语句，其中请求参数使用<code>${参数名}</code>引入。区域1属于设置区域2所解析的语言格式，我最熟悉的当然还是属SQL语言啦。</p>
+<p><img src="/img/20200414/d05.png" alt=""></p>
+<p>示例效果如下：</p>
+<p><img src="/img/20200414/d06.png" alt=""></p>
+<p>右侧的几个按钮分别是：保存、运行、冒烟测试、发布、查看接口历史、禁止/删除接口</p>
+<p><img src="/img/20200414/d07.png" alt=""></p>
+<p>然后就是请求时的参数配置，该配置使用json格式接收。以及返回结果展示</p>
+<p><img src="/img/20200414/d08.png" alt=""></p>
+<p>这样一个简单的接口就完成了！</p>
+<h3 id="使用心得"><a href="#使用心得" class="headerlink" title="使用心得"></a>使用心得</h3><p>首先，这个作者也说了<code>DataQL 的设计初衷是数据的聚合和转换以及过程中的简单加工，因此它不是编程语言。虽然它具备了一些编程性，对逻辑的处理 DataQL 仅限于简单场景。</code></p>
+<p>因此除非你的项目真的很简单到只有CURD并且请求逻辑也简单到单纯是对数据的CRUD，那么就可以从0开始设计好表结构后全部以Dataway进行接口的设计与管理。</p>
+<p>因此，这个工具用成语比喻的话最适合的就是如虎添翼了，在现有的项目基础上引入Dataway，并进行存取数据的简单操作是最适合的了。</p>
+<p>缺点肯定有，首先就是不存在参数校验，直接是返回错误信息。</p>
+<p><img src="/img/20200414/d09.png" alt=""></p>
+<p>其次是接口安全方面，不知道为什么我就算使用了拦截器或者过滤器依旧拦截不到请求配置为<code>/api/**</code>的请求，这就导致了无法对接口进行代码层面的编辑。查看了他的架构设计图,可能是Dataway部分属于另一个实例所以拦截不到吗？不知道，后面再看了。</p>
+<p><img src="/img/20200414/d10.png" alt=""></p>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>
