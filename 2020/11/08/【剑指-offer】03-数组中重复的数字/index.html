@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        【剑指 offer】03.数组中重复的数字 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#题目描述"><span class="toc-text">题目描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#我的解题"><span class="toc-text">我的解题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#思路"><span class="toc-text">思路</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#结果"><span class="toc-text">结果</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最优解"><span class="toc-text">最优解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#思路-1"><span class="toc-text">思路</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#结果-1"><span class="toc-text">结果</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#复杂度分析"><span class="toc-text">复杂度分析</span></a></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        【剑指 offer】03.数组中重复的数字
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2020-11-08 21:05:42</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#LeetCode算法题" title="LeetCode算法题">LeetCode算法题</a>
+        <span>/</span>
+        
+        <a class="tag" href="/tags/#算法" title="算法">算法</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p>来源：力扣（LeetCode）<br>链接：<a href="https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof" target="_blank" rel="noopener">https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof</a></p>
+<h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>找出数组中重复的数字。</p>
+<p>在一个长度为 n 的数组 nums 里的所有数字都在 0～n-1 的范围内。数组中某些数字是重复的，但不知道有几个数字重复了，也不知道每个数字重复了几次。请找出数组中任意一个重复的数字。</p>
+<p>示例 1：</p>
+<blockquote>
+<p>输入：<br>[2, 3, 1, 0, 2, 5, 3]<br>输出：2 或 3<br>输入：<br>[2, 3, 1, 0, 2, 5, 3]<br>输出：2 或 3 </p>
+</blockquote>
+<p>限制：</p>
+<blockquote>
+<p>2 &lt;= n &lt;= 100000</p>
+</blockquote>
+<h3 id="我的解题"><a href="#我的解题" class="headerlink" title="我的解题"></a>我的解题</h3><h4 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h4><p>首先，其中的数字大小限定在0～n-1的范围内，既然给定了大小，那么直接创建对应长度的数组，即<em>int[] list = new int[nums.length]</em>，然后遍历数组nums，取出结果n,并将n作为下标在list数组中+1，如果结果大于1则表示当前n重复出现。</p>
+<p>这里其实就应用了空间换时间的策略，通过创建对应length的数组来加快取值过程，当然也可以使用哈希，那么我们就需要创建Set，为了加快速度，可以在创建对象的时候传入初始容量length。</p>
+<h4 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">findRepeatNumber</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] list = <span class="keyword">new</span> <span class="keyword">int</span>[nums.length];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) &#123;</span><br><span class="line">            <span class="keyword">int</span> n = nums[i];</span><br><span class="line">            list[n]++;</span><br><span class="line">            <span class="keyword">if</span> (list[n] &gt; <span class="number">1</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> n;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="最优解"><a href="#最优解" class="headerlink" title="最优解"></a>最优解</h3><h4 id="思路-1"><a href="#思路-1" class="headerlink" title="思路"></a>思路</h4><p> 由于数字大小的范围是0～n-1，刚好数数组的下标对应，我们可以通过某些操作将值与下标对应，一旦某个索引的值不是一个，则找到了重复的数组，即发生了哈希碰撞。</p>
+<h4 id="结果-1"><a href="#结果-1" class="headerlink" title="结果"></a>结果</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">findRepeatNumber</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//设索引初始值为 i = 0</span></span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">        <span class="comment">//遍历整个数组 nums </span></span><br><span class="line">        <span class="keyword">while</span>(i &lt; nums.length) &#123;</span><br><span class="line">            <span class="comment">//索引 i 的值为 i,无需执行交换操作，查看下一位</span></span><br><span class="line">            <span class="keyword">if</span>(nums[i] == i) &#123;</span><br><span class="line">                i++;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//索引 nums[i] 处的值也为 nums[i]，即找到一组相同值，返回 nums[i] 即可</span></span><br><span class="line">            <span class="keyword">if</span>(nums[nums[i]] == nums[i]) <span class="keyword">return</span> nums[i];</span><br><span class="line">            <span class="comment">//执行交换操作，目的是为了使索引与值一一对应，即索引 0 的值为 0，索引 1 的值为 1</span></span><br><span class="line">            <span class="keyword">int</span> tmp = nums[i];</span><br><span class="line">            nums[i] = nums[tmp];</span><br><span class="line">            nums[tmp] = tmp;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//如果遍历整个数组都没有找到相同的值，返回 -1</span></span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="复杂度分析"><a href="#复杂度分析" class="headerlink" title="复杂度分析"></a>复杂度分析</h3><p>遍历数组需要O(n)的时间。</p>
+<p>在代码中的<em>continue</em>，这表示在while的一次循环中里只有这次循环将 索引(i) 与 索引值(num[i]) 匹配到了，才会执行下一次循环。</p>
+<p>在每一次的循环过程中，索引(i) 与 索引值(num[i]) 匹配到后，在后续的循环过程中不会操作它们，所以虽然一开始的循环过程中，执行的交换操作较多，但在后续的循环过程中根本不需要再执行操作了。</p>
+<p>根据均摊复杂度分析 ，总的时间复杂度为 O(N) ，N 为数组的长度。</p>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>

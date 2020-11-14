@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        【剑指 offer】07. 重建二叉树 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#题目描述"><span class="toc-text">题目描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#我的解题"><span class="toc-text">我的解题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#思路"><span class="toc-text">思路</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#结果"><span class="toc-text">结果</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最优解"><span class="toc-text">最优解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#思路-1"><span class="toc-text">思路</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#结果-1"><span class="toc-text">结果</span></a></li></ol></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        【剑指 offer】07. 重建二叉树
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2020-11-11 22:32:25</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#LeetCode算法题" title="LeetCode算法题">LeetCode算法题</a>
+        <span>/</span>
+        
+        <a class="tag" href="/tags/#算法" title="算法">算法</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p>来源：力扣（LeetCode）<br>链接：<a href="https://leetcode-cn.com/problems/zhong-jian-er-cha-shu-lcof" target="_blank" rel="noopener">https://leetcode-cn.com/problems/zhong-jian-er-cha-shu-lcof</a></p>
+<h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>输入某二叉树的前序遍历和中序遍历的结果，请重建该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。</p>
+<p>例如，给出</p>
+<blockquote>
+<p>前序遍历 preorder = [3,9,20,15,7]<br>中序遍历 inorder = [9,3,15,20,7]<br>返回如下的二叉树：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">  3</span><br><span class="line"> / \ </span><br><span class="line">9  20 </span><br><span class="line">  /  \ </span><br><span class="line"> 15   7</span><br></pre></td></tr></table></figure>
+<p>限制：</p>
+<blockquote>
+<p>0 &lt;= 节点个数 &lt;= 5000</p>
+</blockquote>
+<h3 id="我的解题"><a href="#我的解题" class="headerlink" title="我的解题"></a>我的解题</h3><h4 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h4><p>首先确定两种遍历方式的区别：</p>
+<ul>
+<li>前序遍历：根节点-&gt;左节点-&gt;右节点</li>
+<li>中序遍历：左节点-&gt;根节点-&gt;右节点</li>
+</ul>
+<p>因此，在中序遍历中，在根节点之前被访问的节点都位于左子树，在根节点之后被访问的节点都位于右子树。同时前序遍历的数据顺序对于跟节点来说，等于如下结构【根节点】【所有左节点】【所有右节点】，因此，在通过跟节点从中序遍历中得到跟节点的左右字节点队列与个数后，能根据左右字节点的数量从前序遍历中分解出左节点队列和右节点队列，到了这步通过迭代即可遍历树。</p>
+<blockquote>
+<p>其实我只到两种遍历的区别，没有第一时间意识到通过宏观的角度将数组分成左右两个节点的队列，太久没有接触树的概念生疏了。</p>
+</blockquote>
+<h4 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for a binary tree node.</span></span><br><span class="line"><span class="comment"> * public class TreeNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     TreeNode left;</span></span><br><span class="line"><span class="comment"> *     TreeNode right;</span></span><br><span class="line"><span class="comment"> *     TreeNode(int x) &#123; val = x; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> TreeNode <span class="title">buildTree</span><span class="params">(<span class="keyword">int</span>[] preorder, <span class="keyword">int</span>[] inorder)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (preorder == <span class="keyword">null</span> || preorder.length == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        Map&lt;Integer, Integer&gt; indexMap = <span class="keyword">new</span> HashMap&lt;Integer, Integer&gt;();</span><br><span class="line">        <span class="keyword">int</span> length = preorder.length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; length; i++) &#123;</span><br><span class="line">            indexMap.put(inorder[i], i);</span><br><span class="line">        &#125;</span><br><span class="line">        TreeNode root = buildTree(preorder, <span class="number">0</span>, length - <span class="number">1</span>, inorder, <span class="number">0</span>, length - <span class="number">1</span>, indexMap);</span><br><span class="line">        <span class="keyword">return</span> root;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> TreeNode <span class="title">buildTree</span><span class="params">(<span class="keyword">int</span>[] preorder, <span class="keyword">int</span> preorderStart, <span class="keyword">int</span> preorderEnd, <span class="keyword">int</span>[] inorder, <span class="keyword">int</span> inorderStart, <span class="keyword">int</span> inorderEnd, Map&lt;Integer, Integer&gt; indexMap)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (preorderStart &gt; preorderEnd) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> rootVal = preorder[preorderStart];</span><br><span class="line">        TreeNode root = <span class="keyword">new</span> TreeNode(rootVal);</span><br><span class="line">        <span class="keyword">if</span> (preorderStart == preorderEnd) &#123;</span><br><span class="line">            <span class="keyword">return</span> root;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">int</span> rootIndex = indexMap.get(rootVal);</span><br><span class="line">            <span class="keyword">int</span> leftNodes = rootIndex - inorderStart, rightNodes = inorderEnd - rootIndex;</span><br><span class="line">            TreeNode leftSubtree = buildTree(preorder, preorderStart + <span class="number">1</span>, preorderStart + leftNodes, inorder, inorderStart, rootIndex - <span class="number">1</span>, indexMap);</span><br><span class="line">            TreeNode rightSubtree = buildTree(preorder, preorderEnd - rightNodes + <span class="number">1</span>, preorderEnd, inorder, rootIndex + <span class="number">1</span>, inorderEnd, indexMap);</span><br><span class="line">            root.left = leftSubtree;</span><br><span class="line">            root.right = rightSubtree;</span><br><span class="line">            <span class="keyword">return</span> root;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="最优解"><a href="#最优解" class="headerlink" title="最优解"></a>最优解</h3><h4 id="思路-1"><a href="#思路-1" class="headerlink" title="思路"></a>思路</h4><p> 第一个通过迭代的思路同上。因此这里介绍另一种方法：<em>迭代</em>。<br> 例如要重建的是如下二叉树。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">        3</span><br><span class="line">       / \</span><br><span class="line">      9  20</span><br><span class="line">     /  /  \</span><br><span class="line">    8  15   7</span><br><span class="line">   / \</span><br><span class="line">  5  10</span><br><span class="line"> /</span><br><span class="line">4</span><br></pre></td></tr></table></figure>
+<p>其前序遍历和中序遍历如下。</p>
+<blockquote>
+<p>preorder = [3,9,8,5,4,10,20,15,7]<br>inorder = [4,5,8,10,9,3,15,20,7]</p>
+</blockquote>
+<p>前序遍历的第一个元素 3 是根节点，第二个元素 9 可能位于左子树或者右子树，需要通过中序遍历判断。</p>
+<p>中序遍历的第一个元素是 4 ，不是根节点 3，说明 9 位于左子树，因为根节点不是中序遍历中的第一个节点。同理，前序遍历的后几个元素 8、5、4 也都位于左子树，且每个节点都是其上一个节点的左子节点。</p>
+<p>前序遍历到元素 4，和中序遍历的第一个元素相等，说明前序遍历的下一个元素 10 位于右子树。那么 10 位于哪个元素的右子树？从前序遍历看，10 可能位于 4、5、8、9、3 这些元素中任何一个元素的右子树。从中序遍历看，10 在 8 的后面，因此 10 位于 8 的右子树。把前序遍历的顺序反转，则在 10 之前的元素是 4、5、8、9、3，其中 8 是最后一次相等的节点，因此前序遍历的下一个元素位于中序遍历中最后一次相等的节点的右子树。</p>
+<p>根据上述例子和分析，可以使用栈保存遍历过的节点。初始时令中序遍历的指针指向第一个元素，遍历前序遍历的数组，如果前序遍历的元素不等于中序遍历的指针指向的元素，则前序遍历的元素为上一个节点的左子节点。如果前序遍历的元素等于中序遍历的指针指向的元素，则正向遍历中序遍历的元素同时反向遍历前序遍历的元素，找到最后一次相等的元素，将前序遍历的下一个节点作为最后一次相等的元素的右子节点。其中，反向遍历前序遍历的元素可通过栈的弹出元素实现。</p>
+<ul>
+<li>使用前序遍历的第一个元素创建根节点。</li>
+<li>创建一个栈，将根节点压入栈内。</li>
+<li>初始化中序遍历下标为 0。</li>
+<li>遍历前序遍历的每个元素，判断其上一个元素（即栈顶元素）是否等于中序遍历下标指向的元素。<ul>
+<li>若上一个元素不等于中序遍历下标指向的元素，则将当前元素作为其上一个元素的左子节点，并将当前元素压入栈内。</li>
+<li>若上一个元素等于中序遍历下标指向的元素，则从栈内弹出一个元素，同时令中序遍历下标指向下一个元素，之后继续判断栈顶元素是否等于中序遍历下标指向的元素，若相等则重复该操作，直至栈为空或者元素不相等。然后令当前元素为最后一个想等元素的右节点。</li>
+</ul>
+</li>
+<li>遍历结束，返回根节点。</li>
+</ul>
+<h4 id="结果-1"><a href="#结果-1" class="headerlink" title="结果"></a>结果</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for a binary tree node.</span></span><br><span class="line"><span class="comment"> * public class TreeNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     TreeNode left;</span></span><br><span class="line"><span class="comment"> *     TreeNode right;</span></span><br><span class="line"><span class="comment"> *     TreeNode(int x) &#123; val = x; &#125;</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> TreeNode <span class="title">buildTree</span><span class="params">(<span class="keyword">int</span>[] preorder, <span class="keyword">int</span>[] inorder)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (preorder == <span class="keyword">null</span> || preorder.length == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        TreeNode root = <span class="keyword">new</span> TreeNode(preorder[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">int</span> length = preorder.length;</span><br><span class="line">        Stack&lt;TreeNode&gt; stack = <span class="keyword">new</span> Stack&lt;TreeNode&gt;();</span><br><span class="line">        stack.push(root);</span><br><span class="line">        <span class="keyword">int</span> inorderIndex = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; length; i++) &#123;</span><br><span class="line">            <span class="keyword">int</span> preorderVal = preorder[i];</span><br><span class="line">            TreeNode node = stack.peek();</span><br><span class="line">            <span class="keyword">if</span> (node.val != inorder[inorderIndex]) &#123;</span><br><span class="line">                node.left = <span class="keyword">new</span> TreeNode(preorderVal);</span><br><span class="line">                stack.push(node.left);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">while</span> (!stack.isEmpty() &amp;&amp; stack.peek().val == inorder[inorderIndex]) &#123;</span><br><span class="line">                    node = stack.pop();</span><br><span class="line">                    inorderIndex++;</span><br><span class="line">                &#125;</span><br><span class="line">                node.right = <span class="keyword">new</span> TreeNode(preorderVal);</span><br><span class="line">                stack.push(node.right);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> root;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>
