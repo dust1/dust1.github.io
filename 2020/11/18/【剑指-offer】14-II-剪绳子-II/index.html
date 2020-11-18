@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        【剑指 offer】14- II. 剪绳子 II - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#题目描述"><span class="toc-text">题目描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#我的解题"><span class="toc-text">我的解题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#思路"><span class="toc-text">思路</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#结果"><span class="toc-text">结果</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最优解"><span class="toc-text">最优解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#思路-1"><span class="toc-text">思路</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-循环求余"><span class="toc-text">1.循环求余</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-快速冥求余"><span class="toc-text">2.快速冥求余</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#结果-1"><span class="toc-text">结果</span></a></li></ol></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        【剑指 offer】14- II. 剪绳子 II
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2020-11-18 18:06:41</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#LeetCode算法题" title="LeetCode算法题">LeetCode算法题</a>
+        <span>/</span>
+        
+        <a class="tag" href="/tags/#算法" title="算法">算法</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p>来源：力扣（LeetCode）</p>
+<p>链接：<a href="https://leetcode-cn.com/problems/jian-sheng-zi-ii-lcof" target="_blank" rel="noopener">https://leetcode-cn.com/problems/jian-sheng-zi-ii-lcof</a></p>
+<h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>给你一根长度为 n 的绳子，请把绳子剪成整数长度的 m 段（m、n都是整数，n&gt;1并且m&gt;1），每段绳子的长度记为 k[0],k[1]…k[m - 1] 。请问 k[0]<em>k[1]</em>…*k[m - 1] 可能的最大乘积是多少？例如，当绳子的长度是8时，我们把它剪成长度分别为2、3、3的三段，此时得到的最大乘积是18。</p>
+<p>答案需要取模 1e9+7（1000000007），如计算初始结果为：1000000008，请返回 1。</p>
+<p>示例 1：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">输入: 2</span><br><span class="line">输出: 1</span><br><span class="line">解释: 2 = 1 + 1, 1 × 1 = 1</span><br></pre></td></tr></table></figure></p>
+<p>示例 2:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">输入: 10</span><br><span class="line">输出: 36</span><br><span class="line">解释: 10 = 3 + 3 + 4, 3 × 3 × 4 = 36</span><br></pre></td></tr></table></figure></p>
+<p>提示：<strong>2 &lt;= n &lt;= 1000</strong></p>
+<h3 id="我的解题"><a href="#我的解题" class="headerlink" title="我的解题"></a>我的解题</h3><h4 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h4><p>这题根昨天的题目几乎一样，不过要注意的一点就是由于多了一个取模的条件，所以直接通过dp的max比较已经不行了。但是思路还是一样的。根据数学公式得出，数字n按照拆分的优先级分别是3、2、1，因此我们可以通过循环一个一个减去对应的数字然后保留计算结果，要注意的是，当结果已经小于等于4的时候需要特殊对待。</p>
+<ul>
+<li>n = 4：直接结果与4相乘并退出循环呢</li>
+<li>n &lt; 3：结果与n相乘并退出循环</li>
+</ul>
+<h4 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">cuttingRope</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (n &lt;= <span class="number">3</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> n - <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (n == <span class="number">4</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> n;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> p = <span class="number">1000000007</span>;</span><br><span class="line">        <span class="keyword">long</span> ans = <span class="number">1L</span>;</span><br><span class="line">        <span class="keyword">int</span> a = <span class="number">3</span>;</span><br><span class="line">        <span class="keyword">while</span> (n &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            ans *= a;</span><br><span class="line">            ans %= p;</span><br><span class="line">            n -= <span class="number">3</span>;</span><br><span class="line">            <span class="keyword">if</span> (n == <span class="number">4</span> || n &lt; <span class="number">3</span>) &#123;</span><br><span class="line">                a = n;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">int</span>) ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="最优解"><a href="#最优解" class="headerlink" title="最优解"></a>最优解</h3><h4 id="思路-1"><a href="#思路-1" class="headerlink" title="思路"></a>思路</h4><p>数学的推导过程与上一题一样，但是在最后需要考虑<strong>大数求余</strong>的问题。针对这个问题主要有两种解决思路：</p>
+<ol>
+<li>循环求余</li>
+<li>快速冥求余</li>
+</ol>
+<p>两种方法都是根据以下求余循环法则推导而成：</p>
+<blockquote>
+<p>(xy)%p = (x%p)(y%p)%p</p>
+</blockquote>
+<h5 id="1-循环求余"><a href="#1-循环求余" class="headerlink" title="1.循环求余"></a>1.循环求余</h5><p>根据上述公式推导得：<br><br><img src="/img/202011/009.png" width="50%" height="50%"><br><br>我们可以通过寻汗操作n1、n2…na对p的余数，保证每轮的中间值都在int32的范围内。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 求 (x^a) % p —— 循环求余法</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">remainder</span><span class="params">(x, a, p)</span>:</span></span><br><span class="line">    rem = <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> range(a):</span><br><span class="line">        rem = (rem * x) % p</span><br><span class="line">    <span class="keyword">return</span> rem</span><br></pre></td></tr></table></figure>
+<h5 id="2-快速冥求余"><a href="#2-快速冥求余" class="headerlink" title="2.快速冥求余"></a>2.快速冥求余</h5><p>根据求余公式推导出：<br><br><img src="/img/202011/010.png" width="50%" height="50%"><br><br>当a为奇数时，a/2不是整数，因此将其分为两种情况（“//”表示向下取整的除法）<br><img src="/img/202011/011.png" width="50%" height="50%"><br><br>利用以上公式，可通过循环操作每次把指数 aa 问题降低至指数 a//2 问题，只需循环 log_2(N) 次，因此可将复杂度降低至对数级别。封装方法代码如下所示。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 求 (x^a) % p —— 快速幂求余</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">remainder</span><span class="params">(x, a, p)</span>:</span></span><br><span class="line">    rem = <span class="number">1</span></span><br><span class="line">    <span class="keyword">while</span> a &gt; <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">if</span> a % <span class="number">2</span>: rem = (rem * x) % p</span><br><span class="line">        x = x ** <span class="number">2</span> % p</span><br><span class="line">        a //= <span class="number">2</span></span><br><span class="line">    <span class="keyword">return</span> rem</span><br></pre></td></tr></table></figure>
+<h4 id="结果-1"><a href="#结果-1" class="headerlink" title="结果"></a>结果</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">cuttingRope</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(n &lt;= <span class="number">3</span>) <span class="keyword">return</span> n - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> b = n % <span class="number">3</span>, p = <span class="number">1000000007</span>;</span><br><span class="line">        <span class="keyword">long</span> rem = <span class="number">1</span>, x = <span class="number">3</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> a = n / <span class="number">3</span> - <span class="number">1</span>; a &gt; <span class="number">0</span>; a /= <span class="number">2</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span>(a % <span class="number">2</span> == <span class="number">1</span>) rem = (rem * x) % p;</span><br><span class="line">            x = (x * x) % p;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(b == <span class="number">0</span>) <span class="keyword">return</span> (<span class="keyword">int</span>)(rem * <span class="number">3</span> % p);</span><br><span class="line">        <span class="keyword">if</span>(b == <span class="number">1</span>) <span class="keyword">return</span> (<span class="keyword">int</span>)(rem * <span class="number">4</span> % p);</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">int</span>)(rem * <span class="number">6</span> % p);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>
