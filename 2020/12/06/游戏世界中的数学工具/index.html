@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        游戏世界中的数学工具 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#点和矢量"><span class="toc-text">点和矢量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#坐标系"><span class="toc-text">坐标系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#矢量"><span class="toc-text">矢量</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#笛卡尔基矢量"><span class="toc-text">笛卡尔基矢量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#矢量运算"><span class="toc-text">矢量运算</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#矢量与标量乘法-矢量的缩放"><span class="toc-text">矢量与标量乘法 - 矢量的缩放</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#矢量的加法与减法"><span class="toc-text">矢量的加法与减法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#模"><span class="toc-text">模</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#矢量运算的实际应用"><span class="toc-text">矢量运算的实际应用</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#归一化与单位矢量"><span class="toc-text">归一化与单位矢量</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#法矢量"><span class="toc-text">法矢量</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#点积和投影"><span class="toc-text">点积和投影</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#叉积"><span class="toc-text">叉积</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#点和矢量的线性插值"><span class="toc-text">点和矢量的线性插值</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#矩阵"><span class="toc-text">矩阵</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#矩阵乘法"><span class="toc-text">矩阵乘法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#矩阵表示点和矢量"><span class="toc-text">矩阵表示点和矢量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#单位矩阵"><span class="toc-text">单位矩阵</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#逆矩阵"><span class="toc-text">逆矩阵</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#转置矩阵"><span class="toc-text">转置矩阵</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#齐次坐标"><span class="toc-text">齐次坐标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#变换方向矢量"><span class="toc-text">变换方向矢量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基础变换矩阵"><span class="toc-text">基础变换矩阵</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#坐标空间"><span class="toc-text">坐标空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基的变更"><span class="toc-text">基的变更</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#四元数"><span class="toc-text">四元数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#单位四元数视为三维旋转"><span class="toc-text">单位四元数视为三维旋转</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#四元数运算"><span class="toc-text">四元数运算</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#乘法"><span class="toc-text">乘法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#共轭以及逆四元数"><span class="toc-text">共轭以及逆四元数</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#用四元数旋转矢量"><span class="toc-text">用四元数旋转矢量</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#四元数的串接"><span class="toc-text">四元数的串接</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#等价的四元数和矩阵"><span class="toc-text">等价的四元数和矩阵</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#旋转性的线性插值"><span class="toc-text">旋转性的线性插值</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#球体中的插值"><span class="toc-text">球体中的插值</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#各种旋转"><span class="toc-text">各种旋转</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#欧拉角"><span class="toc-text">欧拉角</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-x-3矩阵"><span class="toc-text">3 x 3矩阵</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#轴角"><span class="toc-text">轴角</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#四元数-1"><span class="toc-text">四元数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SQT变换"><span class="toc-text">SQT变换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他"><span class="toc-text">其他</span></a></li></ol></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        游戏世界中的数学工具
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2020-12-06 13:49:04</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#数学" title="数学">数学</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p>游戏是在计算机上实时模拟虚拟世界的数学模型。</p>
+<p>虽然在游戏中会用到几乎所有的数学分支，但最常用的只有两种：三维矢量与矩阵。</p>
+<h2 id="点和矢量"><a href="#点和矢量" class="headerlink" title="点和矢量"></a>点和矢量</h2><p>物体在三维世界中的三个要素：</p>
+<ol>
+<li>位置（position）</li>
+<li>定向（orientation）</li>
+<li>比例（scale）</li>
+</ol>
+<p>通过连续地修改这三个属性来实现动画效果，将物体变换（transform）至屏幕空间使得物体渲染到屏幕上。在游戏中三维物体几乎都是以三角形组成，三角形的三个顶点（vertex）用点（point）来表示。</p>
+<h3 id="坐标系"><a href="#坐标系" class="headerlink" title="坐标系"></a>坐标系</h3><p>常用的坐标系有三种：</p>
+<ol>
+<li>笛卡尔坐标：由x、y、z三根轴组成</li>
+<li>圆柱坐标：垂直高度h，从垂直轴发射的辐射轴r，偏航角（yaw）角度θ组成</li>
+<li>球坐标：俯视角（pitch）、偏航角（yaw）、半径长度组成</li>
+</ol>
+<p><img src="/img/202012/001.png" width="50%" height="50%"></p>
+<blockquote>
+<p>坐标系选用的例子：<br>Q:若要让物体向漩涡一样绕着主角旋转时用什么坐标系？<br>A:圆柱坐标。要绘制漩涡动画，只需要简单地在θ上加上恒定角速率，在辐射轴r上加入少许向内的恒定线性速率，在h上加上向上的恒定线性速率，物体就会慢慢地旋转向上到角色中</p>
+</blockquote>
+<h3 id="矢量"><a href="#矢量" class="headerlink" title="矢量"></a>矢量</h3><p>矢量由三个标量（x、y、z）组成，即若要在三维空间中表示一个点，至少需要3个参数。</p>
+<blockquote>
+<p>矢量<strong>v</strong> = [x, y, z]</p>
+</blockquote>
+<h4 id="笛卡尔基矢量"><a href="#笛卡尔基矢量" class="headerlink" title="笛卡尔基矢量"></a>笛卡尔基矢量</h4><p>笛卡尔积单位矢量：在笛卡尔坐标系中，沿着三根轴并且模为1的矢量成为笛卡尔积单位矢量，分别表现为:</p>
+<ol>
+<li><strong>i</strong> = [1, 0, 0]</li>
+<li><strong>j</strong> = [0, 1, 0]</li>
+<li><strong>k</strong> = [0, 0, 1]</li>
+</ol>
+<p>在笛卡尔坐标系中的任意点或矢量都能用3个标量与三个基矢量乘积之和表示标量。例如[5 3 -2] = 5<strong>i</strong> + 3<strong>j</strong> - 2<strong>k</strong>。</p>
+<h4 id="矢量运算"><a href="#矢量运算" class="headerlink" title="矢量运算"></a>矢量运算</h4><h5 id="矢量与标量乘法-矢量的缩放"><a href="#矢量与标量乘法-矢量的缩放" class="headerlink" title="矢量与标量乘法 - 矢量的缩放"></a>矢量与标量乘法 - 矢量的缩放</h5><p>矢量<strong>a</strong>与标量s相乘，等于<strong>a</strong>中的每个分量和s相乘:<br><img src="/img/202012/002.png" width="50%" height="50%"><br>矢量与标量相乘表示矢量方向不变，缩放矢量的模，乘以-1表示将矢量方向反转（头尾互换）。其中，s被称为<strong>缩放因子</strong>(scale factor)，其中，矢量的每个轴的缩放因子也会不同，因此将矢量缩放时每个轴的缩放因子是否相同，将其分为：统一缩放和非统一缩放。非统一缩放可以表示为矢量与缩放矢量的分量积,设矢量<strong>a</strong>、缩放矢量<strong>s</strong>,则a的分量积公式如下：<br><img src="/img/202012/003.png" width="50%" height="50%"></p>
+<ul>
+<li>统一缩放：表现为标量s乘以矢量<strong>a</strong>。</li>
+<li>非统一缩放：表现为两个矢量的分量积，分量积不等于两个矢量相乘。这种运算方式又被称为阿达马积。</li>
+</ul>
+<h5 id="矢量的加法与减法"><a href="#矢量的加法与减法" class="headerlink" title="矢量的加法与减法"></a>矢量的加法与减法</h5><p>矢量的相加等于将两个矢量首尾相连后剩下首尾相连所形成的新的矢量。<br><img src="/img/202012/004.png" width="50%" height="50%"></p>
+<p>矢量的相减等同于矢量加上另一个矢量的反方向矢量。<br><img src="/img/202012/005.png" width="50%" height="50%"></p>
+<p>二者表现如下：<br><img src="/img/202012/006.png" width="50%" height="50%"></p>
+<p>矢量与点的加减运算如下：</p>
+<ul>
+<li>方向 + 方向 = 方向</li>
+<li>方向 - 方向 = 方向</li>
+<li>点 + 方向 = 点</li>
+<li>点 - 点 = 方向</li>
+<li>点 + 点 = <strong>无意义</strong></li>
+</ul>
+<h5 id="模"><a href="#模" class="headerlink" title="模"></a>模</h5><p>矢量的模等于矢量的各个标量的平方和开根号。<br><img src="/img/202012/007.png" width="50%" height="50%"><br>类似于勾股定理，在二维空间中，z轴为0，则可以更加直观的看到矢量模的计算：<br><img src="/img/202012/008.png" width="50%" height="50%"></p>
+<blockquote>
+<p>我们在进行模的比较的时候通常可以用模的平方来比较，这样可以减少开销</p>
+</blockquote>
+<h5 id="矢量运算的实际应用"><a href="#矢量运算的实际应用" class="headerlink" title="矢量运算的实际应用"></a>矢量运算的实际应用</h5><p>设某人工智能的角色所在位置为P1，其速度为<strong>v</strong>，则可以找到他的下一帧位置P2，方法是把<strong>v</strong>以△t缩放，再加上P1。等式为P2 = P1 + <strong>v</strong>△t。这称为<strong>显式欧拉法</strong>。其中速度<strong>v</strong>恒定才有效。<br><img src="/img/202012/009.png" width="50%" height="50%"></p>
+<h5 id="归一化与单位矢量"><a href="#归一化与单位矢量" class="headerlink" title="归一化与单位矢量"></a>归一化与单位矢量</h5><p>单位矢量：模为1的矢量</p>
+<p>给定一个矢量<strong>v</strong>，其模为v=|<strong>v</strong>|,将其转化为方向相同的单位矢量<strong>u</strong>的过程如下：<br><img src="/img/202012/010.png" width="50%" height="50%"><br>这个过程称之为<strong>归一化</strong></p>
+<h5 id="法矢量"><a href="#法矢量" class="headerlink" title="法矢量"></a>法矢量</h5><p>在三维世界中，一个平面可以由平面上的一点P以及一个垂直于该平面的矢量组成。这个矢量又被称为<strong>法矢量</strong>。</p>
+<blockquote>
+<p>法矢量不等于单位矢量，他的模不一定为1</p>
+</blockquote>
+<h5 id="点积和投影"><a href="#点积和投影" class="headerlink" title="点积和投影"></a>点积和投影</h5><p>矢量之间可以相乘，这种相乘跟上面所描述的<em>分量积</em>完全不同。通常最常用的乘法有两种：</p>
+<ul>
+<li>点积：又被称为标量积或内积</li>
+<li>叉积：又被称为矢量积或外积</li>
+</ul>
+<p>两个矢量的点积的结果是一个标量，这个标量等于两个矢量的各个标量相乘的和：<br><img src="/img/202012/011.png" width="50%" height="50%"></p>
+<p>点积也可以写成两个矢量的模相乘后再乘以两个矢量之间夹角的余弦：<br><img src="/img/202012/012.png" width="50%" height="50%"></p>
+<p>点积符合交换律，且在加法上符合分配律。</p>
+<p>若<strong>u</strong>是单位矢量，则矢量<strong>a</strong>与矢量<strong>u</strong>的点积等于在<strong>u</strong>所在的直线上矢量<strong>a</strong>的投影。<br><img src="/img/202012/013.png" width="50%" height="50%"></p>
+<p>若矢量与自身相乘，由于矢量的夹角θ为0°，所谓cosθ=1，得矢量与自身的点积为矢量模的平方<br><img src="/img/202012/014.png" width="50%" height="50%"></p>
+<p>点积通常用于判断两个矢量是否共线或垂直，也可用来判断两个矢量是否大致在相同或相反方向：</p>
+<ul>
+<li>共线：<strong>a</strong>·<strong>b</strong>=|<strong>a</strong>||<strong>b</strong>|=ab。夹角θ为0，cosθ=1</li>
+<li>共线但是方向相反：<strong>a</strong>·<strong>b</strong>=-ab。夹角θ为180，cosθ=-1</li>
+<li>垂直：<strong>a</strong>·<strong>b</strong>=0，cosθ=0</li>
+<li>相同方向：<strong>a</strong>·<strong>b</strong> &gt; 0(即cosθ &gt; 0,夹角小于90°)</li>
+<li>相反方向：<strong>a</strong>·<strong>b</strong> &lt; 0(即cosθ &lt; 0,夹角大于90°)</li>
+</ul>
+<p><img src="/img/202012/015.png" width="50%" height="50%"></p>
+<h5 id="叉积"><a href="#叉积" class="headerlink" title="叉积"></a>叉积</h5><p>两个矢量的叉积会产生一个新的矢量，新的矢量垂直于相乘的两个矢量所组成的平面，因此，叉积只存在与三维空间。<br><img src="/img/202012/016.png" width="50%" height="50%"></p>
+<p>叉积的模等于两个相乘矢量的模乘以两个矢量夹角的正弦。所以当两个矢量共线时，他们的叉积为0。<br><img src="/img/202012/017.png" width="50%" height="50%"></p>
+<p>若两条矢量分别是平行四边形的两条边，则两个矢量的叉积等于这个平行四边形的面积。<br><img src="/img/202012/018.png" width="50%" height="50%"></p>
+<p>叉积的方向根据所选择的坐标系法则有关，左右法则和右手法则会得到不同方向的叉积。</p>
+<p>叉积不符合交换律，叉积的先后顺序影响最终结果。但是符合反交换律。<br><img src="/img/202012/019.png" width="50%" height="50%"></p>
+<p>在加法上符合分配律<br><img src="/img/202012/020.png" width="50%" height="50%"></p>
+<p>根据叉积的性质，可以得到笛卡尔积之间互相转换的公式：<br><img src="/img/202012/021.png" width="50%" height="50%"></p>
+<h4 id="点和矢量的线性插值"><a href="#点和矢量的线性插值" class="headerlink" title="点和矢量的线性插值"></a>点和矢量的线性插值</h4><p>在游戏中，为了保证两个点之间移动时的顺滑，需要得到点到点之间的的中间点。为了得到这个中间点的计算称为<strong>线性插值</strong>，通常简写成LERP。其定义如下，设从点<strong>A</strong>到点<strong>B</strong>，其中的中间点<strong>L</strong>与<strong>A</strong>的距离是<strong>A</strong>到<strong>B</strong>的距离的β（0 ≤ β ≤ 1）。则：<br><img src="/img/202012/022.png" width="50%" height="50%"><br>从几何上看效果如下：<br><img src="/img/202012/023.png" width="50%" height="50%"></p>
+<h2 id="矩阵"><a href="#矩阵" class="headerlink" title="矩阵"></a>矩阵</h2><p>矩阵（matrix）由mxn个标量组成的长方形数组，在游戏世界中方便用于表示旋转（transformaction）、平移（translation）、缩放（scale）。</p>
+<p>3x3的矩阵表示纯旋转；4x4的矩阵表示旋转、平移、缩放。</p>
+<h3 id="矩阵乘法"><a href="#矩阵乘法" class="headerlink" title="矩阵乘法"></a>矩阵乘法</h3><p>当两个矩阵的内维相等的时候才能相乘，设<strong>A</strong>为m × p的矩阵，<strong>B</strong>为p × n的矩阵，那么称m × n的矩阵<strong>C</strong>为矩阵<strong>A</strong>与<strong>B</strong>的乘积，记作<strong>C</strong>=<strong>A</strong>·<strong>B</strong>。<br>新的矩阵的各个标量计算如下：<br><img src="/img/202012/024.png" width="50%" height="50%"></p>
+<p>矩阵的乘法先后顺序影响最终结果，不符合乘法交换律。矩阵的乘法有时又被称为<strong>串接</strong>。因为矩阵表示一次变换，矩阵的相乘表示将多个变换串接起来。</p>
+<h3 id="矩阵表示点和矢量"><a href="#矩阵表示点和矢量" class="headerlink" title="矩阵表示点和矢量"></a>矩阵表示点和矢量</h3><p>点和矢量都可以表示为行矩阵（1 × n）或列矩阵（n × 1）。其中n表示使用中的空间纬度，通常是2或3.例如矢量<strong>v</strong>=(3 4 -1)可以写成<br><img src="/img/202012/025.png" width="50%" height="50%"><br>或<br><img src="/img/202012/026.png" width="50%" height="50%"></p>
+<p>两种矩阵方式的选择会影响矩阵相乘的次序。因为矩阵相乘的时候，两个矩阵的内维需要相等。所以：</p>
+<ul>
+<li>要把1 × n行矢量乘以n × n矩阵，矢量必须置于矩阵的左方<img src="/img/202012/027.png" width="50%" height="50%"></li>
+<li>要把n × n矩阵乘以n × 1列矩阵，矢量必须位于矩阵的右方<img src="/img/202012/028.png" width="50%" height="50%"></li>
+</ul>
+<h3 id="单位矩阵"><a href="#单位矩阵" class="headerlink" title="单位矩阵"></a>单位矩阵</h3><p>单位矩阵与其他任何矩阵<strong>M</strong>相乘都等于<strong>M</strong>本身。其表现为对角线元素都是1，其他元素都是0。通常写作<strong>I</strong>。<br><img src="/img/202012/029.png" width="50%" height="50%"></p>
+<h3 id="逆矩阵"><a href="#逆矩阵" class="headerlink" title="逆矩阵"></a>逆矩阵</h3><p>设一个矩阵为<strong>A</strong>，则它的逆矩阵表示为<strong>A⁻¹</strong>,逆矩阵能还原矩阵的变换。所以矩阵与其逆矩阵相乘结果是单位矩阵。通常用高斯消去法或LU分解求得。矩阵串街后求逆等于反向串接各个矩阵的逆矩阵。<br><img src="/img/202012/030.png" width="50%" height="50%"></p>
+<h3 id="转置矩阵"><a href="#转置矩阵" class="headerlink" title="转置矩阵"></a>转置矩阵</h3><p>矩阵<strong>M</strong>的转置写作<strong>Mᵀ</strong>,转置矩阵就是以原来矩阵的对称轴做反射。和逆矩阵一样，矩阵串接后的转置矩阵等于反向串街各个矩阵的转置矩阵。<br><img src="/img/202012/031.png" width="50%" height="50%"></p>
+<p>转置矩阵有一个重要的特点：</p>
+<blockquote>
+<p>纯旋转的矩阵他的逆矩阵与转置矩阵是相同的</p>
+</blockquote>
+<p>因此基于此，通常用转置矩阵代替逆矩阵，因为求转置矩阵的速度比求逆矩阵快。</p>
+<h3 id="齐次坐标"><a href="#齐次坐标" class="headerlink" title="齐次坐标"></a>齐次坐标</h3><p>当点或矢量从三维(3 × 3)延伸至四维(4 × 4)的过程称为<strong>齐次坐标</strong>。因为4 × 4矩阵能够同时表示旋转、平移、缩放，因此在游戏中最常用的就是4 × 4矩阵。</p>
+<p>三维空间中，若一个矢量<strong>r</strong>绕z轴旋转ø°，则可以表示为：<br><img src="/img/202012/032.png" width="50%" height="50%"><br>但是3 × 3矩阵无法表示平移与缩放，而4 × 4可以<br><img src="/img/202012/033.png" width="50%" height="50%"></p>
+<h3 id="变换方向矢量"><a href="#变换方向矢量" class="headerlink" title="变换方向矢量"></a>变换方向矢量</h3><p>矩阵同时携带旋转、平移、缩放这三个变换信息，当矩阵作用在点上时，三者都可以产生作用。但是当用矩阵变换一个方向矢量时要忽略<strong>平移</strong>效果。因为方向矢量并不会产生平移，而且一旦平移就会改变他的模，这不是我们想要看到的。</p>
+<p>在方向矢量与矩阵相乘是，把矢量的齐次坐标中的ω设置成0即可。<br><img src="/img/202012/034.png" width="50%" height="50%"></p>
+<p>在将四维的齐次坐标转化为三维的非齐次坐标的时候通常是将x、y、z分别除以ω，因此当ω为0的时候会产生无穷大，因为在三维空间中的纯方向矢量在四维空间中表示一个无限远的点。<br><img src="/img/202012/035.png" width="50%" height="50%"></p>
+<h3 id="基础变换矩阵"><a href="#基础变换矩阵" class="headerlink" title="基础变换矩阵"></a>基础变换矩阵</h3><p>从上可以知道4 × 4矩阵可以表示旋转、平移与缩放。他们的分布如下：<br><img src="/img/202012/036.png" width="50%" height="50%"></p>
+<ul>
+<li>左上角的3 × 3矩阵<strong>U</strong>代表旋转或缩放</li>
+<li>1 × 3平移矢量<strong>t</strong></li>
+<li>3 × 1矢量<strong>O</strong> = [0 0 0]ᵀ</li>
+<li>右下角标量1</li>
+</ul>
+<p>从中可以看到，最右边一列的标量都是常量，并不会随着矩阵的功能而改变，因此为了节省空间，在计算机中可以用4 × 3矩阵代替。</p>
+<h3 id="坐标空间"><a href="#坐标空间" class="headerlink" title="坐标空间"></a>坐标空间</h3><p>确定物体的具体坐标之前需要确定参照物用于构建坐标系，在三维游戏世界，根据参照物的不同将其分为三个坐标空间：世界空间、模型空间、观察空间。三者的区别如下：</p>
+<ul>
+<li>世界空间：以游戏世界中的某点为原点，游戏世界中所有物体都可以通过世界空间表示，这个坐标将所有物体联系起来组成虚拟世界。是一个固定坐标。</li>
+<li>模型空间：基于游戏中对象的坐标空间，由游戏中对象的某点为原点与其自身质点所构成的坐标系，通常是笛卡尔坐标系。</li>
+<li>观察空间：又称摄像机空间，是固定在摄像机的坐标系，他的原点置于摄像机的焦点。</li>
+</ul>
+<h3 id="基的变更"><a href="#基的变更" class="headerlink" title="基的变更"></a>基的变更</h3><p>上面描述的三者空间可以互相转化，即模型空间与观察空间可以转化为世界空间。这样当玩家角色与物体接触的时候通过基于同一个坐标系的数据进行判断是否产生碰撞。三个坐标构成层次关系，其中世界坐标是最底层的父坐标。</p>
+<p>把点或者矢量从坐标系<strong>C</strong>转移到坐标系<strong>P</strong>写作<strong>M</strong>ᴄ→ᴘ,设点在坐标系C中的点坐标为<strong>P</strong>ᴄ,在坐标系<strong>P</strong>中的坐标是<strong>P</strong>ᴘ。则他们的转化公式如下：<br><img src="/img/202012/037.png" width="50%" height="50%"><br>其中：</p>
+<ul>
+<li><strong>i</strong>ᴄ为子空间x轴的单位基矢量，这个矢量用父空间坐标表示</li>
+<li><strong>j</strong>ᴄ为子空间y轴的单位基矢量，这个矢量用父空间坐标表示</li>
+<li><strong>k</strong>ᴄ为子空间z轴的单位基矢量，这个矢量用父空间坐标表示</li>
+<li><strong>t</strong>ᴄ为子坐标系相对于父坐标系的平移</li>
+</ul>
+<p>例子如下：<br>假设子空间绕z轴旋转角度ᵞ，没有平移，得到公式如下：<br><img src="/img/202012/038.png" width="50%" height="50%"><br>旋转示例如下：<br><img src="/img/202012/039.png" width="50%" height="50%"></p>
+<p>在坐标空间的变换过程中有两种选择：变换坐标系或者变换矢量：<br><img src="/img/202012/040.png" width="50%" height="50%"><br>具体选择哪一种要看情况而定。</p>
+<h2 id="四元数"><a href="#四元数" class="headerlink" title="四元数"></a>四元数</h2><p>3 × 3矩阵并不是最理想的旋转表达形式，原因如下：</p>
+<ol>
+<li>3 × 3矩阵有9个浮点数来旋转矢量，但实际上旋转只有三个自由度（偏航角、俯仰角、滚动角）</li>
+<li>用矢量矩阵乘法来旋转矢量需要3个点积运算。</li>
+<li>在计算机图形学中，表示两个矢量位置的变换通常需要顺滑的过度，因此需要计算两个位置中间的值，这用矩阵计算很麻烦。即不能完全实现游戏对象的变换。</li>
+</ol>
+<p>因此采用四元数来表示旋转，定义如下：</p>
+<blockquote>
+<p>单位长度的四元数能代表三维旋转</p>
+</blockquote>
+<p>即四元数中四个标量的平方和等于1的情况下都能表示三维旋转。</p>
+<h3 id="单位四元数视为三维旋转"><a href="#单位四元数视为三维旋转" class="headerlink" title="单位四元数视为三维旋转"></a>单位四元数视为三维旋转</h3><p>四元数中有四个标量。<br><img src="/img/202012/042.png" width="50%" height="50%"><br>前三个标量组成的矢量<strong>v</strong>是旋转的单位轴乘以旋转半角的正弦。第四个标量qs是旋转半角的余弦。可以写成:<br><img src="/img/202012/041.png" width="50%" height="50%"><br>其中<strong>a</strong>为旋转轴方向的单位矢量，θ是旋转角度。旋转的方向遵守右手守则。从上面可以得到以下等式：<br><img src="/img/202012/043.png" width="50%" height="50%"></p>
+<h3 id="四元数运算"><a href="#四元数运算" class="headerlink" title="四元数运算"></a>四元数运算</h3><h4 id="乘法"><a href="#乘法" class="headerlink" title="乘法"></a>乘法</h4><p>乘法是四元数最常用的计算方法之一，给定两个四元数q和p，他们分别代表旋转<strong>Q</strong>和<strong>P</strong>，则qp代表两个旋转的合成旋转，即先旋转<strong>Q</strong>再旋转<strong>P</strong>。这种跟旋转相关的四元数乘法又叫做格拉斯曼积，定义的pq乘积如下：<br><img src="/img/202012/044.png" width="50%" height="50%"><br>结果分成矢量部分和标量部分，其中矢量部分的结果为四元数的x、y、z，标量部分是四元数的w。</p>
+<h4 id="共轭以及逆四元数"><a href="#共轭以及逆四元数" class="headerlink" title="共轭以及逆四元数"></a>共轭以及逆四元数</h4><p>四元素q的逆四元数写作q⁻¹,逆四元数和原四元数的乘积等于1.即qq⁻¹=（0<strong>i</strong> + 0<strong>j</strong> + 0<strong>k</strong> + 1）= 1.所以四元数[0 0 0 1]代表零旋转。</p>
+<p>四元数q的共轭写作qº（这里的º应该是*，我打不出来。）定义如下：<br><img src="/img/202012/045.png" width="50%" height="50%"><br>从公式中可以知道共轭是四元数矢量部分求反，但保持标量部分不变，有了这个定义，逆四元数又可以写成：<br><img src="/img/202012/046.png" width="50%" height="50%"><br>由于我们用于旋转的四元数都是单位长度，因此分母为1，化简如下：<br><img src="/img/202012/047.png" width="50%" height="50%"><br>所以四元数的逆四元数等于四元数的共轭，但是求共轭的速度快于求逆。因此通常可以用共轭代替求逆的步骤。同时这也比计算3 × 3的逆矩阵快，所以这一步可以用作性能的优化。</p>
+<p>多个四元数之积的逆四元数等于相反的逆四元数相乘，共轭同理。<br><img src="/img/202012/048.png" width="50%" height="50%"></p>
+<h3 id="用四元数旋转矢量"><a href="#用四元数旋转矢量" class="headerlink" title="用四元数旋转矢量"></a>用四元数旋转矢量</h3><p>用四元数旋转矢量，首先要把矢量转化为四元数形式。由于四元数比矢量多了一个标量，只要将第四个标量设置为0即可。给定矢量<strong>v</strong>,他的四元数形式表示为<strong>v</strong>ᶥ=[<strong>v</strong> 0]=[x y z 0]。</p>
+<p>要用四元数q旋转矢量<strong>v</strong>，需要先用q乘以<strong>v</strong>然后再乘以q的逆四元数。<br><img src="/img/202012/049.png" width="50%" height="50%"><br>因为旋转的四元数都是单位四元数，所以可以用四元数的共轭代替逆四元数：<br><img src="/img/202012/050.png" width="50%" height="50%"></p>
+<blockquote>
+<p>在游戏中，各个模型空间相对于世界空间就可以用四元数表示，当要将模型空间内的坐标转化为世界空间的坐标时，只需要将其乘以模型空间定量的四元数即可</p>
+</blockquote>
+<h4 id="四元数的串接"><a href="#四元数的串接" class="headerlink" title="四元数的串接"></a>四元数的串接</h4><p>从上面的四元数用于矢量可以知道，四元数的串接类似于一层一层包裹矢量：<br><img src="/img/202012/051.png" width="50%" height="50%"></p>
+<h3 id="等价的四元数和矩阵"><a href="#等价的四元数和矩阵" class="headerlink" title="等价的四元数和矩阵"></a>等价的四元数和矩阵</h3><p>任何三维旋转都可以从3 × 3矩阵表达方式和四元数表达方式之间自由变换。设q=[q<strong>v</strong> qs] = [x y z w]，则转化为矩阵表达<strong>R</strong>如下：<br><img src="/img/202012/052.png" width="50%" height="50%"><br>类似的，<strong>R</strong>也可以通过特定的计算得到四元数。下面是一段C/C++代码用于将矩阵转化为四元数:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"math.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"iostream"</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">rotMatrixToQuternion</span><span class="params">(<span class="keyword">const</span> <span class="keyword">float</span> R[<span class="number">3</span>][<span class="number">3</span>], <span class="keyword">float</span> q[<span class="number">4</span>])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">float</span> trace = R[<span class="number">0</span>][<span class="number">0</span>] + R[<span class="number">1</span>][<span class="number">1</span>] + R[<span class="number">2</span>][<span class="number">2</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//检测主轴</span></span><br><span class="line">    <span class="keyword">if</span> (trace &gt; <span class="number">0.0f</span>) &#123;</span><br><span class="line">        <span class="keyword">float</span> s = <span class="built_in">sqrt</span>(trace + <span class="number">1.0f</span>);</span><br><span class="line">        q[<span class="number">3</span>] = s * <span class="number">0.5f</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">float</span> t = <span class="number">0.5f</span> / s;</span><br><span class="line">        q[<span class="number">0</span>] = (R[<span class="number">2</span>][<span class="number">1</span>] - R[<span class="number">1</span>][<span class="number">2</span>]) * t;</span><br><span class="line">        q[<span class="number">1</span>] = (R[<span class="number">0</span>][<span class="number">2</span>] - R[<span class="number">2</span>][<span class="number">0</span>]) * t;</span><br><span class="line">        q[<span class="number">2</span>] = (R[<span class="number">1</span>][<span class="number">0</span>] - R[<span class="number">0</span>][<span class="number">1</span>]) * t;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//主轴为负</span></span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">if</span> (R[<span class="number">1</span>][<span class="number">1</span>] &gt; R[<span class="number">0</span>][<span class="number">0</span>]) i = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (R[<span class="number">2</span>][<span class="number">2</span>] &gt; R[i][i]) i = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">int</span> next[<span class="number">3</span>] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> j = next[i];</span><br><span class="line">        <span class="keyword">int</span> k = next[j];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">float</span> s = <span class="built_in">sqrt</span>((R[i][i] - (R[j][j] + R[k][k])) + <span class="number">1.0f</span>);</span><br><span class="line">        q[i] = s * <span class="number">0.5f</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">float</span> t;</span><br><span class="line">        <span class="keyword">if</span> (s != <span class="number">0.0f</span>)  t = <span class="number">0.5f</span> / s;</span><br><span class="line">        <span class="keyword">else</span>            t = s;</span><br><span class="line"></span><br><span class="line">        q[<span class="number">3</span>] = (R[k][j] - R[j][k]) * t;</span><br><span class="line">        q[j] = (R[j][i] + R[i][j]) * t;</span><br><span class="line">        q[k] = (R[k][i] + R[i][k]) * t;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="旋转性的线性插值"><a href="#旋转性的线性插值" class="headerlink" title="旋转性的线性插值"></a>旋转性的线性插值</h3><p>在两个旋转中间，为了保证物体变换表现的顺滑，需要获取到物体在变换时处于两个旋转中间的位置，这个点就叫做插值。</p>
+<p>虽然两个旋转矩阵之间也可以做插值，但是他们的计算开销远远大于四元数。</p>
+<p>最简单快捷的插值方法就是套用四维矢量的线性插值（LERP）至四元数。给定两个代表旋转A、B的四元数qᴀ、qʙ，可以找出旋转A到旋转B之间β百分点的中间旋转qʟᴇʀᴘ:<br><img src="/img/202012/053.png" width="50%" height="50%"></p>
+<blockquote>
+<p>插值后的四元数需要再次归一，因为插值计算无法保证矢量长度。</p>
+</blockquote>
+<p>在图像中体现如下：<br><img src="/img/202012/054.png" width="50%" height="50%"></p>
+<h4 id="球体中的插值"><a href="#球体中的插值" class="headerlink" title="球体中的插值"></a>球体中的插值</h4><p>LERP计算的缺点在于没有考虑四元数其实是四维<strong>超球</strong>上的点。LERP其实是沿着球体的弦进行插值，这样会导致：当β以恒定速率改变时，旋转动画并不是以恒定速率变换的，旋转会在两端慢，在中间骤然加快。为了解决这个问题产生了一个新的插值：<strong>球面线性插值</strong>（SLERP）。SLERP使用正弦和余弦在四维超球面的大圆上进行插值，而不是沿着弦上插值，这样，当β以恒定速率改变时，插值结果会以常速角速度变化。两者的区别如下：<br><img src="/img/202012/055.png" width="50%" height="50%"></p>
+<p>SLERP公式如下：<br><img src="/img/202012/056.png" width="50%" height="50%"><br>其中wᴘ和wǫ取代（1-β）和β，这两个参数使用到了两个四元数之间的正弦与余弦夹角。<br><img src="/img/202012/057.png" width="50%" height="50%"></p>
+<p>虽然SLERP比LERP更加完善，但同时计算插值的开销也更大，具体使用那种插值计算需要根据实际情况来看，在游戏中，优化也占很重要的一部分。</p>
+<h2 id="各种旋转"><a href="#各种旋转" class="headerlink" title="各种旋转"></a>各种旋转</h2><h3 id="欧拉角"><a href="#欧拉角" class="headerlink" title="欧拉角"></a>欧拉角</h3><p>欧拉角能表示旋转，由三个标量组成（偏航角、俯视角、滚动角）。</p>
+<p>优点：</p>
+<ul>
+<li>小巧，只由3个浮点数组成</li>
+<li>直观，容易把三个数值视觉化</li>
+<li>对围绕单轴的旋转容易插值</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>对任意方向的旋转不方便插值</li>
+<li>会遭遇万向节死锁</li>
+<li>旋转次序影响最终结果</li>
+<li>依赖数据多，需要有x/y/z轴和前/左右/上方向上的映射</li>
+</ul>
+<h3 id="3-x-3矩阵"><a href="#3-x-3矩阵" class="headerlink" title="3 x 3矩阵"></a>3 x 3矩阵</h3><p>优点：</p>
+<ul>
+<li>不受万向节锁的影响，独一无二地表达任意旋转</li>
+<li>旋转可以通过矩阵乘法直接施加在矢量或点上</li>
+<li>市面上大多数CPU或GPU都针对矩阵乘法做了内建支持</li>
+<li>纯旋转的逆矩阵为转置矩阵，求解方便</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>不直观，看见一个大数字表无法直观的将其想象在三维空间的变换</li>
+<li>不容易插值，计算繁琐</li>
+<li>占用空间大，需要占用9个存储空间</li>
+</ul>
+<h3 id="轴角"><a href="#轴角" class="headerlink" title="轴角"></a>轴角</h3><p>通过一个单位矢量定义旋转轴，一个标量定义旋转角表示旋转。类似于四元数表示法[旋转轴 旋转角]，写成[<strong>a</strong> θ]的形式。其中<strong>a</strong>是旋转轴、θ是旋转角。</p>
+<p>优点：</p>
+<ul>
+<li>表现直观，直接存在旋转轴与旋转角</li>
+<li>紧凑，只占用4个存储空间</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>无法进行简单的插值</li>
+<li>轴角形式无法直接施加于点或矢量，需要将其先转化为四元数</li>
+</ul>
+<h3 id="四元数-1"><a href="#四元数-1" class="headerlink" title="四元数"></a>四元数</h3><p>与轴角的区别：旋转轴矢量长度为旋转半角的正弦，第四个分量是旋转半角的余弦。</p>
+<p>优点：</p>
+<ul>
+<li>四元数乘法能串接旋转，并把旋转直接施加于矢量和点</li>
+<li>可以轻易地用LERP和SLERP进行旋转插值</li>
+<li>存储空间小，只需要4个浮点数的存储空间</li>
+</ul>
+<h3 id="SQT变换"><a href="#SQT变换" class="headerlink" title="SQT变换"></a>SQT变换</h3><p>4 x 4表示任意变换（旋转、平移、缩放），但是占用空间大，因此，将四元数加上平移矢量与缩放因子来实现任意仿射变换。他的体积比4 x 4矩阵小。统一缩放只需要8个存储空间，非统一缩放需要10个存储空间。</p>
+<blockquote>
+<p>因为统一缩放的时候缩放因子是一个标量，而非统一缩放的时候缩放因子是由三个标量组成的矢量</p>
+</blockquote>
+<p>优点：</p>
+<ul>
+<li>可以表示任意仿射变换</li>
+<li>空间比4 x 4矩阵小</li>
+<li>容易插值，各个部分可以采用不同的插值算法，平移矢量可以用LERP、四元数则可以矢量LERP或SLERP。</li>
+</ul>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>其他还有<strong>对偶四元数</strong>、<strong>旋转和自由度</strong>等方式。</p>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>
