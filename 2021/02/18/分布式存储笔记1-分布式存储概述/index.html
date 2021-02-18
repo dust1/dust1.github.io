@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        分布式存储笔记1 分布式存储概述 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#分布式存储的概念："><span class="toc-text">分布式存储的概念：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#分布式存储的几个特征："><span class="toc-text">分布式存储的几个特征：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#主要需求："><span class="toc-text">主要需求：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#面临的数据需求："><span class="toc-text">面临的数据需求：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分布式存储的分类："><span class="toc-text">分布式存储的分类：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#分布式文件系统："><span class="toc-text">分布式文件系统：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分布式键值系统："><span class="toc-text">分布式键值系统：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分布式表格系统："><span class="toc-text">分布式表格系统：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分布式数据库："><span class="toc-text">分布式数据库：</span></a></li></ol></li></ol></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        分布式存储笔记1 分布式存储概述
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2021-02-18 18:55:20</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#存储" title="存储">存储</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p><hr><br>这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。</p>
+<hr>
+
+<h2 id="分布式存储的概念："><a href="#分布式存储的概念：" class="headerlink" title="分布式存储的概念："></a>分布式存储的概念：</h2><p>分布式存储系统是大量普通PC服务器通过英特网互联，对外作为一个整体提供存储服务。</p>
+<h3 id="分布式存储的几个特征："><a href="#分布式存储的几个特征：" class="headerlink" title="分布式存储的几个特征："></a>分布式存储的几个特征：</h3><ul>
+<li>可扩展：分布式存储系统可以扩展到几百台甚至几千台的集群规模，而且，随着集群规模的增长，系统整体性能表现为线性增长</li>
+<li>低成本：分布式存储系统的自动容错、自动负载均衡机制使其可以构建在普通PC机之上。另外线性扩展能力也使得增加、减少机器非常方便、可以实现自动运维</li>
+<li>高性能：无论是针对整个集群还是单台服务器，都要求分布式存储系统具备高性能</li>
+<li>易用：分布式存储系统需要能够提供易用的对外借口，另外，也要求具备完善的监控、运维工具，并能够方便地与其他系统集成，例如，从hadoop云计算系统导入数据</li>
+</ul>
+<p>主要挑战：数据、状态信息的持久化，要求在自动迁移、自动容错、并发读写的过程中保证数据的一致性。</p>
+<p>主要领域：分布式系统、数据库</p>
+<h3 id="主要需求："><a href="#主要需求：" class="headerlink" title="主要需求："></a>主要需求：</h3><ul>
+<li>数据分布：如何将数据分布到多台服务器才能保证数据分布均匀？数据分布到多台服务器后如何实现扩服务器读写操作？（数据平衡算法？）</li>
+<li>一致性：如何将数据的多个副本复制到脱台服务器，即使在异常情况下，也能够保证不同副本之间的数据一致性？（用paxos等一致性算法）</li>
+<li>容错：如何检测到服务器故障？（心跳检测）如何自动将出现故障的服务器上的数据和服务器迁移到集群中的其他服务器？</li>
+<li>负载均衡：新增服务器和集群正常运行过程中如何实现自动负载均衡？数据迁移的过程中如何保证不影响已有服务？（主副服务器模式，数据迁移过程中切换到副服务器）</li>
+<li>事务与并发控制：如何实现分布式事务？如何实现多版本并发控制？</li>
+<li>易用性：如何设计对外借口使得系统容易使用？如何设计监控系统并将系统的内部状态以方便的形式暴露给运维人员？</li>
+<li>压缩/解压缩：如何根据数据的特点设计合理的压缩/解压缩算法？如何平衡压缩算法节省的存储空间和消耗的CPU计算机资源</li>
+</ul>
+<h3 id="面临的数据需求："><a href="#面临的数据需求：" class="headerlink" title="面临的数据需求："></a>面临的数据需求：</h3><ul>
+<li>非结构化数据：包括所有格式的办公文档、文本、图片、图像、音频和视频信息等</li>
+<li>结构化数据：一般存储在关系数据库中呢，可以用二维关系表结构来表示。结构化数据的模式（Schema，包括属性、数据类型以及数据之间的联系）和内容是分开的，数据的模式需要预先定义。</li>
+<li>半结构化数据：介于非结构化数据和结构化数据之间，HTML文档就属于半结构化数据。它一般是自描述的，与结构化数据最大的区别在于，半结构化数据的模式结构和内容混在一起，没有明显的区分，也不需要预先定义数据的模式结构。</li>
+</ul>
+<h3 id="分布式存储的分类："><a href="#分布式存储的分类：" class="headerlink" title="分布式存储的分类："></a>分布式存储的分类：</h3><ul>
+<li>分布式文件系统</li>
+<li>分布式键值（Key-Value）系统</li>
+<li>分布式表格系统</li>
+<li>分布式数据库</li>
+</ul>
+<h4 id="分布式文件系统："><a href="#分布式文件系统：" class="headerlink" title="分布式文件系统："></a>分布式文件系统：</h4><p>主要用于存储非结构化数据，这些数据以对象的形式组织。对象之间没有关联，这样的数据一般称为Blob（Binary Large Object， 二进制大对象）数据。</p>
+<p>总体上，分布式文件系统存储三种类型的数据：Blod对象、定长块、大文件。而这三者在存储系统内部又被按照数据块（chunk）来组织。一个数据块可以包含多个Blod对象，也可以由多个定长块组成，同时大文件也能拆分为多个数据块。<br><img src="/img/202102/001.png" width="50%" height="50%"></p>
+<blockquote>
+<p>Blod对象、定长块、大文件是逻辑上的概念，在存储系统中会转化为物理上的概念数据块（chunk）进行存储。对Blod对象、定长块、大文件的操作最终都映射为对数据块的操作</p>
+</blockquote>
+<h4 id="分布式键值系统："><a href="#分布式键值系统：" class="headerlink" title="分布式键值系统："></a>分布式键值系统：</h4><p>分布式键值系统用于存储关系简单的半结构化数据，他只提供基本主键的CRUD功能。从数据结构的角度看，分布式键值系统与传统的哈希表比较类似，不同的是，分布式键值系统支持将数据分布到集群中的多个存储节点。（一个主键对应的数据会被拆分到多个存储节点）<br>分布式键值系统是分布式表格系统的一种简化实现，一般作用与缓存。<br>一致性哈希是分布式键值系统中常用的数据分布技术。</p>
+<h4 id="分布式表格系统："><a href="#分布式表格系统：" class="headerlink" title="分布式表格系统："></a>分布式表格系统：</h4><p>分布式表格系统用于存储关系较为复杂的半结构化数据，与分布式键值系统相比，分布式表格系统不仅仅支持简单的CRUD操作，还支持扫描某个主键范围。<br>分布式表格系统以表格为单位组织数据，每个表格包括很多行，通过主键标示一行，支持根据主键的CRUD功能以及范围查找功能。<br>分布式表格系统借鉴了很多关系数据库的激素，例如事务。<br>与分布式数据库相比，分布式表格系统主要支持针对单张表的操作，不支持一些特别复杂的操作，比如多表关联，多表连接，嵌套子查询等。<br>在分布式表格系统中，同一个表格的多个数据行也不要求包含相同类型的列，适合半结构化数据。<br>分布式表格系统是一种很好的权很，这类系统可以做到超大规模，而且支持较多的功能，但实现比较复杂，有一定的使用门槛。</p>
+<h4 id="分布式数据库："><a href="#分布式数据库：" class="headerlink" title="分布式数据库："></a>分布式数据库：</h4><p>分布式数据库一般是从单机关系数据库扩展而来，用于存储结构化数据。分布式数据库采用二维表格组织数据，提供SQL关系查询语言，支持多表关联，嵌套子查询等复杂操作，并提供数据库事务以及并发控制。</p>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>
