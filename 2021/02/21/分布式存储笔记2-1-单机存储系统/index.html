@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        分布式存储笔记2.1 单机存储系统 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#单机存储引擎与单机存储系统："><span class="toc-text">单机存储引擎与单机存储系统：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#网络拓扑："><span class="toc-text">网络拓扑：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#常用硬件参数："><span class="toc-text">常用硬件参数：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#存储介质对比："><span class="toc-text">存储介质对比：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#存储层次架构："><span class="toc-text">存储层次架构：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#单机存储引擎："><span class="toc-text">单机存储引擎：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#哈希存储引擎-键值存储系统："><span class="toc-text">哈希存储引擎 - 键值存储系统：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#数据结构："><span class="toc-text">数据结构：</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#B树存储引擎-关系数据库："><span class="toc-text">B树存储引擎 - 关系数据库：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#缓冲区管理："><span class="toc-text">缓冲区管理：</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LSM树存储引擎-分布式表格系统："><span class="toc-text">LSM树存储引擎 - 分布式表格系统：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#LevelDB存储引擎："><span class="toc-text">LevelDB存储引擎：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#合并操作："><span class="toc-text">合并操作：</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#数据模型："><span class="toc-text">数据模型：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#文件模型："><span class="toc-text">文件模型：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#关系模型："><span class="toc-text">关系模型：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#键值模型："><span class="toc-text">键值模型：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#表格模型："><span class="toc-text">表格模型：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据压缩："><span class="toc-text">数据压缩：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#压缩算法："><span class="toc-text">压缩算法：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#列式存储："><span class="toc-text">列式存储：</span></a></li></ol></li></ol></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        分布式存储笔记2.1 单机存储系统
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2021-02-21 21:58:43</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#存储" title="存储">存储</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p><hr><br>这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。</p>
+<hr>
+
+<h2 id="单机存储引擎与单机存储系统："><a href="#单机存储引擎与单机存储系统：" class="headerlink" title="单机存储引擎与单机存储系统："></a>单机存储引擎与单机存储系统：</h2><p>单机存储引擎就是哈希表、B树等数据结构在机械磁盘、SSD等持久化介质上的实现。单机存储系统就是单机存储引擎的一种封装，对外提供文件、键值、表格或关系模型。</p>
+<p>数据库将一个或多个操作组成一组，称作事务，事务必须满足原子性、一致性、隔离性以及持久性，简称ACID特性。</p>
+<h3 id="网络拓扑："><a href="#网络拓扑：" class="headerlink" title="网络拓扑："></a>网络拓扑：</h3><p>传统网络拓扑分为三层结构：接入层、汇聚层、核心层<br><img src="/img/202102/002.png" width="50%" height="50%"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这样的问题在于，同一接入层之间的服务器之间的带宽为1GB，不同接入层之间的服务器之间的带宽小于1GB，而同一接入层往往放在同一个机架中，因此设计系统的时候需要考虑到服务器是否在一个机架内，减少跨机架拷贝大量数据。</p>
+<blockquote>
+<p>不同核心层之间的服务器进行通信需要经过接入层、汇聚层、核心层，而核心层、汇聚层服务器在同时处理多台接入层的设备，使得网络带宽资源被占用。</p>
+</blockquote>
+<p>hadoop的三个存储副本中，有两个都处于同一个机架内。</p>
+<blockquote>
+<p>即两个副本付出同一接入层下，保证了两个副本之间带宽为1Gb</p>
+</blockquote>
+<p>新型的一种网络拓扑结构是谷歌推出的扁平化拓扑结构，即三级CLOS网络，同一个集群内最多支持20480台服务器，且任何两台之间都有1Gb带宽。但是这需要投入更多的交换机，不过好处就是设计系统时不需要考虑底层网络拓扑，从而很方便地将整个集群做成一个计算资源池。</p>
+<h3 id="常用硬件参数："><a href="#常用硬件参数：" class="headerlink" title="常用硬件参数："></a>常用硬件参数：</h3><p><img src="/img/202102/003.png" width="50%" height="50%"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;存储系统的性能瓶颈主要在于磁盘的随机读写，设计存储引擎的时候需要根据磁盘的特性做出相应的处理，比如将随机写操作转化为顺序写，通过缓存你减少磁盘随机读操作。</p>
+<h3 id="存储介质对比："><a href="#存储介质对比：" class="headerlink" title="存储介质对比："></a>存储介质对比：</h3><p><img src="/img/202102/004.png" width="50%" height="50%"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;由于SSD价格高，但是在随机读写方面性能好的特定，可以将SSD作为缓存使用。</p>
+<h3 id="存储层次架构："><a href="#存储层次架构：" class="headerlink" title="存储层次架构："></a>存储层次架构：</h3><p>不同机架之间的服务器互相访问需要有额外的网络传输协议与网络协议栈的开销。</p>
+<blockquote>
+<p>传统网络拓扑结构如果要保证跨层间服务器网络带宽最大，需要为上层服务器开通更大的带宽</p>
+</blockquote>
+<p>存储系统的性能主要包括两个维度：</p>
+<ul>
+<li>吞吐量（系统的吞吐能力指系统在某一段时间可以处理的请求总数，常用美妙处理的读操作数QPS或者写操作数TPS来衡量）</li>
+<li>访问延时（指从某个请求发出到接收到返回结果消耗的时间，通常用平均延时或者99.9%以上请求的最大延时来衡量）</li>
+</ul>
+<p>设计系统时要求能够在保证访问延时的基础上，通过最低的成本尽可能实现高的吞吐量。优先保证访问延时，又有余力的情况下提高吞吐量</p>
+<blockquote>
+<p>优先保证访问延时，又有余力的情况下提高吞吐量</p>
+</blockquote>
+<p>磁盘与SSD的访问延时差别很大，但是带宽差别不大，因此磁盘适合大块顺序访问的存储系统，SSD适合 随机访问较多或者对延时比较敏感的关键系统。（SSD就算读取出了大块数据，最终还是要等网络带宽将其传输出去。</p>
+<p>二者也可以组合成混合存储：热数据（频繁访问）存储到SSD中，冷数据（访问不频繁）存储到磁盘中。</p>
+<blockquote>
+<p>就算IO性能再强，也要等待网络将数据发送出去，对外来说服务器理论最大的吞吐量就是服务器的满速带宽。</p>
+</blockquote>
+<h3 id="单机存储引擎："><a href="#单机存储引擎：" class="headerlink" title="单机存储引擎："></a>单机存储引擎：</h3><p>存储系统的核心是存储引擎，它直接决定了存储系统的性能与功能。</p>
+<p>存储系统的基本功能：增删改读</p>
+<p>读操作又分为：随机读取、顺序扫描</p>
+<h4 id="哈希存储引擎-键值存储系统："><a href="#哈希存储引擎-键值存储系统：" class="headerlink" title="哈希存储引擎 - 键值存储系统："></a>哈希存储引擎 - 键值存储系统：</h4><p>是哈希表的持久化实现，支持增删改查，其中的查询操作属于随机读取，不支持顺序扫描。</p>
+<p>Bitcask是基于哈希表结构的键值存储系统，用于日志存储。</p>
+<p>因此它只支持追加操作。</p>
+<blockquote>
+<p>日志对时间顺序要求很高不允许随机写入，而且作为记录不允许修改</p>
+</blockquote>
+<p>由于日志会长时间连续不断地写入，因此日志文件需要在到达一定大小之后分块，否则将无法读取。</p>
+<blockquote>
+<p>单个文件过大无法打开</p>
+</blockquote>
+<p>为了保证日志写入的时间顺序，在任意时刻，只有一个文件是可写的，老的文件只读不写。这个文件被称为活跃数据文件，其他已经达到大小限制的文件称为老数据文件。</p>
+<h5 id="数据结构："><a href="#数据结构：" class="headerlink" title="数据结构："></a>数据结构：</h5><p><img src="/img/202102/005.png" width="50%" height="50%"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bitcask数据文件中的数据是一条一条的写入操作。每条数据项分别为主键（Key）、value内容（value），主键长度（key_sz）、value长度（value_sz）、时间戳（timestamp）以及crc校验值。</p>
+<p>数据删除不会物理删除数据，而是通过将value设定为一个特殊的值用于标识的逻辑删除。</p>
+<blockquote>
+<p>将删除的开销整合到垃圾回收当中</p>
+</blockquote>
+<p>内存中采用基于哈希表的索引数据结构，哈希表的作用是通过主键快速地定位到value的位置。（如果只需要获取数据，从索引中得到的信息可以直接从文件中获取。如果要获取到这条记录的详细信息，如：时间戳、crc等，就需要从value位置读取再解析。这样在索引部分冗余了value长度等信息，可以加快对内容本身的获取速度）</p>
+<p>系统中的记录删除或者更新后，原来的记录成为了垃圾数据。Bitcask定期会执行垃圾回收的合并操作。将所有老数据扫描一遍生成新的数据文件，由于旧数据不允许更新，因此对同一个Key的更新操作也是会新追加一条记录，因此在垃圾回收的时候，对于同一个Key的多条数据，以最新的一条数据为准，对已经删除的数据则直接抛弃。</p>
+<p>为了保证系统宕机时对索引的快速恢复，系统的索引也需要一个持久化的索引文件并定时更新索引。<br>Bitcask在进行合并的时候会产生一个索引文件，这个索引文件跟内存中的索引完全一样。</p>
+<h4 id="B树存储引擎-关系数据库："><a href="#B树存储引擎-关系数据库：" class="headerlink" title="B树存储引擎 - 关系数据库："></a>B树存储引擎 - 关系数据库：</h4><p>是B树的持久化实现，支持单条记录的增删改查操作，还支持顺序扫描。也能够实现键值存储系统。<br><img src="/img/202102/006.png" width="50%" height="50%"></p>
+<p>InnoDB中常用的是B+树。</p>
+<h5 id="缓冲区管理："><a href="#缓冲区管理：" class="headerlink" title="缓冲区管理："></a>缓冲区管理：</h5><p>缓冲区管理是在内存中分配的一个额外空间，与页面同等大小。磁盘块的内容可以传送到缓冲区中。常用的缓冲区替换策略有两种：</p>
+<ol>
+<li>LRU：<br> LRU算法淘汰最长时间没有读或者写过的块。这种方法要求缓冲区管理器按照页面最后一次被访问的时间组成一个链表，每次淘汰链表的尾页。但是有一个问题：加入某一个查询做了一次全表扫描，将导致缓冲池中的大量页面被替换（全局查询的结果将整个链表全部替换），从而污染缓冲池。</li>
+<li>LIRS：<br> 现代数据库一般采用LIRS算法，即将缓冲池分为两级，数据首先进入第一级，如果数据在短时间内被访问两次或者以上，则称为热点数据进入第二级。每一级都是由LRU组成。</li>
+</ol>
+<h4 id="LSM树存储引擎-分布式表格系统："><a href="#LSM树存储引擎-分布式表格系统：" class="headerlink" title="LSM树存储引擎 - 分布式表格系统："></a>LSM树存储引擎 - 分布式表格系统：</h4><p>支持增删改查（包括随机读取与顺序扫描）通过批量转储技术规避磁盘随机写入问题。</p>
+<p>将对数据的修改增量保持在内存中，达到指定大小限制后将这些修改操作批量写入磁盘，读取时需要合并磁盘中的历史数据和内存中最新的修改操作。</p>
+<p>该算法的优势在于有效地规避了磁盘随机写入问题，但读取时可能需要访问较多的磁盘文件。</p>
+<blockquote>
+<p>如果服务器突然宕机可能会丢失部分在内存中的数据</p>
+</blockquote>
+<h5 id="LevelDB存储引擎："><a href="#LevelDB存储引擎：" class="headerlink" title="LevelDB存储引擎："></a>LevelDB存储引擎：</h5><p><img src="/img/202102/007.png" width="50%" height="50%"></p>
+<p>该引擎主要包括：</p>
+<ul>
+<li>内存中：MemTable、不可变MemTable</li>
+<li>磁盘上：当前（Current）文件、清单（Manifest）文件、操作日志（Commit Log，又叫提交日志）、SSTable文件</li>
+</ul>
+<p>当应用写入一条记录时，LevelDB首先将修改操作写入到操作日志文件中，成功后再将修改操作应用到MemTable，这时候就完成了写入操作。</p>
+<blockquote>
+<p>这样当服务器宕机的时候也可以从操作日志中恢复MemTable数据，不会使得数据丢失<br>为什么写了日志缺不写入数据块呢？因为日志属于追加写操作，对磁盘的开销小。而对数据块的操作会有增删改查这4个操作，这些操作的开销比追加写要大很多</p>
+</blockquote>
+<p>当MemTable占用的内存达到一个上限值后，需要将内存的数据转储到对外文件中（即持久化到磁盘）这时会先将使用中的MemTable冻结，后续的操作由一个新创建的MemTable接收，LevelDB将不可变MemTable中的数据排序后转储到磁盘，形成一个新的SSTable文件，这个操作称为Compaction。</p>
+<blockquote>
+<p>感觉Compaction之后应该也要将这个操作写入操作日志当中，因为宕机恢复的话一部分数据是会从操作日志恢复的，如果不做记录会将已经持久化的数据也恢复到内存中。不过这样看来问题也不大。</p>
+</blockquote>
+<p>SSTable文件是内存中的数据不断进行Compaction后形成的，且SSTable的数据是一种层级结构，第0层是Level 0。</p>
+<p>SSTable的数据是按照主键大小顺序排列的，因此一个SSTable的范围可以由两端的最大、最小主键所确定。而清单文件就记录了这些信息，包括属于哪个层级、文件名称、最小主键、最大主键。</p>
+<p>随着SSTable的产生，清单文件也会越来越大，必然会进行拆分并且设置出哪个清单文件是当前生效的，因此当前文件（Current）就是用来指出当前是哪个清单文件在生效。</p>
+<p>因此一次查询将会查询多个文件，对此LevelDB做了一个优化：查询时首先查询MemTable，如果没有结果则往不可变MemTable查询，如果还没有则从新往旧查询SSTable。</p>
+<h5 id="合并操作："><a href="#合并操作：" class="headerlink" title="合并操作："></a>合并操作：</h5><p>LevelDB的Compaction操作有两种，分别为minor和major。Minor compaction指的是将内存中的MemTable持久化到磁盘中的操作，major Compaction指的是将磁盘中多个SSTable合并的操作。当某个层级下的SStable文件数目超过一定设置值后，LevelDB会将这个层级的SSTable文件与高一级的SSTable文件合并。Major compaction按照主键顺序依次迭代出所有SSTable文件记录，如果没有价值，则将其抛弃。</p>
+<blockquote>
+<p>这样的话这部分操作应该跟bitcask的垃圾回收是一样的，LevelDB中对数据的更新操作也不会直接修改数据块中的数据，而是在后面追加一条。删除数据也是在数据块中做一个标记表示删除。这样在major Compaction的时候可以回收大量的磁盘空间。<br>补充1:具体的需要根据源码确认，目前只是猜测，这里这篇文章应该会有所收获：<a href="https://zhuanlan.zhihu.com/p/46718964" target="_blank" rel="noopener">LevelDB的Compaction</a><br>补充2:看来上面的猜测是正确的，major compaction所作的工作除了减少SSTable的文件数量外，还做了跟Bitcask一样的垃圾回收操作。<br>从上文可知：<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Major compaction的目的是：均衡各个level的数据，保证 read 的性能；合并delete数据，释放磁盘空间，因为leveldb是采用的延迟（标记）删除；合并update的数据，例如put同一个key，新put的会替换旧put的，虽然数据做了update，但是update类似于delete，是采用的延迟（标记）update，实际的update是在compact中完成，并实现空间的释放。<br>PS：跟我上面的猜想一样</p>
+</blockquote>
+<h4 id="数据模型："><a href="#数据模型：" class="headerlink" title="数据模型："></a>数据模型：</h4><p>存储系统的数据模型包括三类：文件、关系、键值<br>关系模型描述能力强，产业链完整。但是新的键值模型更能满足当前大型系统需要，但是没有同一的业界标准。</p>
+<h5 id="文件模型："><a href="#文件模型：" class="headerlink" title="文件模型："></a>文件模型：</h5><pre><code>以系统以及目录树的形式组织文件。POSIX是应用程序访问文件系统的API标准，主要包括：
+</code></pre><ul>
+<li>Open/Close：打开/关闭一个文件，获取文件描述符</li>
+<li>Read/Write：读取一个文件或者往文件中写入数据</li>
+<li>Opendir/Closedir：打开或关闭一个目录</li>
+<li>Readdir：遍历目录</li>
+</ul>
+<p>POSIX还定义了读写操作语义。他要求读写并发时能够保证操作的原子性，即读操作要么读到所有结果，要么什么都读不到；</p>
+<p>POSIX适合单机系统，在分布式文件系统中，出于性能考虑往往不会严格遵守，NFS文件系统允许客户端缓存文件数据，多个客户端并发修改同一个文件时可能出现不一致的情况。但是会出现A、B同时修改了文件C并先后提交的情况，这样会导致A的修改被B的修改所覆盖。</p>
+<p>对象模型与文件系统类似，但是弱化了目录树的概念，对象模型要求对象一次性写入到系统中，只能删除整个对象，不允许修改一部分。<br>就是平时使用的文件系统</p>
+<h5 id="关系模型："><a href="#关系模型：" class="headerlink" title="关系模型："></a>关系模型：</h5><p>平时数据库的表结构就是关系模型<br>每个关系都是一个表格，由多个元组（行）构成，每个元组包含多个属性（列）。关系名、属性名以及属性类型称作该关系的模式（schema）。<br>数据库语言SQL用于描述查询以及修改操作。SQL还有个强大的特性是允许在WHERE、FROM、HAVING子句中使用子查询。<br>SQL还有两个重要特征：索引、事务。<br>索引用于减少SQL执行时扫描的数据量，提高读取性能；事务规定了各个数据库操作的语义，保证了多个操作并发执行时的ACID特性（原子性、一致性、隔离性、持久性）</p>
+<h5 id="键值模型："><a href="#键值模型：" class="headerlink" title="键值模型："></a>键值模型：</h5><p>大量的NoSQL系统采用了键值模型，有点类似于HashTable，也称为Key-Value模型。每行记录由主键和值两部分组成。<br>所有操作都是基于主键，包括：</p>
+<ul>
+<li>Put：保存一个Key-Value对</li>
+<li>Get：读取一个Key-Value对</li>
+<li>Delete：删除一个Key-Value对<br>K-V模型过于简单，使用场景有限，NoSQL系统中比较广泛采用的模型是表格模型。</li>
+</ul>
+<h5 id="表格模型："><a href="#表格模型：" class="headerlink" title="表格模型："></a>表格模型：</h5><p>表格模型弱化了关系模型中的多表关联，支持基于单表的简单操作，典型的有BigTable、HBase。表格模型除了支持简单的基于主键的操作，还支持范围扫描，另外也支持基于列的操作：</p>
+<ul>
+<li>Insert：插入一行数据，每行包含若干列</li>
+<li>Delete：删除一行数据</li>
+<li>Update：更新整行或者其中的某些列的数据</li>
+<li>Get：读取整行或者其中某些列的数据</li>
+<li>Scan：扫描一段范围的数据，根据主键确定扫描的范围，支持扫描部分列、支持按列过滤、排序、分组等</li>
+</ul>
+<h3 id="数据压缩："><a href="#数据压缩：" class="headerlink" title="数据压缩："></a>数据压缩：</h3><p>数据压缩分为有损压缩和无损压缩。<br>早期的压缩技术以Huffman编码为主，通过统计字符出现的频率计算最优前缀编码。<br>1977年后则以LZ77系列压缩算法为主，通过在一个窗口内部找重复并维护数据字典。<br>压缩算法的核心是找重复数据，列式存储技术通过把相同列的数据组织在一起。传统的OLAP数据库，如：Sybase IQ、Teradata、Bigtable、HBase等分布式表格系统都实现了列式存储。</p>
+<h4 id="压缩算法："><a href="#压缩算法：" class="headerlink" title="压缩算法："></a>压缩算法：</h4><p>压缩需要根据数据的特点选择或开发合适的算法，本质是查找数据的重复或者规律，用尽量少的字节表示。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;存储系统在选择压缩算法的时候需要考虑压缩比和效率。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;读操作需要先读取磁盘中的内容呢再解压缩，写操作需要先压缩再将压缩结果写入磁盘中，整个操作的延时包括压缩/解压缩和磁盘的读写。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;压缩比越大，磁盘读写的数据量越小，而压缩/解压缩的时间也会越长，这里是一个权衡点。</p>
+<blockquote>
+<p>igTable使用BMADiff以及Zippy两种压缩算法，牺牲一定的压缩比换取算法执行速度的大幅提升。</p>
+</blockquote>
+<p>Huffman编码/LZ系列压缩算法：自己查资料</p>
+<h4 id="列式存储："><a href="#列式存储：" class="headerlink" title="列式存储："></a>列式存储：</h4><p>传统的行式数据库将完整的数据行存储在数据页中。如果查询时需要用到大量的列，这种方式在磁盘IO上比较高效。一般来说，OLTP（联机事务处理）应用适合采用这种方式。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;如果一个应用需要查询大量的数据但是只涉及一两列的情况，行式数据库的开销是十分大的。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;此时如果采用列式存储就可以有效优化这部分开销，但于此同时，系统常常查询单条记录的情况下，由于列式存储需要从不同行中查询一个对象的不同属性，他查询的开销是比行式存储大。因此可以根据系统具体的业务更换存储方式。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;而且，由于同一列的数据重复率很高，因此，列式数据库压缩时有很大的优势。</p>
+<blockquote>
+<p>Google 的BigTable列式数据库对网页库压缩可以达到15倍以上的压缩率</p>
+</blockquote>
+<p>同时，可以针对列式存储做专门的索引优化，比如性别（只有两个值：男、女），可以对这列建立位图索引：<br><img src="/img/202102/008.png" width="50%" height="50%"><br>100101:分别从左到右的第1、4、6为1表示数据的第1、4、6行为男<br>011010:与上面相反，表示2、3、5行为女</p>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>
