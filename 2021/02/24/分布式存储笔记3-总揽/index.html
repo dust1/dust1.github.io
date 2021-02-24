@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        分布式存储笔记3 总揽 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#主要协议："><span class="toc-text">主要协议：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基本概念："><span class="toc-text">基本概念：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#异常："><span class="toc-text">异常：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#异常类型："><span class="toc-text">异常类型：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#超时："><span class="toc-text">超时：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#一致性："><span class="toc-text">一致性：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#衡量指标："><span class="toc-text">衡量指标：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#性能："><span class="toc-text">性能：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#可用性："><span class="toc-text">可用性：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#一致性：-1"><span class="toc-text">一致性：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#可扩展性："><span class="toc-text">可扩展性：</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#性能分析："><span class="toc-text">性能分析：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#分析实例："><span class="toc-text">分析实例：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据分布："><span class="toc-text">数据分布：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#哈希分布："><span class="toc-text">哈希分布：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#顺序分布："><span class="toc-text">顺序分布：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#负载均衡："><span class="toc-text">负载均衡：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#复制："><span class="toc-text">复制：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#复制的概述："><span class="toc-text">复制的概述：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#一致性与可用性："><span class="toc-text">一致性与可用性：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#容错："><span class="toc-text">容错：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#故障检测："><span class="toc-text">故障检测：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#租约机制："><span class="toc-text">租约机制：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#故障恢复："><span class="toc-text">故障恢复：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#可扩展性：-1"><span class="toc-text">可扩展性：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总控节点："><span class="toc-text">总控节点：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据库扩容："><span class="toc-text">数据库扩容：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#异构系统："><span class="toc-text">异构系统：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#同构系统："><span class="toc-text">同构系统：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#异构系统：-1"><span class="toc-text">异构系统：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分布式协议："><span class="toc-text">分布式协议：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#两阶段提交协议（2PC）："><span class="toc-text">两阶段提交协议（2PC）：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Paxos协议："><span class="toc-text">Paxos协议：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Paxos与2PC："><span class="toc-text">Paxos与2PC：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#跨机房部署："><span class="toc-text">跨机房部署：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#集群整体切换："><span class="toc-text">集群整体切换：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#单个集群跨机房："><span class="toc-text">单个集群跨机房：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Paxos选主副本："><span class="toc-text">Paxos选主副本：</span></a></li></ol></li></ol></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        分布式存储笔记3 总揽
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2021-02-24 23:10:32</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#存储" title="存储">存储</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p><hr><br>这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。</p>
+<hr>
+
+<p>架构设计之初需要估算系统的性能从而权衡不同的设计方法</p>
+<blockquote>
+<p>我感觉最难的就是估算性能与权衡不同的设计方法了。估算性能需要对系统的业务与公司的用户群体有一个清晰的认识，权衡不同的设计方法则需要大量的技术积累，毕竟量多了才能选</p>
+</blockquote>
+<p>接下来首先会有分布式系统相关的基础概念和性能估算方法。接着才是分布式系统的基础理论知识，包括数据分布、复制、一致性、容错等。最后就是常见的分布式协议。</p>
+<h2 id="主要协议："><a href="#主要协议：" class="headerlink" title="主要协议："></a>主要协议：</h2><ul>
+<li>paxos协议：paxos选举协议用于多个节点之间达成一致，往往用于实现总控结点选举</li>
+<li>两阶段提交协议：用于保证跨多个结点操作的原子性</li>
+</ul>
+<h2 id="基本概念："><a href="#基本概念：" class="headerlink" title="基本概念："></a>基本概念：</h2><h3 id="异常："><a href="#异常：" class="headerlink" title="异常："></a>异常：</h3><p>在分布式存储系统中，往往将一台服务器或者服务器上运行的一个进程称为一个节点。</p>
+<p>大规模分布式存储系统的一个核心问题在于自动容错，由于网络与硬件往往是不可靠的，因此会出现各种异常情况。</p>
+<h4 id="异常类型："><a href="#异常类型：" class="headerlink" title="异常类型："></a>异常类型：</h4><ol>
+<li><p>服务器宕机<br>可能原因：内存错误、服务器停电<br>服务器宕机可能随时发生，此时节点无法正常工作，称为不可用（unavailable），服务器重启后节点失去所有内存信息。需要读取持久化介质中你数据来恢复内存信息，从而快速恢复到宕机前的某个一致状态。进行退出同理。</p>
+<blockquote>
+<p>所以需要在节点重启/启动的时候快速构建内存信息，通常可以通过持久化内存信息作为索引文件来实现</p>
+</blockquote>
+</li>
+<li><p>网络异常<br>可能原因：消息丢失、消息乱序（如果采用UDP通信）、网络包数据错误、数据分区（通常是不同网络服务商之间无法正常通信的现象）<br>设计时就要假定网络永远不可靠，只有收到接收方确认消息后才能认定这条消息发送成功。</p>
+</li>
+<li><p>磁盘故障<br>可能原因：磁盘损坏、磁盘数据报错<br>磁盘损坏会导致数据丢失，因此需要将数据备份到多台服务器上，如果出现损坏则快速地从其他服务器恢复数据。<br>磁盘数据错误可以采用校验和（checksum）机制来解决，这个机制既可以在OS层面上实现，也可以在应用程序层面实现</p>
+</li>
+</ol>
+<h4 id="超时："><a href="#超时：" class="headerlink" title="超时："></a>超时：</h4><p>在分布式系统调用中，通过RPC对远端服务器函数进行调用会有三种状态：成功、失败、超时。与本地调用的两种状态相比（成功、失败）多了一个超时，这是因为网络延时/故障等原因引起。这三个状态也称为分布式存储系统的三态。<br><img src="/img/202102/025.png" width="50%" height="50%"></p>
+<blockquote>
+<p>之所以将“超时”独立与失败，是因为调用方无法确定是在发起请求的时候网络异常还是在调用成功后响应时网络异常。</p>
+</blockquote>
+<p>当超时的时候客户端不能简单地认为服务器端处理失败。通常这种情况可以将服务端暴露出来的接口设计为冥等，这样当出现失败/超时的时候客户端可以一直用相同的参数发起请求，直到成功。</p>
+<h3 id="一致性："><a href="#一致性：" class="headerlink" title="一致性："></a>一致性：</h3><p>由于异常的存在，分布式存储系统设计时往往会将数据冗余存储多份，每一份称为一个副本，当某一个节点出现故障时可以从其他副本读取数据。    </p>
+<p>副本是分布式存储系统容错技术的唯一手段。</p>
+<p>而由于多个副本的存在，如何保证多个副本间数据的一致性就是整个分布式系统理论的核心。</p>
+<p>两个方面理解一致性：</p>
+<ul>
+<li>从客户的角度：客户的读写时对他们来说数据是否一致</li>
+<li>从服务端的角度：整个存储系统中所有副本是否一致，更新顺序是否相同</li>
+</ul>
+<blockquote>
+<p>两个不同的角度对于一致性的要求也不一样。如果从客户端角度出发，只要求客户端在读写数据的时候保证一致性，那么在存储系统中这个数据的某些副本可能并不处于一致状态，只不过在客户端读的过程中会将这些副本给排除掉；从服务端的角度出发则要求整个存储系统的副本达成高度的统一。</p>
+</blockquote>
+<p>定义场景<br><img src="/img/202102/026.png" width="50%" height="50%"><br>从客户端的角度出发一致性包含三种情况：<br><img src="/img/202102/027.png" width="50%" height="50%"><br><img src="/img/202102/028.png" width="50%" height="50%"><br><img src="/img/202102/029.png" width="50%" height="50%"></p>
+<blockquote>
+<p>最终一致性，需要等待一段时间达成一致性。通常来说分布式存储系统采用的都是强一致性和最终一致性。而具体要用哪一个需要看业务的具体需要，如果是读取频率高的场景则要保证强一致性，如果类似于分布式文件系统的场景则可以采用最终一致性</p>
+</blockquote>
+<p>最终一致性具有其他变体：<br><img src="/img/202102/030.png" width="50%" height="50%"></p>
+<blockquote>
+<p>读写一致性通常需要等待数据在存储系统中同步完成；会话一致性可能是为了提高吞吐量从而将一部分写入数据保存在内存中，类似于LevelDB的方式，这样当一个失效的时候可能会丢失内存中的数据，导致新创建的会话无法读取这部分数据；</p>
+</blockquote>
+<h3 id="衡量指标："><a href="#衡量指标：" class="headerlink" title="衡量指标："></a>衡量指标：</h3><h4 id="性能："><a href="#性能：" class="headerlink" title="性能："></a>性能：</h4><p>常见的性能指标有：系统的吞吐能力、系统的响应时间</p>
+<p>这两个指标往往是矛盾的，追求高吞吐的系统呢往往很难做到低延迟；追求低延迟的系统，吞吐量也会受限制。</p>
+<blockquote>
+<p>前文讲过，分布式存储系统是在保证低延迟的基础上提高吞吐量</p>
+</blockquote>
+<h5 id="可用性："><a href="#可用性：" class="headerlink" title="可用性："></a>可用性：</h5><p>系统可用性指系统在面对各种异常时可以提供正常服务的能力。可用性可以用系统停服务的时间与正常服务的时间的比例来衡量。</p>
+<ul>
+<li>某个系统的可用性为4个9（99.99%），他的允许停服务时间最大不能超过365 x 24 x 60 / 10000 = 52.56分钟。</li>
+</ul>
+<h5 id="一致性：-1"><a href="#一致性：-1" class="headerlink" title="一致性："></a>一致性：</h5><p>前文有过说明，一般来说，越是强的一致性模型，用户使用起来越简单。</p>
+<p>大部分存储系统都倾向强一致性</p>
+<blockquote>
+<p>因为如最终一致模型，对用户来说可能无法区分是同步失败还是在等待同步当中</p>
+</blockquote>
+<h5 id="可扩展性："><a href="#可扩展性：" class="headerlink" title="可扩展性："></a>可扩展性：</h5><p>指分布式存储系统通过扩展集群服务器规模来提高系统存储容量、计算量和性能的能力。</p>
+<p>良好的分布式存储系统的扩展性体现在系统性能与服务器数量呈线性关系。</p>
+<h4 id="性能分析："><a href="#性能分析：" class="headerlink" title="性能分析："></a>性能分析：</h4><p>需要在系统设计之初就估算存储系统的性能。</p>
+<p>系统设计之初通过性能分析来确定设计目标，防止出现重大设计失误。等系统运行后通过性能优化方法找到系统的瓶颈点并消除。</p>
+<p>性能分析的结果是不精准的，但是不会相差一个大的数量级。</p>
+<p>设计之初需要分析整体架构，然后重点分析可能成为瓶颈的单机模块。系统的资源（CPU、内存、磁盘、网络）是有限的，性能分析就是需要找出可能出现的资源瓶颈。</p>
+<h5 id="分析实例："><a href="#分析实例：" class="headerlink" title="分析实例："></a>分析实例：</h5><p><strong>Q:生成一张有30张缩略图（假设图片原始大小为256KB）的页面需要多少时间？</strong><br><img src="/img/202102/031.png" width="50%" height="50%"><br><img src="/img/202102/032.png" width="50%" height="50%"></p>
+<p><strong>Q:1GB的4字节证书，执行一次快速排序需要多少时间？</strong><br><img src="/img/202102/033.png" width="50%" height="50%"></p>
+<p><strong>BigTable系统性能分析</strong><br><img src="/img/202102/034.png" width="50%" height="50%"><br><img src="/img/202102/035.png" width="50%" height="50%"></p>
+<blockquote>
+<p>还是要在实践中积累经验</p>
+</blockquote>
+<h3 id="数据分布："><a href="#数据分布：" class="headerlink" title="数据分布："></a>数据分布：</h3><p>数据分布的方式有两种：哈希分布、顺序分布</p>
+<p>数据分散到多台机器后，需要尽量保证多台机器之间的负载时比较均衡的。衡量机器负载均衡的因素很多：机器Load值、CPU、内存、磁盘、网络等资源的使用情况；读写请求数及请求量等。</p>
+<p>分布式存储系统需要能自动识别负载高的节点，当某台机器的负载较高时，将它服务的部分数据迁移到其他机器，实现自动负载均衡。</p>
+<blockquote>
+<p>Q:为什么不将流量转移到其他的备份机器中呢？<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A:GFS的备份最多不会超过10台，如果流量大到10台机器都满了那就没地方迁移了，而直接将热点数据转移到其他空闲的服务器可以保证扩容的灵活性，在流量继续增加的情况下还可以添加新的服务器并将热点数据转移到这台服务器上。</p>
+</blockquote>
+<p>分布式存储系统的一个基本要求就是透明性，包括数据分布透明性、数据迁移透明性、数据复制透明性、故障处理透明性。</p>
+<h4 id="哈希分布："><a href="#哈希分布：" class="headerlink" title="哈希分布："></a>哈希分布：</h4><p>通常根据数据主键（hash(key) % N）或者数据所属的用户id（hash(user_id) % N）计算哈希值来决定将数据映射到哪台服务器。</p>
+<p>哈希分布的难点在于如何找到一个好的散列特性。</p>
+<ul>
+<li>如果按数据主键分布，会使得一个用户下的数据分布到多台服务器，当要操作同一个用户下的多条数据的时候要同时修改多台服务器的数据十分困难，此时大量的网络开销就是性能瓶颈。</li>
+<li>如果按照用户id分布，容易出现呢“数据倾斜”的问题，即某些大用户的数据量很大，无论集群的规模多大，这些用户始终由一台服务器处理。</li>
+</ul>
+<p>处理大用户问题一般有两种方式：手动拆分、自动拆分</p>
+<ul>
+<li>自动拆分：根据数据分布算法实现动态调整，自动就爱哪个大用户的数据拆分到多台服务器上。</li>
+<li>手动拆分：线下标记系统中的大用户（例如运行一次MapReduce作业），并根据这些大用户的数据量将其拆分到多台服务器。</li>
+</ul>
+<p>传统的哈希还有一个问题，当系统中的服务器上线下线的时候N值发生变化，数据映射被完全打乱，几乎所有数据都需要重新排布，这将带来大量数据迁移。</p>
+<p><strong>解决办法：</strong><br><img src="/img/202102/036.png" width="50%" height="50%"></p>
+<blockquote>
+<p>但这样又需要一台新的服务器用于保存哈希值与服务器的对应关系，同时必须要保证这个模块高可用，这将提高整个系统的复杂性</p>
+</blockquote>
+<p><img src="/img/202102/037.png" width="50%" height="50%"></p>
+<blockquote>
+<p>这只是缓解了数据重新排布的情况，不能完全避免，依旧会有数据要重新排布。</p>
+</blockquote>
+<p><img src="/img/202102/038.png" width="50%" height="50%"><br>加入node-5后只影响了node-3的数据分布。但node-3需要迁移的数据如果过多，整个集群的负载也会不均衡。一种方法是将需要迁移的数据分散到各个集群当中，没台服务器只需要迁移1/N的数据量，为此引入了虚拟节点的概念。</p>
+<h4 id="顺序分布："><a href="#顺序分布：" class="headerlink" title="顺序分布："></a>顺序分布：</h4><p>哈希散列破坏了数据的有效性，只支持随机读，不支持顺序扫描。</p>
+<blockquote>
+<p>不过如果按照之前说的添加一台哈希-元数据服务器的话可以通过这台服务器进行扫描。</p>
+</blockquote>
+<p>一种方法是按用户id进行哈希分布，这样就保证一个用户的数据位于同一节点下，可以进行顺序扫描。但是也会带来数据倾斜的问题，无法发挥分布式存储系统的多机并行处理能力。</p>
+<p>因此，顺序分布常用于分布式表格系统。将大表按顺序划分为连续的范围，每个范围成为一个子表，总控服务器负责将这些子表按照一定的策略分配到存储节点上。<br><img src="/img/202102/039.png" width="50%" height="50%"><br>Root用来维护数据的分布情况。</p>
+<p>随着子表数据插入与删除，有些子表会变得很大，某些变得很小，数据分布不均匀。如果采用顺序分布，在设计时就需要考虑子表的分裂与合并，这将会增大系统的复杂度。</p>
+<ul>
+<li>子表分裂：当一个子表太大超过一定阈值的时候，需要分裂为两个子表，从而有机会通过系统的负载均衡机制分散到多个存储节点。</li>
+<li>子表合并：一般由数据删除引起。当相邻的两个子表都很小时，可以合并为一个子表。</li>
+</ul>
+<p>一般来说，单个服务节点能够服务的子表数量是有限的，比如4000～10000个，子表合并的目的是为了防止系统中出现过多太小的子表，减少系统中的元数据</p>
+<blockquote>
+<p>减少Root的维护成本</p>
+</blockquote>
+<h4 id="负载均衡："><a href="#负载均衡：" class="headerlink" title="负载均衡："></a>负载均衡：</h4><p>分布式存储系统中的每个集群一般有一个总控节点，其他节点为工作节点你，由总控节点根据全部负载信息进行整体调度。</p>
+<p>工作节点刚上线时，总控节点需要将数据迁移到该节点</p>
+<blockquote>
+<p>采用数据迁移而不是直接追加写的原因可能是为了防止大量的写入请求冲击这台服务器。</p>
+</blockquote>
+<p>系统运行过程中也要随时不断的进行数据迁移，将数据从负载较高的工作节点迁移到负载较低的工作节点。</p>
+<p>工作节点通过心跳包将节点负载相关信息（CPU、内存、磁盘、网络等资源利用率，读写次数以及读写数据量）发送给主控节点。主控节点计算出工作节点的负载以及需要迁移的数据量。生成迁移任务放入迁移队列中等待执行。</p>
+<p>负载均衡需要掌握节奏，如果新加入一台机器，主控节点立刻将大量的数据同时迁移到这台新的机器，整个系统在新增机器的过程中服务能力就会大幅降低。一般来说，从新增机器加入到集群负载达到比较均衡的状态需要较长一段时间，比如30分钟到一个小时，</p>
+<blockquote>
+<p>可以将负载量大的工作节点中的数据优先迁移，即根据负载量进行排序，最高的几台工作节点优先迁移数据。</p>
+</blockquote>
+<p>工作节点的数据往往会有多个副本，对外提供服务的称为主副本。当发生数据迁移的时候，可以将服务切换到其他副本然后进行迁移，这种无缝操作对用户来说完全透明。<br><img src="/img/202102/040.png" width="50%" height="50%"><br><img src="/img/202102/041.png" width="50%" height="50%"></p>
+<h4 id="复制："><a href="#复制：" class="headerlink" title="复制："></a>复制：</h4><p>数据备份了多份，但通常只会有一份用于提供服务，当无法提供服务时，主控系统会自动切换到备份，这个操作称为自动容错。</p>
+<p>数据的副本有两种：主副本（Primary）、备副本（Backup）</p>
+<p>复制协议分为两种：强同步复制、异步复制</p>
+<ul>
+<li>强同步复制：可以保证主备副本之间的一致性，但是当备副本出现故障时，也可能阻塞存储系统的正常写服务。影响系统整体可用性。</li>
+<li>异步复制：可用性相对较好，但是一致性得不到保障，主副本出现故障时还有数据丢失的可能。</li>
+</ul>
+<p>两者的区别在于用的鞋请求是否需要同步到备副本才可以返回成功。加入备副本不止一个，复制协议还会要求写请求至少需要同步到几个备副本。</p>
+<blockquote>
+<p>不管是强同步还是异步，都要求主副本写入完成后才可以返回，即保证了主副本数据完整。但是这里难道说异步复制连主副本是否需要写入完成都不需要判断了吗？</p>
+</blockquote>
+<h5 id="复制的概述："><a href="#复制的概述：" class="headerlink" title="复制的概述："></a>复制的概述：</h5><p>复制常见的做法是将数据写给主副本，由主副本确定操作的顺序并复制到其他副本。<br><img src="/img/202102/042.png" width="50%" height="50%"><br><img src="/img/202102/043.png" width="50%" height="50%"></p>
+<blockquote>
+<p>备副本阻塞无法返回的情况下可以参考多数派写方法，当超过一半的备副本返回写入成功响应后就视本次写入成功。（超过一半 =&gt; 至少1个）<br><img src="/img/202102/044.png" width="50%" height="50%"><br>本地写入完成并且还没备份到其他服务器的时候，如果发生不可恢复的故障会导致本次写入数据完全丢失，而对于客户端来说本次写入是已经完成了的。</p>
+</blockquote>
+<p>强同步复制和异步复制都是将主副本的数据以某种形式发送到其他副本，这种复制协议称为基于主副本的复制协议（Primary-based protocol）。这种方法要求在任何时刻只能由一个副本作为主副本，由它来确定写操作之间的顺序，如果主副本出现故障，需要选举一个备副本称为新的主副本，这步操作称为选举，经典的选举协议为paxos协议。</p>
+<p>主备副本之间的复制一般通过操作日志实现。</p>
+<p>为了利用好磁盘的顺序读写特性，将客户端的写操作先顺序写入到磁盘中，然后应用到内存中，由此内存是随机读写设备，可以很容易通过各种数据结构有效组织起来。当服务器宕机时，只需要回放操作日志就可以恢复内存状态。为了提高并发能力，系统往往会用成组提交技术写入数据。</p>
+<blockquote>
+<p>如果是写入大文件根据HDFS的EditsLog来看也是直接记录数据内容的，然后通过定期合并/删除等方式减少操作日志的大小。<br><img src="/img/202102/045.png" width="50%" height="50%"><br>跟前面第一次遇到检查点概念的时候我的理解一样，检查点持久化后只需要恢复这个检查点之后的数据即可。</p>
+</blockquote>
+<p>除了给予主副本的复制协议，分布式存储系统中还可能使用给予写多个存储节点的复制协议（Replicated-write protocol）。比如Dynamo系统中的NWR复制协议，其中N为副本数量，W为写操作的副本数，R为度操作的副本数。</p>
+<p>NWR协议中多个副本不再区分主副，客户端根据一定的策略往其中的W个副本写入数据，读取其中的R个副本。只要W+ R &gt; N，可以保证读到的副本中至少有一个包含了最新的更新。</p>
+<p>但是，这种协议的问题在于不同副本的操作顺序可能不一致，从多个副本读取时可能出现冲突。（不建议使用）</p>
+<blockquote>
+<p>R或者W设置的越大也会导致整个响应越长，因为最终的响应时间是根据最慢的响应来的。在读取到数据的时候还需要判断哪些数据是最新的，这时就需要向量时钟来配合。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;只要W + R &gt; N，就能保证读的节点一定会和写的节点产生交集。这样才能保证系统的强一致性。</p>
+</blockquote>
+<h3 id="一致性与可用性："><a href="#一致性与可用性：" class="headerlink" title="一致性与可用性："></a>一致性与可用性：</h3><p>CAP理论：一致性（Consistency）、可用性（Availability）、分区可容忍性（Tolerance of network Partition）三者不能同时满足。<br><img src="/img/202102/046.png" width="50%" height="50%"><br>其中，分区可容忍性是一定要满足的，因此只能从一致性与可用性中权衡利弊。<br><img src="/img/202102/047.png" width="50%" height="50%"><br>具体如何采用需要根据系统的业务来权衡。</p>
+<h3 id="容错："><a href="#容错：" class="headerlink" title="容错："></a>容错：</h3><p>容错是分布式存储系统设计的重要目标，只有实现了自动化容错，才能减少人工运维成本呢，实现呢分布式存储的规模效应。</p>
+<p>分布式存储系统需要能够检测到机器故障，故障检测往往通过租约（Lease）协议实现。然后需要能够将服务复制或者迁移到集群哪种呢的其他正常的存储节点。</p>
+<p>最常出现的故障就是单机故障（通过备份解决），然后是机架故障（备份到其他机架）等</p>
+<h4 id="故障检测："><a href="#故障检测：" class="headerlink" title="故障检测："></a>故障检测：</h4><p>心跳是一种很自然很常见的故障检测方法。</p>
+<p>但是当主从服务器之间的网络出现延时，或者副节点过于繁忙导致长时间无法及时响应心跳等原因，会使得副节点没有宕机，但主节点就开始对他所保存数据开始复制，这会出现多台服务器（原先的副节点与新备份的节点）同时服务同一份数据从而导致数据不一致。</p>
+<p>这里的重心是接收心跳方在何种情况下应该被认为已发生故障并停止服务。</p>
+<blockquote>
+<p>如果在主控节点那边做判断，一旦副节点无法及时响应心跳并开始转移它数据的服务，那么在逻辑层面将这台服务器下线，后续如果继续上线则将其认定为一台全新的服务器。</p>
+</blockquote>
+<p>由于机器之间会进行时钟同步，且相差不大（比如不会超过0.5秒），那么，我们可以通过租约（Lease）机制进行故障检测。</p>
+<h4 id="租约机制："><a href="#租约机制：" class="headerlink" title="租约机制："></a>租约机制：</h4><p>租约机制是一种带有超时时间的授权。</p>
+<p>假设机器A需要检测机器B是否发生故障，机器A可以给机器B发放租约，机器B持有的租约在有效期内才允许提供服务，否则主动停止服务。机器B的租约快要到期时向机器A主动申请租约。</p>
+<p>正常情况下，机器B通过不断申请租约来延长有效期，当机器B出现故障或者与机器A之间的网络发生故障时，机器B的租约将国旗，从而机器A能够确保机器B不再提供服务，机器B的服务也会被迁移到其他服务器。</p>
+<blockquote>
+<p>在什么情况下机器A才会认定机器B的服务出现故障呢？如果机器B出现故障，那么机器A是无法检测到的，只能等服务请求机器B的数据的时候才会出现异常，那这种情况应该就是服务请求B的数据的时候如果出现异常则向机器A报告，并由机器A将B的服务迁移到其他服务器中。若是迁移完成后机器B又恢复了服务且他的租约尚未过期，那A不过不在逻辑层面将B下线的话不一样还是会有多台机器对同一份数据提供服务吗？<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;上述问题答案：租约加上提前量，假设租约10秒过期，则A需要等到11秒后才能认定B无法提供服务，这样就能保证将B的服务迁移后就能保证B如果在后面恢复之后不会继续提供服务。</p>
+</blockquote>
+<h4 id="故障恢复："><a href="#故障恢复：" class="headerlink" title="故障恢复："></a>故障恢复：</h4><p>常见的分布式存储系统分为两种结构：单层结构和双层结构。</p>
+<ul>
+<li>单层结构：在系统中对每个数据分片维护多个副本；</li>
+<li>双层结构：类似于BigTable系统，将存储和服务分为两层，存储层对曾哥数据分片维护多个副本，服务层只有一个副本提供服务。（服务就是Bigtable，存储依托于GFS）<br><img src="/img/202102/048.png" width="50%" height="50%"></li>
+</ul>
+<p>单层结构：当节点1出现故障时，会启用节点2对外提供服务。此时节点1会有两种情况：临时故障、永久故障</p>
+<ul>
+<li>临时故障：当节点1重新上线后，会将节点2的数据同步到节点1，此时节点1作为备份节点。</li>
+<li>永久故障：当一段时间后节点1还是无法上线则将其认定为永久故障，此时需要对节点1的数据进行复制。</li>
+</ul>
+<p>双层结构：数据块不会在服务节点中做备份，当一个服务节点发生故障的时候，系统会从分布式文件系统中重新获取这个节点中的数据块，并将其放置在其他正常的节点并提供服务（这里可以将数据直接加载到内存中）。</p>
+<p>节点故障会影响系统服务，在故障检测以及故障恢复的过程中不能提供些服务及强一致性读服务。</p>
+<blockquote>
+<p>为什么？提供写服务，并在后续节点上线后将数据同步过去不可以吗？<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;后续节点上线后其中的数据已经不一致，但是该节点可以参与后续的服务工作，这样会使得客户端读取到过期数据。而且实现也复杂。</p>
+</blockquote>
+<p>故障检测时间分为两种：故障检测时间、故障恢复时间</p>
+<p>单层结构的备副本和主副本之间保持实时同步，切换为主副本的时间很短。</p>
+<p>两层结构故障恢复往往实现成本只需要将数据的索引重新加载到内存中即可。</p>
+<p>总控节点也会出现故障，因此也需要总控节点的副节点以及通过实时同步保证数据的一致性。</p>
+<p>当故障发生时，通过外部服务器选举某台副本作为新的总控节点，而这个外部服务也得是高可用的，为了进行选主或者维护系统中的重要信息，可以维护一套通过Paxos协议实现的分布式锁服务，比如Chubby或者Zookeeper。</p>
+<h3 id="可扩展性：-1"><a href="#可扩展性：-1" class="headerlink" title="可扩展性："></a>可扩展性：</h3><p>主流的分布式存储系统大多都带有主控节点，理论上P2P架构更有优势，但实际上主控节点依旧能够满足大部分业务所需。</p>
+<p>传统数据库可以通过分库分表进行水平扩展。</p>
+<p>分布式存储系统的可扩展性不能简单地通过系统是否为P2P架构或者是否能够将数据分布到多个存储节点来衡量，而应该综合考虑节点故障后的恢复时间，扩容的自动化程度，扩容的灵活性等。</p>
+<h3 id="总控节点："><a href="#总控节点：" class="headerlink" title="总控节点："></a>总控节点：</h3><p>总控节点用于恢复数据分布信息，执行工作机管理，数据定位，故障检测和恢复，负载均衡等全局调度工作。</p>
+<p>总控节点使得系统的设计更加简单，并且更加容易做到强一致性，对用户友好。</p>
+<ul>
+<li>分布式文件系统的总控节点除了执行全局调度，还需要维护文件系统目录树，此时内存容量可能会成为瓶颈。</li>
+<li>总控节点只需要维护数据分片的位置信息，这时内存一般不会成为瓶颈。<br><img src="/img/202102/049.png" width="50%" height="50%"><br>如果总控节点成为瓶颈，可以在总控机与工作机之间增加一层元数据节点，每个元数据节点只维护一部分而不是整个分布式文件系统的元数据。而总控节点只需要维护少量元数据节点数据即可。</li>
+</ul>
+<h3 id="数据库扩容："><a href="#数据库扩容：" class="headerlink" title="数据库扩容："></a>数据库扩容：</h3><p>数据库可扩展性实现的手段包括：通过主从复制提高系统的读取能力，通过垂直拆分和水平拆分将数据分布到多个存储节点，通过主从复制将系统扩展到多个数据中心。<br><img src="/img/202102/050.png" width="50%" height="50%"><br><img src="/img/202102/051.png" width="50%" height="50%"><br><img src="/img/202102/052.png" width="50%" height="50%"></p>
+<h3 id="异构系统："><a href="#异构系统：" class="headerlink" title="异构系统："></a>异构系统：</h3><h4 id="同构系统："><a href="#同构系统：" class="headerlink" title="同构系统："></a>同构系统：</h4><p><img src="/img/202102/053.png" width="50%" height="50%"></p>
+<blockquote>
+<p>这就有点像GFS的设计，读写部分由客户端直接与存储节点交互</p>
+</blockquote>
+<p>将存储节点分为若干组，每个组内的节点服务完全相同的数据，其中一个节点为主节点，其他节点为备节点。同一组存储节点服务相同的数据，这样的存储系统成为同构系统。</p>
+<p>缺点：增加副本需要迁移的数据量太大（如果要增加副本，则要将主节点中的数据全部拷贝到副本节点，假设主节点数据量为1T，节点之间带宽为20MB/s,则完全备份需要1TB/20MB/s=50000s，耗时长且容易出错）</p>
+<ul>
+<li>大规模分布式存储系统要求具有线性可扩展性，即随时加入或者删除一个或者多个存储节点，系统的处理能力与存储节点的个数成线性关系。</li>
+</ul>
+<h4 id="异构系统：-1"><a href="#异构系统：-1" class="headerlink" title="异构系统："></a>异构系统：</h4><p>异构系统与同构系统的区别在于对数据的划分，同构系统将数据全部放置在同一个节点中，这样会使得数据的备份十分耗时。而异构系统将数据划分为多个数据块，并将这些数据块分布到整个集群中的不同节点当中，当一个存储节点出现问题的时候，将由整个集群来恢复数据服务而不是固定的几台服务器，这样能提高数据的可用性，且备份的时候传输数据块的效率比一个完整的数据要高很多。<br><img src="/img/202102/054.png" width="50%" height="50%"><br>当节点1宕机的时候其中的数据服务将由节点2、节点3来支撑，并由其他节点5、节点4来重新备份，这样可以将备份的网络开销与提供服务的网络开销隔离开使得效率更高，且恢复时间短，当集群规模越大的时候，优势越明显。</p>
+<h3 id="分布式协议："><a href="#分布式协议：" class="headerlink" title="分布式协议："></a>分布式协议：</h3><p>分布式协议有很多，例如：租约、复制协议、一致性协议。其中两阶段提交协议与Paxos协议最有代表性。</p>
+<p>两阶段提交协议用于保证跨多个节点操作的原子性。</p>
+<p>Paxos协议用于确保多个节点对某个投票（例如哪个节点为主节点）达成一致。</p>
+<h4 id="两阶段提交协议（2PC）："><a href="#两阶段提交协议（2PC）：" class="headerlink" title="两阶段提交协议（2PC）："></a>两阶段提交协议（2PC）：</h4><p>常用来实现分布式事务。</p>
+<p>在2PC中，系统一般包含两类节点：一类为协调者（coordinator），通常一个系统中只有一个；另一类为事务参与者（participants，cohorts或workers），一般包含多个。</p>
+<p>协议中假设每个节点都会记录操作日志并持久化到非易失性存储介质，及时节点发生故障日志也不会丢失。两个阶段如下：<br><img src="/img/202102/055.png" width="50%" height="50%"></p>
+<blockquote>
+<p>如果当一个参与者长时间没有回复，就会导致整个协议过程阻塞。或者协调者通知完参与者后下线了且数据没有做保存，那么也会导致该流程失败。不过可以引入事务超时机制来避免此问题。<br><img src="/img/202102/056.png" width="50%" height="50%"></p>
+</blockquote>
+<p>上面的两个故障总结如下：</p>
+<ul>
+<li>事务参与者发生故障。给每个事务设置一个超时时间，如果某个事务参与者一直不响应，到达超时时间后整个事务失败。</li>
+<li>协调者发生故障。协调者需要将事务相信信息记录到操作日志并同步到备用协调者，加入协调者发生故障，备用协调者可以接替他完成后续的工作。如果没有备用协调者，协调者又发生了永久性故障，事务参与者将无法完成事务而一直等待下去。<br>  两阶段提交协议是阻塞协议，执行过程中需要锁住其他更新，且不能容错，通常大部分分布式存储系统都会放弃分布式事务的支持。</li>
+</ul>
+<h4 id="Paxos协议："><a href="#Paxos协议：" class="headerlink" title="Paxos协议："></a>Paxos协议：</h4><p>Paxos协议用于解决多个节点之间的一致性问题。</p>
+<p>多个节点之间通过操作日志同步数据，如果只有一个节点为主节点，那么很容易确保多个节点之间操作日志的一致性。当主节点出现故障的时候，系统需要选举出新的主节点。</p>
+<p>只要保证多个节点之间操作日志的一致性，就能够在这些节点上构建高可用的全局服务，例如分布式锁服务，全局命名和配置服务等。</p>
+<blockquote>
+<p>分布式系统一致性的核心就是保证多个节点之间的操作日志一致性。</p>
+</blockquote>
+<p>当主节点出现故障，备节点会提议自己成为主节点。这里的问题在于：网络分区的时候，可能会有多个备节点提议（Proposer，提议者）自己成为主节点。</p>
+<p>Paxos协议执行步骤如下：<br><img src="/img/202102/057.png" width="50%" height="50%"><br>如果Proposer第一次发器的accept请求没有被accepter中的多数派批准，即与其他的proposer冲突。则完整执行一轮Paxos协议：<br><img src="/img/202102/058.png" width="50%" height="50%"><br><img src="/img/202102/059.png" width="50%" height="50%"></p>
+<blockquote>
+<p>跟之前那篇paxos文章不同，上一篇通过Paxos保证了多个节点之间数据的一致性。而这里的Paxos协议则是通过在Proposer保证了多个节点之间记录的最后哪个成功修改结果并成为主节点信息一致。</p>
+</blockquote>
+<h4 id="Paxos与2PC："><a href="#Paxos与2PC：" class="headerlink" title="Paxos与2PC："></a>Paxos与2PC：</h4><p>Paxos协议有两种用法：</p>
+<ol>
+<li>用它来实现全局的锁服务或者命名和配置服务，例如：Chubby、Zookeeper</li>
+<li>用它来将用户数据复制到多个数据中心，例如：Megastore、Spanner</li>
+</ol>
+<p>2PC协议最大的缺陷在于无法处理协调者宕机问题，如果协调者宕机，那么2PC协议中的每个参与者都可能不知道事务应该提交还是回滚，整个协议备阻塞。</p>
+<p>常见的做法是将Paxos与2PC组合起来，通过2PC保证多个数据分片上的操作的原子性，通过Paxos协议实现同一个数据分片的多个副本之间的一致性。</p>
+<p>通过Paxos协议解决2PC协议中协调者宕机问题，当协调者宕机时，通过Paxos协议选举出新的协调者继续提供服务。</p>
+<blockquote>
+<p>这里也可以衍生为当主控节点与其备份节点全部宕机的时候该怎么办？答：通过选举从存储节点中选举出新的主控节点。</p>
+</blockquote>
+<h3 id="跨机房部署："><a href="#跨机房部署：" class="headerlink" title="跨机房部署："></a>跨机房部署：</h3><p>在分布式系统中跨机房是个大问题，机房之间网络延时比较大，且不稳定。</p>
+<p>问题主要包含两个方面：数据同步以及服务切换。</p>
+<p>跨机房部署方案有三个：集群整体切换、单个集群跨机房、Paxos选主副本</p>
+<h4 id="集群整体切换："><a href="#集群整体切换：" class="headerlink" title="集群整体切换："></a>集群整体切换：</h4><p><img src="/img/202102/060.png" width="50%" height="50%"></p>
+<p>两个机房的主控节点与数据节点完全相同。并且其中机房1是主机房，机房2是备机房。机房之间的数据同步方式可能为强同步或者异步。如果采用异步模式，那么备机房的数据总是落后于主机房。</p>
+<p>当主机房整体出现故障时，有两种选择：</p>
+<ol>
+<li>将服务切换到备机房，忍受数据丢失的风险</li>
+<li>停止服务，直到主机房恢复服务</li>
+</ol>
+<p>如果数据同步是异步，那么主备机房切换往往是手工的，允许用户根据业务的特点选择“丢失数据”或者“停止服务”。</p>
+<p>如果采取强同步的方式，那么除了手动切换外还可以采取自动切换的方式，通过分布式锁服务检测主机房的服务，当主机房出现故障时，自动将备机房切换为主机房。</p>
+<h4 id="单个集群跨机房："><a href="#单个集群跨机房：" class="headerlink" title="单个集群跨机房："></a>单个集群跨机房：</h4><p><img src="/img/202102/061.png" width="50%" height="50%"></p>
+<p>跟集群整体切换不同，单个集群跨机房将数据备份分布在两个机房中，总控节点也是跨机房分布，当主总控节点运行中时，他需要跟两个机房的存储节点保持通信。当总控节点出现故障时，由分布式锁服务切换总控节点。</p>
+<p>这种方式需要在数据备份的时候尽可能地将副本分布在多个不同的机房。</p>
+<blockquote>
+<p>总控节点与其他机房存储节点的通信不包含服务部分，即总控节点只需要维持其他机房存储节点的元数据即可。这样与主服务之间关系不大，可以专门开辟一个线程用于维持链接，不会阻塞服务。</p>
+</blockquote>
+<h4 id="Paxos选主副本："><a href="#Paxos选主副本：" class="headerlink" title="Paxos选主副本："></a>Paxos选主副本：</h4><p>前两种方法中，总控节点与工作节点之间需要保持租约以维持通信。<br><img src="/img/202102/062.png" width="50%" height="50%"></p>
+<p>如果采用Paxos协议选主副本，那么每个数据分片的多个副本构成一个Paxos复制组。</p>
+<p>当B1出现故障时，其他副本将尝试切换为主副本，他的优点在于对总控节点的依赖低，缺点则是工程复杂度太高，很难线下模拟所有的异常情况。谷歌的Gegastore和Spanner都采用这种方式。</p>
+<blockquote>
+<p>这里如果出现整个机房故障的话应该和整体切换一样。那么这种方式和上述两种可以结合。将提供服务的基础单位由存储节点细化为数据块。</p>
+</blockquote>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>
