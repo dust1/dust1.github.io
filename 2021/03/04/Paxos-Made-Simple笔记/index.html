@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        Paxos Made Simple笔记 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#提案的选择："><span class="toc-text">提案的选择：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#如何证明P2b成立："><span class="toc-text">如何证明P2b成立：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Acceptor"><span class="toc-text">Acceptor</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#获取被选定的提案值："><span class="toc-text">获取被选定的提案值：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#进展性："><span class="toc-text">进展性：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实现："><span class="toc-text">实现：</span></a></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        Paxos Made Simple笔记
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2021-03-04 20:56:44</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#分布式" title="分布式">分布式</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p>原文：<a href="https://www.microsoft.com/en-us/research/uploads/prod/2016/12/paxos-simple-Copy.pdf" target="_blank" rel="noopener">Paxos Made Simple</a> 翻译：<a href="https://www.cnblogs.com/j-well/p/7056951.html" target="_blank" rel="noopener">点击查看</a></p>
+<p>一致性算法需要在一组服务器节点或者进程中保证一个提案能够在最终结果上达成一致。这里的提案可以是对一次操作的认定，也可以衍生为对一个值的最终结果。</p>
+<p>paxos算法中，由三个角色组成：Proposers(提议者)、Acceptors(接受者)、Learners(学习者)。在一个实现中，单个进程可以充当多个角色。</p>
+<p>通常在节点之间的通信采用异步模型。</p>
+<ul>
+<li>每个参与者（Proposer,Acceptor,Learner）都有可能因为不同的原因导致执行失败、进程停止。当一个提案被选定后，如果所有参与者都同时下线并重启，必须要保证提案结果能被恢复，即需要将结果持久化到各个参与者的磁盘中。</li>
+<li>参与者之间传递的信息可能会超时、丢失，但不会被修改也允许被修改</li>
+</ul>
+<p>从安全角度来说：</p>
+<ul>
+<li>只有从提案发起者发起的提案才能被选定是否通过</li>
+<li>在最终结果没有出来前，任何节点/进程不能假设某个提案已经通过或者某个提案会有很大概率通过</li>
+</ul>
+<p>一个分布式算法，有两个重要属性：Safety和Liveness</p>
+<ul>
+<li>Safety：指那些需要保证永远都不会发生的事</li>
+<li>Liveness：指哪些最终一定会发生的事情</li>
+</ul>
+<h2 id="提案的选择："><a href="#提案的选择：" class="headerlink" title="提案的选择："></a>提案的选择：</h2><p>选定提案最简单的方式就是只有一个Acceptor存在，这样不会存在多个不同的提案情况，但是一旦唯一的Acceptor宕机，则整个系统不可用。</p>
+<p>对上一种问题唯一的解决办法就是增加多个Acceptor。此时Proposer向一个Acceptor集合发送提案，某个Acceptor可能会通过这个提案。当有足够多的Acceptor通过它时，我们就认为这个提案被选定了。</p>
+<p>这里一个重要问题就是如何判断“足够多”是多少个Acceptor？为了保证数量，这个集合需要包含所有Acceptor成员。</p>
+<p>因为集合中任意取两个“大多数”子集，他们一定会存在交集，即用于判断提案是否通过的Acceptor数量至少要超过集合的一半，这就是多数派读写一致性要求。</p>
+<p>再要求所有Acceptor只能通过一个提案，那么就可以保证至少有一个提案会被通过。</p>
+<p>但是上面并没有考虑实际使用过程中节点不可用的情况。而这种情况在实际问题中往往无可避免，属于Liveness。</p>
+<p>在假设没有Acceptor下线的情况下，我们可以设置如下需求：</p>
+<blockquote>
+<p>P1：一个Acceptor必须通过它收到的第一个提案</p>
+</blockquote>
+<p>上面所有的假设都在只有一个Proposer的情况下。如果当有多个Proposer同时提出不同的提案，那么可能会发生所有提案都无法满足“足够多”的情况。</p>
+<ul>
+<li>由于网络延时等原因，提案送达的时间会有先后，可能会出现两个提案各自通过的Acceptor数量相等的情况。但这种情况可以用奇数个数量的Acceptor节点修复。</li>
+<li>但是考虑到实际情况中会出现的Accptor下线等问题，会有5个Acceptor节点，其中2个通过提案A，3个通过提案B。当他们要将结果返回给Proposer时，有一个通过提案B的节点下线了，此时Proposer收到的有2个节点通过提案A，两个节点通过提案B。</li>
+</ul>
+<p>上面的问题，暗示了一个Accpetor必须要能够通过不止一个提案。</p>
+<p>通过对每一个提案分配一个编号来记录一个Acceptor通过的那些提案，于是一个提案就包含一个提案编号以及他的value值。为了不产生混淆，需要保证不同的提案具有不同的编号。当一个具有value值的提案被多数Acceptor通过后，我们就认为该value被选定了。</p>
+<p>We can allow multiple proposals to be chosen, but we must guarantee that all chosen proposals have the same value.  这句无法理解，允许通过多个提案，但是必须保证所有的提案都具有相同的值？</p>
+<blockquote>
+<p>P2：如果具有value值v的提案被选定了，那么所有比它编号高的提案的value值也必须是v。</p>
+</blockquote>
+<p>也就是说，如果有两个存在先后顺序的提案同时发出，当最先发出的提案通过并确定好值后，后判断的提案上的值必须时上一步已经确定好的值。</p>
+<p>一个提案能否被选定，至少需要有一个Acceptor通过。</p>
+<blockquote>
+<p>P2a：如果一个具有value值v的提案被选定了，那么被Acceptor通过的所有编号比他高的提案的value值也必须时v。</p>
+</blockquote>
+<p>即，Acceptor需要保存上一次通过的提案，这个通过的提案不是单个Acceptor通过的提案，而是经过一次paxos流程后最终选定的这个提案。那样的话在一个提案通过后Proposer需要将通过的提案重新传回给Acceptor并让其留档，当同样的提案再次被发送过来的时候可以根据Acceptor保存的上一个提案来对当前要通过的提案执行判断。</p>
+<p>由于通信是异步的，一个提案可能会在某个Acceptor c还没收到任何提案的时候就被选定了。此时有另一个Proposer提出了一个具有不同value值的更高编号的提案，根据P1，需要c通过这个提案，但是这样又与P2a矛盾，因为对整个集群来说提案已经通过了，但是对于c来说这个提案根本没有发给他。因此需要对P2进行强化：</p>
+<blockquote>
+<p>P2b：如果具有value值v的提案被选定了，那么所有比他编号更高的被Proposer提出的提案value值也必须是v</p>
+</blockquote>
+<h3 id="如何证明P2b成立："><a href="#如何证明P2b成立：" class="headerlink" title="如何证明P2b成立："></a>如何证明P2b成立：</h3><p>假设某个具有编号m和value值v的提案被选定了，需要证明任意具有编号n（n &gt; m）的提案都具有value值v。我们可以通过对n使用数学归纳法来简化证明，在额外的假设下：即编号在[m, n-1]之间的提案具有value值v，来证明编号为n的提案具有value值v，其中[i, j]表示从i到j的集合。因为编号为m的提案已经被选定了，这就意味着存在一个多数Acceptor组成的集合C，C中的每个成员都通过了这个提案。结合归纳的假设，m被选定意味着C中的每个Acceptor都通过了一个编号在[m, n - 1]之间的提案，并且每个编号在[m, n-1]之间的被Acceptor通过的提案都具有value值v。</p>
+<p>由于任何包含多数Acceptor的集合S都至少包含一个c中的成员，我们可以通过保持如下不变性来确保编号为n的提案具有value值v：</p>
+<ul>
+<li>P2c:对于任意v和n，如果一个编号为n，value值为v的提案被提出，那么肯定存在一个由多数Acceptor组成的集合S满足以下条件中的一个：<ul>
+<li>S中不存在任何Acceptor通过了编号小于n的提案</li>
+<li>v是S中所有Acceptor已经通过的编号小于n的具有最大编号的提案的value值</li>
+</ul>
+</li>
+</ul>
+<p>只要维护P2c的不变性就可以满足P2b了。</p>
+<p>当一个提案被通过后，所有通过改提案的Acceptor都要保存这个提案到本地，这样，在所有Acceptor集合中，必然存在一个表示“大多数”的集合，这个集合中一定存在有通过了之前提案的Acceptor。但是这个Acceptor不一定在这个“大多数”集合中占据大多数。比如100和Acceptor，第一次提案时有60台通过了提案，然后进行第二次提案，此时这个新的集合中包含60个Acceptor，但是其中只有10台属于上次通过了提案的Acceptor。此时其他50台的相同提案的编号肯定小于那10台，因此这里又产生一个约束条件：保证当提案通过后在新的提案到达时如果有两种不同编号的同一种提案，则采取编号最新的提案的value。</p>
+<p>这种情况下，当一个Proposer在提出一个编号为n的提案时，如果存在一个将要或者已经被多数Acceptor通过的编号小于n的最大编号提案，Proposer需要知道他的信息。在将提案发往Acceptor的时候需要由Acceptor判断出当前自身以通过或者正在执行的小于n的最大编号提案，如果存在则将这个信息发给Proposer。<br>单单返回已经通过的提案很简单，但是那种正在执行判断的很难预测它是否会被通过（虽然大部分情况下都是accept的），为了避免陷入预测未来这种困境，Proposer通过提出承诺不会有那样的通过情况来控制它。换句话说，Proposer会请求哪些Acceptor不要再通过任何编号小于n的提案了。即如果某个小于n的提案正在执行中，此时Proposer发送编号为n的提案给Acceptor，Acceptor会保证这个小于n的提案必定不会被通过。<br>这就导致了如下提案生成算法：</p>
+<pre><code>1. Proposer选择一个新的提案编号n，然后向某个Acceptor集合中的成员发送请求，要求他做出如下回应：
+    a. 保证不再通过任何编号小于n的提案
+    b. 返回它当前已经通过的编号小于n的最大编号提案，如果存在的话
+我们把这样的请求称为编号n的prepare请求。
+2. 如果Proposer收到来自集合中多数成员的响应结果，那么它可以提出编号为n，value值为v的提案，
+这里v时所有响应中最大编号提案的value值，如果响应中不包含任何提案，那么这个值就由Proposer自由决定。
+</code></pre><p>Proposer通过向某个Acceptor集合发送需要被通过的提案请求来产生一个提案（这里的Acceptor集合不一定是响应前一个请求的集合）。这个过程叫做accept请求。</p>
+<h2 id="Acceptor"><a href="#Acceptor" class="headerlink" title="Acceptor"></a>Acceptor</h2><p>Acceptor会收到两种请求：prepare、accept。Acceptor可以忽略任意请求而不用担心破环算法的安全性。<br>它可以再任何时候响应prepare请求，也可以再不违反现有承诺的情况下响应accept请求。</p>
+<ul>
+<li>P1a:一个Accepter可以通过一个编号为n的提案，只要它还未响应任何编号大于n的prepare请求</li>
+</ul>
+<p>假设一个Acceptor收到了一个编号为n的prepare请求，但是它已经对编号大于n的prepare请求作出了相应，因此它肯定不会再通过任何新的编号为n的提案，于是我们会让Acceptor忽略这样的prepare请求，我们也会让他忽略那些他已经通过的提案的prepare请求。</p>
+<p>通过这个优化，Acceptor只需要记住它已经通过的提案的最大编号以及它已经响应过prepare请求的提案的最大编号。因为必须要在出错的情况下也保证P2c的不变性，所以Acceptor要在故障和重启的情况下也能记住这些信息。</p>
+<p>Proposer可以随时丢弃提案以及它的所有信息，只要它可以保证不会提出具有相同编号的提案即可。</p>
+<p>把Proposer和Acceptor的行为结合起来，我们就能得到算法的两阶段执行过程：</p>
+<pre><code>Phase 1:
+    • Proposer选择一个提案编号n，然后向Acceptor的多数集发送编号为n的prepare请求。
+    • 如果一个Acceptor收到一个编号为n的prepare请示，且n大于它所有已经响应的请求的编号，那么他就会保证不会再通过任意编号小于n的提案，同时将它已经通过的最大编号提案（如果存在的话）一并作为响应。
+Phase 2:
+    • 如果Proposer收到多数Acceptor对他的prepare请求（编号为n）的响应，那么它就会发送一个编号为n，value值为v的提案的acceptor请求给每个Acceptor，这里v是收到的响应中最大编号提案的值，如果响应中不包含任何提案，那么他就可以是任意值。
+    • 如果acceptor收到一个编号为n的提案的accept请求，只要它还未对编号大于n的prepare作出响应，他就可以通过这个提案
+</code></pre><p><strong>优化：如果一个Acceptor已经收到一个大于n的prepare请求，那么他应该通知给出编号n提案的Proposer，使得Proposer放弃编号为n的提案。</strong></p>
+<h3 id="获取被选定的提案值："><a href="#获取被选定的提案值：" class="headerlink" title="获取被选定的提案值："></a>获取被选定的提案值：</h3><p>这里会跟Learner有关，Learner必须要能够知道一个提案已经被多数Acceptor通过了，最直观的算法是，让每个Acceptor再通过一个提案时就通知所有Leaner。但这需要让每个Acceptor与每个Leaner通信，通信次数是二者的乘积。</p>
+<p>更一般地，Acceptor可以将信息发送给一个特写的Learner集合，他们中的任何一个都可以在某个value被选定后通知所有Learner。这个集合中的Learner越多，可靠性越好，通信复杂度越高。</p>
+<p>如果只通知一次Learner的话消息可能会丢失，Learner可以向Acceptor询问他们通过了那些提案，但是任一Acceptor出错，都有可能导致无法分辨是否有多个Acceptor通过了某个提案。在这种情况下Learner可以由Proposer扮演，Proposer之间负责维持通信。</p>
+<p>当一个新的提案被选定时，Learner才能发现被选定的value。如果一个Learner想知道是否已经选定一个value，他可以让Proposer利用上面的算法提出一个提案。</p>
+<h3 id="进展性："><a href="#进展性：" class="headerlink" title="进展性："></a>进展性：</h3><p>会有这种情况，两个Proposer轮流发起prepaer请求，但是永远没有一个Proposer进入plase2阶段。<br>为了保证进度，必须选择一个特定的Proposer作为唯一的提案提出者。如果这个Proposer可以和多数Acceptor进行通信，并且可以使用比已用编号更大的编号进行提案的话，那么它提出的提案就可以成功被通过。如果知道有某些编号更高的请求，他可以通过舍弃当前的提案并重新开始，这个Proposer最终一定会选到一个足够大的提案编号。这个Proposer叫做Leader。<br>文中是说通过选举得到一个Leader，但是具体如何选呢？</p>
+<p>即在所有Proposer中选择一个特殊的Proposer，他可以在accept阶段被拒绝后重新获取一个新的编号并发起提案，而其他的Proposer在accept阶段被拒绝后将无法重新获取新编号，除非最外逻辑重新发起一轮新的提案。</p>
+<h2 id="实现："><a href="#实现：" class="headerlink" title="实现："></a>实现：</h2><p>Paxos算法假设了一组进程网络。在他的一致性算法中，每个进程都扮演着Proposer，Acceptor，以及Learner的角色。<br>该算法选择了一个Leader来扮演那个特定的Proposer和Learner。Paxos一致性算法就是上面描述的那样，请求和响应都以普通消息的方式发送（响应消息通过对应的提案编号来标识以免混淆）。使用可靠的存储设备存储Acceptor需要记住的信息来防止出错。<br>Acceptor在真正发送响应之前，会将它记录到可靠的存储设备中。</p>
+<p>不同的Proposer从不相交的编号集合中选择自己的编号，这样任何两个Proposer就不会用到相同的编号。每个Proposer都记录它使用过的最大编号，然后用这个比这更大的编号的提案开始Phase 1</p>
+<blockquote>
+<p>本来后面还有一章状态机的，但是我看不太懂就没放。</p>
+</blockquote>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>
