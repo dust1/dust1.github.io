@@ -205,7 +205,7 @@
 <p>如果在追加过程中主ChunkServer租约过期而失去chunk修改操作的权限改怎么办？<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;主ChunkServer应该要向Master续租，如果续租失败，为了保证流程规范，此次写入应该判定为失败，并让客户端重新向Master请求，由Master选举出新的主ChunkServer。</p>
 </blockquote>
 <blockquote>
-<p>这里说的是写入主ChunkServer，但是前面又说写入最近的ChunkServer并由最近的ChunkServer转发给其他ChunkServer。他们的区别是什么呢？<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;答：可能是数据量的不同，如果是追加流程且数据量较小的情况下，只需要由客户端发送给最近的ChunkServer并由他进行转发，或者发送给所有的ChunkServer，并将写入命令发给主ChunkServer即可。如果是大文件写入，则需要按照上述流程进行大文件转发。<a href="https://zhuanlan.zhihu.com/p/185619042" target="_blank" rel="noopener">相关链接</a></p>
+<p>这里说的是写入主ChunkServer，但是前面又说写入最近的ChunkServer并由最近的ChunkServer转发给其他ChunkServer。他们的区别是什么呢？<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;答：可能是数据量的不同，如果是追加流程且数据量较小的情况下，只需要由客户端发送给最近的ChunkServer并由他进行转发，或者发送给所有的ChunkServer，并将写入命令发给主ChunkServer即可。如果是大文件写入，则需要按照上述流程进行大文件转发。<a href="https://zhuanlan.zhihu.com/p/185619042" target="_blank" rel="noopener">相关链接</a><br>2020-03-15追加：就是数据量的不同，最开始的那种数据流与控制流分离的做法适用于数据量大的情况，这可以减少数据传输对整个系统的影响，但会使得写入流程变得更加复杂</p>
 </blockquote>
 <h3 id="容错机制"><a href="#容错机制" class="headerlink" title="容错机制"></a>容错机制</h3><h4 id="Master容错"><a href="#Master容错" class="headerlink" title="Master容错"></a>Master容错</h4><p>Master容错与传统方法类似，通过操作日志加checkpoint的方式进行，并且有一台被称为“Shadow Master”的实时热备。<br><img src="/img/202102/074.png" width="50%" height="50%"></p>
 <p>Master需要持久化前两种元数据。对于第三种元数据，可以交给ChunkServer维护，当ChunkServer上线的时候将这些信息发送给Master。</p>
