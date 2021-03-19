@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        分布式存储笔记笔记3-3 分布式键值系统（Amazon Dynamo &amp; Tair） - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Amazon-Dynamo"><span class="toc-text">Amazon Dynamo</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#数据分布"><span class="toc-text">数据分布</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一致性与复制"><span class="toc-text">一致性与复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#容错"><span class="toc-text">容错</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#数据回传"><span class="toc-text">数据回传</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Merkle树同步"><span class="toc-text">Merkle树同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#读取修复"><span class="toc-text">读取修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#负载均衡"><span class="toc-text">负载均衡</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#读写流程"><span class="toc-text">读写流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#单机实现"><span class="toc-text">单机实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#讨论"><span class="toc-text">讨论</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#淘宝Tair"><span class="toc-text">淘宝Tair</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#系统架构"><span class="toc-text">系统架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关键问题"><span class="toc-text">关键问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#数据分布-1"><span class="toc-text">数据分布</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#容错-1"><span class="toc-text">容错</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据迁移"><span class="toc-text">数据迁移</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Config-Server"><span class="toc-text">Config Server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Data-Server"><span class="toc-text">Data Server</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#讨论-1"><span class="toc-text">讨论</span></a></li></ol></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        分布式存储笔记笔记3-3 分布式键值系统（Amazon Dynamo &amp; Tair）
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2021-03-19 21:24:57</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#存储" title="存储">存储</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p><hr><br>这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。</p>
+<hr>
+
+<p>分布式键值模型可以看成是分布式表格模型的一种特例。由于它只支持针对单个key-value的增删改查（随机查找）操作，因此适用哈希分布算法。</p>
+<p>学习Dynamo的设计对学习分布式系统理念很有帮助。但是这个系统的主要价值在学术层面，从工程的角度来看，它牺牲了一致性，却没有换来什么好处。</p>
+<h1 id="Amazon-Dynamo"><a href="#Amazon-Dynamo" class="headerlink" title="Amazon Dynamo"></a>Amazon Dynamo</h1><p>Dynamo以很简单的键值方式存储数据，不支持复杂的查询。Dynamo存储的是数据的原始形式，不解析数据的具体内容。Dynamo是一个P2P结构的分布式存储模型，而不是常用的中心节点模型。<br><img src="/img/202103/018.png" width="50%" height="50%"></p>
+<h2 id="数据分布"><a href="#数据分布" class="headerlink" title="数据分布"></a>数据分布</h2><p>Dynamo采用一致性哈希算法将数据分布到多个存储节点中。</p>
+<p>考虑到节点的异构性，不同节点之间处理能力的差别会很大，Dynamo使用了改进的一致性哈希算法：每个物理节点根据其性能的差异分配多个token，这样，性能高的节点他的哈希选中率也会提高。<br><img src="/img/202103/019.png" width="50%" height="50%"><br>如果新增了存储节点，只需要将对应的token分配到该节点上即可。</p>
+<p>为了找到数据所属的节点，要求每个节点维护一定的集群信息用于定位。Dynamo系统中每个节点维护整个集群你的信息。</p>
+<blockquote>
+<p>因为是P2P结构，所以要求一个节点必要时能够和其他所有节点通信。</p>
+</blockquote>
+<p>所有节点每隔固定时间（比如1s）通过Gossip协议的方式从其他节点中任选一个与之通信的节点。如果连接成功，双方交换各自保存的节点信息。</p>
+<p><a href="https://zhuanlan.zhihu.com/p/41228196" target="_blank" rel="noopener">Gossip协议</a>用于P2P系统中自治的节点协调对整个集群的认知，比如集群的节点状态、负载情况。</p>
+<ul>
+<li>A告诉B其管理的所有节点的版本（包括Down状态和Up状态的节点）</li>
+<li>B告诉A那些节点的版本比较旧了，哪些版本它有最新的，然后把最新的节点状态发给A（处于Down状态的节点由于版本没有发生更新则不会被关注）</li>
+<li>A将B中比较旧的节点告诉B，同时将B发送来的最新节点信息在本地更新</li>
+<li>B收到A发来的最新节点后更新本地的元数据</li>
+</ul>
+<blockquote>
+<p> 双方各自比较对方的节点版本并用对方的新版本替换自身的旧版本。</p>
+</blockquote>
+<p>由于种子节点的存在，新节点的加入可以做的比较简单。新节点加入时首先与种子节点交换集群信息，从而对集群有了认识。DHT（一致性哈希表）环中原有的其他节点也会定期和种子节点交换集群信息，从而发现新节点的加入。</p>
+<blockquote>
+<p>这样看来种子节点起到了一个类似中心的作用，不过它的功能不在于完成存储业务，而是负责节点集群之间信息的交互。</p>
+</blockquote>
+<p>每个节点需要定期通过Gossip协议同其他节点交换集群信息，如果发现某个节点很长时间状态都没有更新，则认为该节点已经下线了。</p>
+<blockquote>
+<p>这里对于节点的存活与否依赖于其他节点的检查，而不是与种子节点建立心跳通信。这样的好处就是减少了种子节点的业务复杂度与网络压力。</p>
+</blockquote>
+<h2 id="一致性与复制"><a href="#一致性与复制" class="headerlink" title="一致性与复制"></a>一致性与复制</h2><p>为了处理节点失效的情况（DHT环中删除节点），需要对节点的数据进行复制。</p>
+<blockquote>
+<p>这种需要中心节点处理的流程也是交给存储节点吗？还是交给种子节点？</p>
+</blockquote>
+<p>假设数据存储N份，DHT定位到的数据所属节点为K，则数据存储在节点K，K+1，…，K + N上。如果第K + i（0 ≤ i ≤ N-1）台机器宕机，则往后找一台机器K+N临时替代。如果第K+i台机器重启，临时替代的机器K+N能够功过Gossip协议发现，他会将这些临时数据归还K+i，这个过程在Dynamo中叫做数据回传。</p>
+<blockquote>
+<p>这里一个问题就是“临时数据”属于什么数据？当第K + N台机器接入的时候，它本身是没有数据的，因此除非接入的时候就进行一次数据的复制工作，否则机器K+N的缓存无法命中，如果不进行数据复制，那么这里的数据将会是后续新添加的缓存，但是既然数据已经分多台机器存储备份，那么当K+i号机器重新上线后也可以直接从临近的机器上同步数据。</p>
+</blockquote>
+<p>在这台机器下线的时间段内，所有的读写均落入到机器[K, K + i - 1]和[K + i + 1, K + N]中，如果机器K + i永久失效，机器K+N需要进行数据同步操作。这个过程通过Merkle树对机器的数据文件进行快速同步。</p>
+<p>NWR是Dunamo中的一个亮点，其中N表示复制的备份数，R指成功读操作的最少节点数，W指成功写操作的最少节点数。只要满足W + R &gt; N，就可以保证当存在不超过一台机器故障的的时候，至少能够读到一份有效数据。</p>
+<blockquote>
+<p>像什么？多数派写！当写数量 + 读数量 &gt; 节点总数量则能够保证一定有一次成功的写入被读取到。但是这里的数据必须要有一个版本号或者携带时间戳用于区分数据的新旧。</p>
+</blockquote>
+<p>在P2P这样的集群中，由于每个节点存储的集群信息有所不同，可能出现同一条记录被多个节点同时更新的情况，无法保证多个节点之间的更新顺序，为此Dynamo引入向量时钟（Vector Clock）的技术手段来尝试解决冲突。<br><img src="/img/202103/020.png" width="50%" height="50%"><br>Dynamo中的向量时钟用一个[nodes, counter]对表示。其中nodes表示节点，counter是一个计数器，初始为0，节点每次更新操作加1。</p>
+<p><strong>例如：</strong><br>首先，Sx对某一个对象进行一次写操作，产生一个对象版本D1([Sx, 1])，接着Sx再次操作，counter值更新为2，产生第二个版本D2（[Sx， 2]）；之后，Sy和Sz同时对该对象进行写操作，Sy将自身的信息加入向量时钟产生了新的版本D3（[Sx，2]，[Sy，1]），Sz同样产生了新的版本信息D4（[Sx，2]，[Sz，1]），这时系统中就有了两个冲突的版本。最常见的冲突解决方法有两个：一种是通过客户端逻辑来解决，比如购物车应用；另外一种常见的策略是“last write wins”，即选择时间戳最新的副班，然而这个策略以来集群内节点之间的时钟同步算法，不能完全保证准确性。</p>
+<blockquote>
+<p>对每一个线程对同一个对象的操作都生成一个独立的版本，这样就会导致N个线程同时写入就会有N个版本。这里就跟paxos不一样了，在paxos中，如果要执行写入的rnd小于last_rnd，那么就拒绝写入，而在Dynamo中都是先写入后执行解决冲突策略。</p>
+</blockquote>
+<blockquote>
+<p>存储节点之间的时钟必然会有误差，如果误差过大比如超过5秒，那么一致性就很难保证。</p>
+</blockquote>
+<p>向量时钟不能完美解决冲突，即使N + W &gt; R，Dynamo也只能保证每个读取操作能读到所有的更新版本，这些版本可能冲突，需要进行版本合并。Dynamo只保证最终一致性，如果多个节点之间的更新顺序不一致，客户端可能读取不到期望的结果。这个不一致的问题影响到了应用程序的设计和对整个系统的测试工作。</p>
+<blockquote>
+<p>从上面会产生版本冲突的问题来看，在Dynamo中，一个数据被分布到多个节点上，并不会使得某一个节点成为主节点用于提供服务，而是所有的节点都会提供对这个数据的增删改服务，这能够极大程度增加系统承压能力，但是也导致了同一条数据多个不同节点之间数据的不一致性。</p>
+</blockquote>
+<h2 id="容错"><a href="#容错" class="headerlink" title="容错"></a>容错</h2><p>Dynamo把异常分为两种类型：临时性的异常和永久性异常。</p>
+<p>这种分类是依据异常的持续时间划分，比如机器假死属于临时性异常；硬盘报修或者机器报废就是永久性异常。</p>
+<h3 id="数据回传"><a href="#数据回传" class="headerlink" title="数据回传"></a>数据回传</h3><p>同上文，当下线的机器恢复后第K+N台机器会通过Gossip协议发现并启动传输任务将暂存的数据回传给机器K+i。</p>
+<h3 id="Merkle树同步"><a href="#Merkle树同步" class="headerlink" title="Merkle树同步"></a>Merkle树同步</h3><p>如果超过了时间T机器K+i还是处于宕机状态，这种异常被认为是永久性的。这时需要借助Merkle树机制从其他副本进行数据同步。</p>
+<blockquote>
+<p>应该要从多台机器中获取备份并将冲突解决后作为自身的最终数据，因为Dynamo无法保证强一致性，因此同一份数据不同备份之间可能不一致，所以K+N在获取备份的时候应该要“货比三家”。</p>
+</blockquote>
+<p>Merkle树中每个非叶子结点对应多个文件，为其所有子节点组合以后的哈希值；叶子结点对应单个数据文件，为文件内容的哈希值。这样，任何一个数据文件不匹配都将导致从该文件对应的叶子结点到根结点的所有节点值不同。每台机器对每一段范围的数据维护一颗Merkle树，机器同步时首先传输Merkle树信息，并且只需要同步从根到叶子的所有节点值均不相同的文件。</p>
+<blockquote>
+<p>即，每个非叶子结点的哈希值都是它下属所有文件组合后的哈希值，每个叶子结点都是其对应的文件内容的哈希值。这样，当某个文件不同步时，必然会有一条从根结点到叶子结点的树与其他Merkle树不一致，此时只需要同步这条路径上的哈希值与叶子结点的文件即可。<br>这种方法在于能够高效快速地筛选出两颗Merkle之间的不同，但是如何同步，或者说当两条路径不一致时该选用哪一条路径为主就需要另外的解决冲突逻辑。通常如同上文说的一样可以由客户端代码实现，也可以选用最新修改的数据。</p>
+</blockquote>
+<h3 id="读取修复"><a href="#读取修复" class="headerlink" title="读取修复"></a>读取修复</h3><p>假设N=3，W=2，R=2，机器K宕机，可能有部分写操作已经返回客户端成功了但是没有完全同步到所有副本，如果机器K出现永久性异常，导致三个副本之间的数据不一致。客户端的读取操作如果发现了某些副本版本太老，则启动异步的读取修复任务。该任务会合并多个副本的数据，并使用合并后的结果更新过期的副本，从而使得副本之间保持一致。</p>
+<blockquote>
+<p>也就是上文所说，Dyamo无法保证所有节点中同一数据的一致性，但是能保证最新的数据必定已被写入成功，因此当R+W&gt;N时，会读取到多个不同版本的数据，这时候需要合并冲突并得到最终最新的值，并将这个值更新到所有机器中。相当于一个保底机制：第一次写入没有一致的情况下，在第一次读取的时候会进行冲突合并，并重新写入，保证数据不会在多次读取后还是处于不一致的状态。</p>
+</blockquote>
+<h2 id="负载均衡"><a href="#负载均衡" class="headerlink" title="负载均衡"></a>负载均衡</h2><p>Dynamo的负载均衡取决于如何给每台机器分配虚拟结点号，即token。由于集群环境的异构性，每台物理机器包含多个虚拟结点。一般有以下两种分配方式：<br><img src="/img/202103/021.png" width="50%" height="50%"></p>
+<blockquote>
+<p>随机分配导致token分布零散，体现在Merkle树中就是同一台机器的不同token位于不同非叶子结点下（或者说，一台机器拥有的token在Merkle树中的路径十分宽大）使得新节点加入/离开系统时需要对Merkle树中的大量节点进行修改。且由于是随机分布没有规律，也无法将数据进行归档/备份。<br>数据范围等分+随机分配：先将数据等分，然后按顺序将token分配给不同的结点，这样就使得当节点新增/下线时对Merkle树的影响最小，且由于的顺序分配，使得归档/备份变得容易许多。</p>
+</blockquote>
+<p>由于Dynamo中同步操作、写操作重试等后台任务比较多。为了不影响正常读写服务，需要对后台任务能够使用的资源做出限制。</p>
+<p>Dynamo维护一个资源授权系统。该系统将整个机器的资源切分成多个片，监控60秒内的磁盘读写响应时间，事务超时时间及锁冲突情况，根据监控信息算出机器负载从而动态调整分配给后台任务的资源片个数。</p>
+<h2 id="读写流程"><a href="#读写流程" class="headerlink" title="读写流程"></a>读写流程</h2><p><img src="/img/202103/022.png" width="50%" height="50%"></p>
+<blockquote>
+<p>这里W就是表示“大部分”，即不需要等所有副本都返回写入成功，只要大部分副本都写入成功就认为这次写入是成功的。就是多数派写。</p>
+</blockquote>
+<p>由于没有中心节点，因此客户端会从所有存储节点中选出一个作为协调者，这个协调者就起到了主存储节点的作用。客户端只需要把写入请求发给协调者即可，后续的所有节点的写入与同步问题都交给协调者处理。</p>
+<p>在读取时也是一样，根据一致性哈希算法计算出所有副本存储的节点，并选出其中一个作为协调者，通过协调者读取所有（实际上不需要所有，只需要根据负载均衡策略计算出的R个副本即可）存储副本以及自身的数据，汇总之后返回给客户端。这里可能会产生冲突，默认情况下是使用最新的数据，用户也可以自定义冲突解决策略。在将最终的数据返回给客户端后，协调者还会异步地将最终数据返回给所有副本用于更新最新结果，用于修复错误副本。<br><img src="/img/202103/023.png" width="50%" height="50%"></p>
+<h2 id="单机实现"><a href="#单机实现" class="headerlink" title="单机实现"></a>单机实现</h2><p>Dynamo的存储节点包含三个组件：请求协调、成员和故障检测、存储引擎。</p>
+<p>Dynamo设计支持可插拔的存储引擎，比如BerkerlyDB（BDB），Mysql InnoDB等。</p>
+<blockquote>
+<p>也就是说Dynamo类似于一个分布式存储的上层解决方案，而最终将数据持久化的任务交给其他存储引擎？</p>
+</blockquote>
+<p>请求协调组建采用基于事件驱动的设计，每个客户端的读写请求对应一个状态机，系统根据发生的事件及状态机中的状态决定下一步的操作。比如读取操作对应的状态包括：</p>
+<ul>
+<li>协调者发送读请求到其他节点</li>
+<li>等待其他节点返回读取结果，最少需要R-1个（加上协调者自己就是R个）</li>
+<li>如果请求其他节点返回失败，需要按照一定的策略重试</li>
+<li>如果到达时间限制成功的节点仍然小于R-1个，返回客户端请求超过</li>
+</ul>
+<p>合并协调者及其他R-1个节点的读取结果，并返回客户端，合并的结果可能包含多个冲突版本；如果设置了冲突解决方法 ，协调者还需要解决冲突。</p>
+<p>读操作返回客户端后状态机不会立刻被销毁，而是会等待一段时间，等待其他节点将过期的数据返回，并将最新的数据更新到这些节点。</p>
+<blockquote>
+<p>这样来看R只是一个阈值。实际请求的时候应该是请求所有的节点，然后当R-1个节点返回时候就判断读取成功执行后续的合并与返回操作，但是后续还有一些返回的节点只需要更新到最新的值即可。</p>
+</blockquote>
+<h2 id="讨论"><a href="#讨论" class="headerlink" title="讨论"></a>讨论</h2><p>Dynamo采用无中心节点的P2P设计，增加了系统的可扩展性，但同时带来了一致性问题，影响上层应用。</p>
+<blockquote>
+<p>这里就差不多可以总结出中心节点的优劣了：好处是由于所有元数据都交给/都经过中心节点，可以最大程度上保证数据的一致性，就算暂时不一致，在后续存储节点与中心节点的通信中也可以被中心节点检测出来并及时修正；缺点是扩展性不如P2P结构，在P2P结构中，新加入节点只需要通知一下种子节点然后通过Gossip协议对接上其他存储节点即可，而中心节点架构需要联系上中心节点并通过修改元数据与负载均衡来让新节点加入。</p>
+</blockquote>
+<p>Dynamo在Amazon的使用场景优先，主流的分布式系统一般都带有中心节点，这样能够简化设计且中心节点只需要维护少量的元数据，一般不会称为性能瓶颈。</p>
+<p>Dynamo及其开源实现Cassandra在实践中受到的关注逐渐减小，但是它应用了各种分布式技术，在实践过程中也可以借鉴。</p>
+<h1 id="淘宝Tair"><a href="#淘宝Tair" class="headerlink" title="淘宝Tair"></a>淘宝Tair</h1><p>Tair分为持久化和非持久化两种使用方式：非持久化可以看成是一个分布式缓存，持久化的Tair将数据存放于磁盘中。持久化的容错机制与现有的分布式存储备份机制一样。</p>
+<h2 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h2><p><img src="/img/202103/024.png" width="50%" height="50%"><br>Tair作为一个分布式系统，是由一个中心控制节点和若干服务节点组成。其中，中心控制节点被称为Config Server，服务节点称为Data Server。Data Server以心跳的方式将自身状况汇报给Config Server。</p>
+<blockquote>
+<p>实际上心跳与租约两者并无冲突，心跳可以检测系统是否时常在线，租约负责下放权限。</p>
+</blockquote>
+<h2 id="关键问题"><a href="#关键问题" class="headerlink" title="关键问题"></a>关键问题</h2><h3 id="数据分布-1"><a href="#数据分布-1" class="headerlink" title="数据分布"></a>数据分布</h3><p>根据数据的主键计算哈希值后，分布到Q个桶中，桶是负载均衡和数据迁移的基本单位。Config Server按照一定的策略把每个桶指派到不同的Data Server上。因为数据按照主键计算哈希值，所以可以认为每个桶中的数据基本是平衡的，只要保证桶分布的均衡性，就能够保证数据分布的均衡性。根据Dynamo论文中的实验结论，Q取值需要远大于集群的物理机器数，例如Q取10240.</p>
+<blockquote>
+<p>桶分布的均衡性不是平均分配，而是考虑每台机器的硬件配置与运行情况进行的一种非均匀分配，使得每台机器的压力趋于平衡。那么这里的桶可以当作一组token的集合</p>
+</blockquote>
+<h3 id="容错-1"><a href="#容错-1" class="headerlink" title="容错"></a>容错</h3><p>当某台Data Server故障不可用时，Config Server能够检测到。每个哈希桶在Tair中存储多个副本，如果是备副本，那么Config Server会重新为其指定一台DataServer，如果是持久化存储，还将复制数据到新的Data Server上。如果是主副本，则第一时间启用其他备副本用于提供服务，然后再选择另外一台Data Server称为备副本，确保数据的备份数。</p>
+<blockquote>
+<p>通过主备副本的方式来实现容错，并保证数据的一致性。但针对请求的吞吐量弱于Dynamo。</p>
+</blockquote>
+<h3 id="数据迁移"><a href="#数据迁移" class="headerlink" title="数据迁移"></a>数据迁移</h3><p>机器加入或者负载不均衡可能导致桶迁移，迁移的过程中需要保证对外服务。某个Data Server中存放三个副本A、B、C，如果A尚未迁移完成，B还在迁移当中，C已经迁移完成。当请求读写A的时候，依旧是原有Data Server提供服务，当请求读写B的时候，原有Data Server提供服务，并将修改操作记录到日志中，当迁移完成时将日志也同步过去使得新的节点能够重现迁移期间进行的修改操作，当读写C的时候直接讲请求转到新的Data Server上。</p>
+<blockquote>
+<p>这样看来，迁移的时候会复制一份新的数据，原有的数据继续对外提供服务，新复制的数据连同期间的修改日志一同迁移到新的机器并通过日志与原有数据进行同步。</p>
+</blockquote>
+<h3 id="Config-Server"><a href="#Config-Server" class="headerlink" title="Config Server"></a>Config Server</h3><p>客户端缓存路由表，大多数情况下，客户端不需要访问Config Server，Config Server宕机也不影响客户端正常访问。每次路由的变更，Config Server都会将新的配置信息推给Data Server。在客户端访问Data Server的时候，会发送客户端缓存的路由表版本号。如果Data Server发现客户端的版本号过旧，则会通知客户端去Config Server获取一份新的路由表。如果客户端访问某台Data Server发生了不可达的情况，客户端也会主动去Config Server获取新的路由表。</p>
+<blockquote>
+<p>当主Config Server宕机的情况下如何继续提供服务：通常来说中心节点都是一主一备的配置，如果主Config Server宕机，且备Config Server还没上上线的情况下，客户端通过读取自身缓存的路由表可以在一定程度上减少对Config Server的依赖，为Config Server切换主备提供时间，并在此时间内能够正常对外服务。</p>
+</blockquote>
+<blockquote>
+<p>当路由表发生改变时客户端才会往Config Server请求新的路由表。当Config Server检测到路由表发生改变的时候并不会直接通知客户端，而是将最新的版本号发送给所有Data Server，当客户端用旧的路由表请求DataServer的时候由DataServer通知客户端往Config Server请求新的路由表；或者当客户端请求Data Server失败的时候表示现有的路由表不是完全准确的了，因此也会主动请求新的路由表。这样的设计最大程度减少了Config Server的压力，使得Config Server不会成为性能的瓶颈。</p>
+</blockquote>
+<blockquote>
+<p>如果Data Server一个一个依次下线/上线，那么就会导致Config Server频繁更新路由表，这或许会使得Config Server达到性能瓶颈。</p>
+</blockquote>
+<h3 id="Data-Server"><a href="#Data-Server" class="headerlink" title="Data Server"></a>Data Server</h3><p>Data Server负责数据的存储，并根据Config Server的要求完成数据的复制和迁移工作。Data Server具备抽象的存储引擎层，可以很方便地添加新的存储引擎。Data Server还有一个插件容器，可以动态加载/卸载插件<br><img src="/img/202103/025.png" width="50%" height="50%"><br>Tair存储引擎有一个抽象层，只要满足存储引擎需要的接口，就可以很方便地替换Tair底层的存储引擎。Tair默认包含两个存储引擎：Mdb和Fdb，另外还支持Berkerly BD、Tokyo Cabinet、Inno DB、Level DB等各种存储引擎。</p>
+<h2 id="讨论-1"><a href="#讨论-1" class="headerlink" title="讨论"></a>讨论</h2><p>Dynamo采用P2P架构，而在Tair中引入了中心节点Config Server，这种方式很容易处理数据的一致性问题，因为所有的数据都要经过中心节点方便管理。</p>
+<blockquote>
+<p>P2P相关技术：向量时钟、数据回传、Merkle树、冲突处理</p>
+</blockquote>
+<p>由于Tair的复制是异步的，所以当有DataServer发生故障时，客户端有可能在一定时间内读不到最新的数据，甚至发生最新修改的数据丢失的情况。</p>
+<blockquote>
+<p>比如数据在迁移过程中主Data Server永久性异常了，那么节点在迁移期间内的所有修改操作全部丢失，因为此时数据还是保存在主Data Server的操作日志中，并没有备份。而同步过去的数据只是该节点在迁移前某个时间点的快照。</p>
+</blockquote>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>
