@@ -266,6 +266,9 @@
 <blockquote>
 <p>子表合并一个最大的问题就是主键不连续。而随着子表的合并，在元数据表中按道理说要删除n-1行数据，由此，如何分配并管理合并后的子表主键就是一个问题。<br><a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/bigtable-osdi06.pdf" target="_blank" rel="noopener">论文原文</a></p>
 </blockquote>
+<blockquote>
+<p>2021/03/25追加：合并或许不需要修改根表，只需要修改根表到子表的映射即可，跟Facebook Haystack一样，修改的是映射关系，即一张子表由两段不相交的连续的主键组成，在根表中有两个引用指向该表。</p>
+</blockquote>
 <h2 id="单机存储"><a href="#单机存储" class="headerlink" title="单机存储"></a>单机存储</h2><p><img src="/img/202103/030.png" width="50%" height="50%"><br>Bigtable采用Merge-dump存储引擎。数据写入是需要先写操作日志，成功后应用到内存中的MemTable中，写操作日志是往磁盘中的日志文件追加数据，很好地利用了磁盘设备的特性。</p>
 <blockquote>
 <p>写日志也是往GFS中写，这样可以方式Tablet Server永久下线导致的数据丢失，实际上在Tablet Server中已经不会有独属于它自身的持久化数据，MemTable与SSTable的数据都通过操作日志的形式在GFS中留有备份，他的元数据信息也是存在GFS中，而元数据的索引保存在上级元数据节点中。</p>
