@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        Gossip 协议 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#演示如下："><span class="toc-text">演示如下：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Gossip的特点"><span class="toc-text">Gossip的特点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Gossip的缺点"><span class="toc-text">Gossip的缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#活动线程"><span class="toc-text">活动线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#被动线程"><span class="toc-text">被动线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        Gossip 协议
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2021-03-27 22:07:15</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#分布式" title="分布式">分布式</a>
+        <span>/</span>
+        
+        <a class="tag" href="/tags/#算法" title="算法">算法</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p>Gossip protocol 也叫 Epidemic Protocol （流行病协议）。从名字就可以猜到这个算法的作用主要在服务器集群中进行数据的传播，这种传播方式类似于人群中的流行病一样一传十十传百，随着时间推移接收请求的服务器节点将会越来越多。</p>
+<blockquote>
+<p>Gossip protocol 最早是在 1987 年发表在 ACM 上的论文 《Epidemic Algorithms for Replicated Database Maintenance》中被提出。主要用在分布式数据库系统中各个副本节点同步数据之用，这种场景的一个最大特点就是组成的网络的节点都是对等节点，是非结构化网络，这区别与之前介绍的用于结构化网络中的 DHT 算法 Kadmelia。</p>
+</blockquote>
+<blockquote>
+<p>我们知道，很多知名的 P2P 网络或区块链项目，比如 IPFS，Ethereum 等，都使用了 Kadmelia 算法，而大名鼎鼎的 Bitcoin 则是使用了 Gossip 协议来传播交易和区块信息</p>
+</blockquote>
+<blockquote>
+<p>实际上，只要仔细分析一下场景就知道，Ethereum 使用 DHT 算法并不是很合理，因为它使用节点保存整个链数据，不像 IPFS 那样分片保存数据，因此 Ethereum 真正适合的协议应该像 Bitcoin 那样，是 Gossip 协议。</p>
+</blockquote>
+<p>Gossip执行过程：Gossip过程由某个种子节点发起，当该节点由状态需要更新到网络中的其他节点时，他会随机选择周围几个节点散播消息，收到消息的节点也会重复这个过程，直至最终网络中所有的节点都收到了消息。这个过程要有一段时间，而且无法保证某个时刻所有的节点都能收到消息，但是能保证最终整个集群中的节点都会收到消息，因此他是一个最终一致性协议。</p>
+<p>类似水滴，在水滴滴下后往周围传播波。</p>
+<p>由于需要进行大量的网络请求，因此对于Gossip节点来说，他们的网络请求都应该是异步的，而且发出请求后不需要等待响应；因此会产生大量的消息冗余。这就类似于图的广度优先搜索，一圈一圈往外传播。</p>
+<p>由于是异步的网络请求，因此Gossip可以十分频繁地进行传播。通常一个请求周期为一秒。Gossip在传播的过程中会选择相邻的节点，通常选择3个节点进行散播。每次收到消息的节点都选择尚未发送过的节点进行散播。收到消息的节点不再往发送节点散播，即A -&gt; B，B在散播的时候不会再发往A。</p>
+<h2 id="演示如下："><a href="#演示如下：" class="headerlink" title="演示如下："></a>演示如下：</h2><ul>
+<li>首先节点1发起传播：<br><img src="/img/202103/033.png" width="50%" height="50%"><br>传播到2和7后，由2、7继续这一过程<br><img src="/img/202103/034.png" width="50%" height="50%"><br>直到整个集群的节点都收到消息<br><img src="/img/202103/035.png" width="50%" height="50%"></li>
+</ul>
+<h2 id="Gossip的特点"><a href="#Gossip的特点" class="headerlink" title="Gossip的特点"></a>Gossip的特点</h2><ol>
+<li>扩展性<br> 网络可以允许节点的任意增加和减少，新增加的节点的状态最终会与其他节点一致</li>
+<li>容错<br> 网络中任何节点的宕机和重启都不会影响Gossip消息的传播，Gossip协议具有天然的分布式系统容错特性</li>
+<li>去中心化<br> Gossip协议不要求任何中心节点，所有节点都可以是对等的，任何一个节点无需知道整个网络状况，只要网络是联通的，任意一个节点就可以把消息散播到全网</li>
+<li>一致性收敛<br> Gossip协议中的消息会以一传十、十传百一样的指数级速度再网络中快速传播，因此系统状态的不一致可以在很快的时间内收敛到一致。消息传播速度达到了logN</li>
+<li>简单<br> Gossip协议的过程及其简单，实现起来几乎没有太多复杂性</li>
+</ol>
+<h2 id="Gossip的缺点"><a href="#Gossip的缺点" class="headerlink" title="Gossip的缺点"></a>Gossip的缺点</h2><ol>
+<li>消息延迟：<br> 节点随机像少数几个几点发送消息，消息最终是通过多个轮次的散播而到达全网，不可避免地造成消息延迟</li>
+<li>消息冗余：<br> 节点定期随机选择周围节点发送消息，而收到消息的节点也会重复该步骤，因此不可避免地引起同一节点多次接收同意消息，增加消息处理的压力。一次通信会对网络带宽、CPU资源造成很大的负载，而这些负载又受限于通信频率，该频率又影响着算法收敛的速度。</li>
+<li>拜占庭问题：<br> 如果有一个恶意传播消息的节点，Gossip协议的分布式系统就会出现问题</li>
+</ol>
+<blockquote>
+<p>由于没有中心节点，所以没有一个同一的消息校验规则。只能区分消息的正确与否，无法区分消息的好坏。</p>
+</blockquote>
+<p>上诉缺点的本质是因为Gossip是一个带冗余的容错算法，是一个最终一致性算法，无法保证在某一时刻所有节点状态一直，但可以保证“最终所有节点一致”，但这个最终时间是一个理论无法明确的时间点。所以适合AP场景的数据一致性处理，常见的有：P2P网络通信、Apache Cassandra、Redis Cluster、Consul</p>
+<p>Márk Jelasity 在它的 <a href="http://publicatio.bibl.u-szeged.hu/1529/1/gossip11.pdf" target="_blank" rel="noopener">Gossip</a>一书中对其进行了归纳：<br><img src="/img/202103/036.png" width="50%" height="50%"><br>Gossip模块由两个线程组成：活动线程与被动线程。一个用于发起Gossip请求，一个用于接收其他节点传递过来的Gossip请求。</p>
+<p>在这两段伪代码中:</p>
+<ul>
+<li>push表示发起信息交换的节点A随机选择联系节点B，并向其发送自己的信息，节点B在收到信息后更新比自己新的数据，一般有新信息的节点才会作为发起节点。</li>
+<li>pull表示发起信息交换的节点A随机选择联系节点B，并从对方获取信息。一般无新信息的节点才会作为发起节点</li>
+<li>push/pull表示发起信息交换的节点A像选择的节点B发送信息，同时从对方获取数据，用于更新自己的本地数据</li>
+</ul>
+<h2 id="活动线程"><a href="#活动线程" class="headerlink" title="活动线程"></a>活动线程</h2><p>在一个循环中，每经过T段时间就发起一次Gossip请求。</p>
+<ol>
+<li>首先从selectPeer()函数中随机获取一个联系节点p</li>
+<li>如果是push的通信方式<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. 发送方根据自身的网络信息以及跳数（默认0）生成描述符<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. 将自身描述符与自身信息合并<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. 将合并后的信息发送给p<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d. 如果没有新消息要发给p则直接发送一个空信号（为什么直接不发送呢？）</li>
+<li>如果是pull的通信方式<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. 从p中获取他的信息<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. 给他的跳数递增<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. 将p的信息与本地的信息合并</li>
+</ol>
+<h2 id="被动线程"><a href="#被动线程" class="headerlink" title="被动线程"></a>被动线程</h2><ol>
+<li>从网络队列中获取节点p的消息</li>
+<li>将这个消息的跳数递增</li>
+<li>如何这个消息类型是pull<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. 接收方根据自身的网络信息以及初始跳数（默认0）生成自身的描述符<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. 将描述符与自身数据结合后返回给p</li>
+<li>将p的数据跟自身的数据合并</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从上面两种方式（pull、push）可以发现Gossip主要有两种请求方式：</p>
+<ul>
+<li>将最新的变更传播出去</li>
+<li>与其他节点进行数据交换，并将其他节点中的最新数据合并到本地，同时与其交换的结点也会更新到最新数据</li>
+</ul>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+    <script>
+        /**
+         *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+         *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+        */
+        if( '' || '')
+        var disqus_config = function () {
+            this.page.url = '';  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.identifier = ''; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://airclouds-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
+
+
+</html>
