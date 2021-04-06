@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        分布式存储笔记3-4：分布式表格系统（Windows Azure Storage） - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#整体架构"><span class="toc-text">整体架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#定位服务（Location-Service，-LS）："><span class="toc-text">定位服务（Location Service， LS）：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#存储区（Storage-Stamp）："><span class="toc-text">存储区（Storage Stamp）：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#文件流层："><span class="toc-text">文件流层：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分区层："><span class="toc-text">分区层：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#前端层："><span class="toc-text">前端层：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#复制方式："><span class="toc-text">复制方式：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#存储区内复制（Intra-Stamp-Replication）："><span class="toc-text">存储区内复制（Intra-Stamp Replication）：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#跨存储区复制（Inter-Stamp-Replication）："><span class="toc-text">跨存储区复制（Inter-Stamp Replication）：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件流层：-1"><span class="toc-text">文件流层：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#架构："><span class="toc-text">架构：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#流管理器（Stream-Manager，SM）："><span class="toc-text">流管理器（Stream Manager，SM）：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#extent存储节点（Extent-Node，-EN）："><span class="toc-text">extent存储节点（Extent Node， EN）：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#客户端库（Partition-Layer-Client）："><span class="toc-text">客户端库（Partition Layer Client）：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#复制及一致性："><span class="toc-text">复制及一致性：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#存储优化："><span class="toc-text">存储优化：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分区层：-1"><span class="toc-text">分区层：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#架构：-1"><span class="toc-text">架构：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#客户端："><span class="toc-text">客户端：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分区服务器（Partition-Server，-PS）："><span class="toc-text">分区服务器（Partition Server， PS）：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分区管理器（Partition-Manager，PM）："><span class="toc-text">分区管理器（Partition Manager，PM）：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#锁服务（Lock-Service）："><span class="toc-text">锁服务（Lock Service）：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分区数据结构："><span class="toc-text">分区数据结构：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#负载均衡："><span class="toc-text">负载均衡：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分裂与合并："><span class="toc-text">分裂与合并：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#讨论："><span class="toc-text">讨论：</span></a></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        分布式存储笔记3-4：分布式表格系统（Windows Azure Storage）
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2021-04-06 21:40:40</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#存储" title="存储">存储</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p><hr><br>这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。</p>
+<hr>
+
+<p>Windows Azure Storage = WAS</p>
+<p>WAS包含三种数据存储服务：Windows Azure Blob、Windows Azure Table、Windows Azure Queue。三种数据存储共享一套底层架构。</p>
+<h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p>WAS依赖底层的Windows Azure结构控制器（Fabric Controller）管理硬件资源。结构控制器的功能包括节点管理，网络配置，健康检查，服务启动，关闭，部署和升级。</p>
+<p>WAS还通过请求结构控制器获取网络拓扑信息，集群物理部署以及存储节点硬件配置信息。<br><img src="/img/202104/010.png" width="50%" height="50%"></p>
+<p>WAS主要分为两个部分：定位服务、存储区</p>
+<h3 id="定位服务（Location-Service，-LS）："><a href="#定位服务（Location-Service，-LS）：" class="headerlink" title="定位服务（Location Service， LS）："></a>定位服务（Location Service， LS）：</h3><p>功能有管理所有的存储区，管理用户到存储区之间的映射关系，收集存储区的负载信息，分配新用户到负载较轻的存储区。LS自身也有分布在两个不同地域以实现高可用。LS通过DNS服务来使得每个账户的请求定位到所属存储区。</p>
+<blockquote>
+<p>起到了中心节点的作用</p>
+</blockquote>
+<h3 id="存储区（Storage-Stamp）："><a href="#存储区（Storage-Stamp）：" class="headerlink" title="存储区（Storage Stamp）："></a>存储区（Storage Stamp）：</h3><p>每个存储区是一个集群，一般由10～20个机架组成，每个机架有18个存储节点，提供大约2PB存储容量。</p>
+<p>存储区分三层：文件流层（Stream Layer）、分区层（Partition Layer）以及前端层（Fornt-End Layer）。</p>
+<h4 id="文件流层："><a href="#文件流层：" class="headerlink" title="文件流层："></a>文件流层：</h4><p>与GFS类似，提供分布式文件存储。其中文件称为流（stream），文件中的chunk称为范围（extent）。且不对外服务，需要经过服务分区层。</p>
+<h4 id="分区层："><a href="#分区层：" class="headerlink" title="分区层："></a>分区层：</h4><p>与Bigtable类似，将对象划分到不同的分区以被不同的分区服务器（Partition Server）服务，分区服务器将对象持久化到文件流层。</p>
+<blockquote>
+<p>在原始文件数据的基础上抽象出了对象的概念</p>
+</blockquote>
+<h4 id="前端层："><a href="#前端层：" class="headerlink" title="前端层："></a>前端层：</h4><p>前端层包括一系列无状态的web服务器，这些web服务器完成权限验证等功能并根据请求的分区名（Partition Name）将请求转发到不同的分区服务器。分区映射表（Partition Map）用来决定应该将请求转化到哪个分区服务器，前端服务器一半缓存了此表从而减少一次网络请求。</p>
+<p>从定位服务的功能来看，分区映射表应该是保存在定位服务器上。</p>
+<h3 id="复制方式："><a href="#复制方式：" class="headerlink" title="复制方式："></a>复制方式：</h3><h4 id="存储区内复制（Intra-Stamp-Replication）："><a href="#存储区内复制（Intra-Stamp-Replication）：" class="headerlink" title="存储区内复制（Intra-Stamp Replication）："></a>存储区内复制（Intra-Stamp Replication）：</h4><p>文件流层实现，同一个extent的多个副本之间的复制模式为强同步，每个成功的写操作必须保证所有的副本都同步成功，用来实现强一致性。</p>
+<blockquote>
+<p>在extent中主备副本的文件偏移应该也要一样。</p>
+</blockquote>
+<h4 id="跨存储区复制（Inter-Stamp-Replication）："><a href="#跨存储区复制（Inter-Stamp-Replication）：" class="headerlink" title="跨存储区复制（Inter-Stamp Replication）："></a>跨存储区复制（Inter-Stamp Replication）：</h4><p>服务分区层实现，通过后台线程异步复制到不同的存储区，用来实现异地容灾。</p>
+<blockquote>
+<p>这种情况下应该只需要实现“至少一次成功写入”这样的弱一致性即可。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;两者的区别实际上就是是否跨集群复制。在网络拓扑中可能就是跨机房或者跨机架。其中的主要区别就是网络因素：在网络条件允许的情况下追求强一致性；在网络通讯成本高的情况下追求数据的完整性而不是一致性。</p>
+</blockquote>
+<h2 id="文件流层：-1"><a href="#文件流层：-1" class="headerlink" title="文件流层："></a>文件流层：</h2><p>文件流层提供内部接口供服务分区层使用。它提供类似文件系统的命名空间和API，但所有的写操作只能是追加，支持的接口包括：打开&amp;关闭文件、改名、读取以及追加到文件。</p>
+<p>文件流层的文件称为流，每个流包含一系列的extent，每个extent由一系列的block组成。<br><img src="/img/202104/011.png" width="50%" height="50%"></p>
+<pre><code>加封：不允许对extent追加数据
+未加封：允许对extent追加数据
+</code></pre><p>block是数据读写的最小单位，每个block最大不超过4MB。文件流层对每个block计算校验和。读取操作总是给定某个block的边界，然后一次性连续读取一个或者多个完整的block数据；写入操作凑成一个或者多个block写入到系统。WAS中的block与GFS中的记录（record）概念是一致的。</p>
+<blockquote>
+<p>对于写入一整个完整文件来说，会将文件分成一个个完整的block，如果多余1KB，也会分隔成一个单独的block，而不是跟其他文件的block混合。</p>
+</blockquote>
+<p>extent是文件流层数据复制，负载均衡的基本单位，每个存储区默认对每个extent保留三个副本，每个extent的默认大小为1GB。如果存储小对象，则多个对象共用同一个extent；如果存储大对象（GB或者TB级别）则会将对象分成多个extent。与GFS中的chunk概念相同。</p>
+<p>stream用于文件流层对外接口，每个stream在层级命名空间中有一个名字。这stream与GFS中的file概念相同。</p>
+<h3 id="架构："><a href="#架构：" class="headerlink" title="架构："></a>架构：</h3><p><img src="/img/202104/012.png" width="50%" height="50%"></p>
+<p>文件流层由三部分组成：</p>
+<h4 id="流管理器（Stream-Manager，SM）："><a href="#流管理器（Stream-Manager，SM）：" class="headerlink" title="流管理器（Stream Manager，SM）："></a>流管理器（Stream Manager，SM）：</h4><p>流管理器维护了文件流层的元数据，包括文件流的命名空间，文件流到extent之间的映射关系，extent所在的存储节点信息。</p>
+<p>他还需要监控 extent存储节点，负责整个系统的全局控制，如extent复制，负载均衡，垃圾回收无用的extent，等等。流管理器会定期通过心跳的方式轮询extent存储节点。流管理器自身通过Paxos协议实现高可用性。</p>
+<blockquote>
+<p>对于每一个文件流层来说都是一个小型的文件存储系统。包括存储节点与中心节点，其中流管理器就是中心节点，但这个中心节点只能管理本集群的所有存储节点，如果涉及到跨集群复制等操作，需要通过分区层来调度。</p>
+</blockquote>
+<h4 id="extent存储节点（Extent-Node，-EN）："><a href="#extent存储节点（Extent-Node，-EN）：" class="headerlink" title="extent存储节点（Extent Node， EN）："></a>extent存储节点（Extent Node， EN）：</h4><p>extent存储节点实际存储每个extent的副本数据。每个extent单独存储成一个磁盘文件，这个文件包含extent中所有block的数据及checksum，以及针对每个block的索引信息。extent节点之间互相通信拷贝客户端追加的数据。extent还需要接受流管理器的命令，例如创建extent副本，垃圾回收指定extent等等。</p>
+<blockquote>
+<p>extent以磁盘为单位，副本存放在多个extent之间，如果这样的话一个集群下线不就使得一部分数据无法提供服务了吗？不应该还有一部分数据是备份到集群之外的？从架构层面来看流管理器起到一个对存储节点的管理作用，而更上层的分区层应该就负责跨集群的数据操作。</p>
+</blockquote>
+<h4 id="客户端库（Partition-Layer-Client）："><a href="#客户端库（Partition-Layer-Client）：" class="headerlink" title="客户端库（Partition Layer Client）："></a>客户端库（Partition Layer Client）：</h4><p>客户端库是文件流层提供给上层应用（分区层）的访问接口，不遵守POSIX规范。</p>
+<p>分区层访问文件流层时，首先访问流管理器节点，获取与之进行交互的extent存储节点你信息，然后直接访问这些存储节点。</p>
+<blockquote>
+<p>也就是说客户端库相当于提供了一个功能列表的作用，并不是完美分割分区层与文件流层。分区层从客户端库获取到文件流层extent命名空间等信息，然后直接与其通信。</p>
+</blockquote>
+<h3 id="复制及一致性："><a href="#复制及一致性：" class="headerlink" title="复制及一致性："></a>复制及一致性：</h3><p>WAS中的流文件只允许追加，不允许更改。追加操作是原子的，数据追加以数据块为单位，多个数据块可以由客户端凑成一个缓冲区一次性提交到文件流层的服务端，保证原子性。与GFS一样，客户端追加数据块可能失败需要重试，从而产生重复记录，分区层需要处理这种情况。</p>
+<p>分区层通过两种方式处理重复记录：</p>
+<ul>
+<li>对于元数据（metadata）和操作日志流（commmit log streams），所有的数据都有一个唯一的事务编号（trannsaction sequence），顺序读取时忽略编号相同的事务；</li>
+<li>对于每个表格中的行数据流（row data streams），只有最后一个追加成功的数据块才会被索引，因此先前追加失败的数据块不会被分区层读取到，将来也会被系统的垃圾回收机制删除。</li>
+</ul>
+<blockquote>
+<p>只有追加成功的block的文件信息才会作为元数据保存，而失败的相关信息会被上层忽略，但是在文件流层中能够被检测出来，说明文件流层需要维护整个extent的所有block的元数据，其中包括block在extent中的偏移地址与长度，通过这些数据才能够计算出一个extent中有多少多余的重复数据的空间。</p>
+</blockquote>
+<p>如图6-12，WAS追加流程如下：</p>
+<ol>
+<li>如果分区层客户端没有缓存当前extent信息，例如追加到新的流文件或者上一个extent已经缝合，客户端请求SM创建一个新的extent。</li>
+<li>SM根据一定的策略，如存储节点负载，机架位置等，分配一定数量（默认为3）的extent副本到EN。其中一个副本作为主副本允许分区层写入，其他副本作为备副本，只允许接收主副本同步的数据。Extent写入过程中主副本维持不变，因此，WAS不需要类似GFS中的租约机制，大大简化了追加流程；<blockquote>
+<p>那如果在追加过程中主extent宕机了该怎么办？从文中并没有看到相关处理方案。难道是直接提示追加失败吗？</p>
+</blockquote>
+</li>
+<li>分区层写请求发送到主副本。主副本执行以下操作：<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1) 决定追加的数据块在extent中的位置<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2) 定序：如果有多个客户端往同一个extent并发追加，主副本需要确定这些追加操作的顺序<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3) 将数据块写入主副本本身</li>
+<li>主副本把待追加数据发送给某个备副本，被副本接着转发给其他备副本。</li>
+<li>备副本写成后应答主副本</li>
+<li>如果所有的副本都应答成功，主副本你应答客户端追加操作成功。</li>
+</ol>
+<blockquote>
+<p>问题同上，在追加的时候如果有一个extent出现故障，则客户端认定此次追加失败并告知SM，SM将已经写入的extent缝合（加封），然后创建新的extent用来提供追加操作。这样不会太浪费空间了吗？为什么不按照block来缝合？<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3需要按情况，如果是追加写失败，应该直接跳过失败的block，如果是新建extent并首次写入失败，则将这个extent直接缝合。</p>
+</blockquote>
+<p>每个extent副本都维护了已经成功提交的数据长度（commit length），如果初夏一场，各个副本当前长度可能不一致。SM缝合extent时首先请求所有的副本获取当前党读，如果副本之间不一致，SM将选择最小的长度值作为缝合后的长度。如果缝合操作的过程中某个副本所在的节点出现故障，缝合操作仍然可以成功执行，等到节点重启后，SM将强制该节点从extent的其他副本同步数据。</p>
+<blockquote>
+<p>这里的缝合不等于加封，这里的缝合相当于将多个不同extent之间进行数据的同步工作，同步的这部分就是写入失败的错误数据。当讲这部分切分到最小长度后又能够重新对外提供服务，如果没有切除干净也没事，最终生成block元数据的只会是写入成功的block，其他重复数据、错误数据将会在垃圾回收阶段被清除。</p>
+</blockquote>
+<p>文件流层保证如下两点：</p>
+<ul>
+<li>只要记录被追加并成功响应客户端呢，从任何一个副本都能读到相同的数据</li>
+<li>及时追加过程中出现故障，一旦extent被缝合，从任何一个被缝合的副本都能读到相同内容（按照最短长度切分）</li>
+</ul>
+<h3 id="存储优化："><a href="#存储优化：" class="headerlink" title="存储优化："></a>存储优化：</h3><p>extent需要面临两个问题：如何保证磁盘调度公平性以及避免磁盘随机写操作。</p>
+<ol>
+<li>如果存储节点上某个磁盘当前已发出请求的期望完成时间超过100ms或者最近一段时间内某个请求的响应时间超过200ms，避免将新的IO请求调度到该磁盘。<blockquote>
+<p>很多磁盘优先执行大块顺序写操作，这样会阻塞大量的随机读操作，导致后续读取超时。这种办法就是将随机读的时候检测IO是否繁忙，如果繁忙则到另一块磁盘上读取数据。这另一块磁盘就是extent的备份。</p>
+</blockquote>
+</li>
+<li>存储节点采用单独的日志盘（journal drive）顺序保存节点上所有extent的追加数据，追加操作分两步：<br> A. 将待追加的数据写入日志盘<br> B. 将数据写入extent文件，操作A将随机写变为针对日志盘的顺序写，一般来说，操作A先成功，操作B只是将数据保存到系统内存中。<br>如果节点发生故障，需要通过日志盘中的数据恢复extent文件。<blockquote>
+<p>将多个针对磁盘的随机写操作修改为针对单个日志文件的顺序写入，类似于Redis的单线程写入一样，减少磁盘的随机写，提高吞吐量并降低延时。</p>
+</blockquote>
+</li>
+<li>抹除码（erasure coding）机制用于减少extent副本占用的空间。每个extent副本都默认需要存储三份，为了降低存储成本，文件流层会对已经缝合的extent进行Reed-Solomon编码。</li>
+</ol>
+<p>文件流层在后台定期执行任务，将extennt划分为N个长度大致相同的数据块，并通过Reed-Solomon算法计算出M个纠错码段用于纠错。只要出现问题的数据段或者纠错码段总和小于或者等于M个，文件流层都能重建整个extent。</p>
+<p>推荐的配置是N=10，M=4，也就是只需要1.4倍的存储空间，就能容忍多达4个存储节点出现故障。<a href="https://zhuanlan.zhihu.com/p/103888948?utm_source=wechat_session" target="_blank" rel="noopener">RS编码</a></p>
+<h2 id="分区层：-1"><a href="#分区层：-1" class="headerlink" title="分区层："></a>分区层：</h2><p>分区层位于文件流层之上，在文件数据的基础上抽象出了对象的概念，与Bigtable一样提供了事务支持。</p>
+<p>分区层内支持一种称为对象表（Object Table， OT）的数据架构，每个OT是一张最大可达若干PB的大表。对象表类似于Bigtable的子表，被动态地划分为连续的范围分区，并分散到WAS存储区的多个分区服务器上。范围分区之间互相不重叠。</p>
+<blockquote>
+<p>大致跟BIgtable一样，Bigtable维护子表，而分区层维护OT的范围分区。</p>
+</blockquote>
+<p>WAS存储区包含的对象表包括：账户表、Blob数据表、Entity数据表、Message数据表。</p>
+<p>分区层还有一张全局的Schema表格，保证所有的对象表哥的schema信息，即每个对象表包含的每个列的名字，数据类型及其他属性。（就是每张对象表的元数据信息）</p>
+<p>每个对象表的行主键包括用户账户名，分区名以及对象名三部分。</p>
+<p>系统内部还维护了一张分区映射表，用于记录每个范围当前分区所在的分区服务器。</p>
+<h3 id="架构：-1"><a href="#架构：-1" class="headerlink" title="架构："></a>架构：</h3><p><img src="/img/202104/013.png" width="50%" height="50%"></p>
+<h4 id="客户端："><a href="#客户端：" class="headerlink" title="客户端："></a>客户端：</h4><p>提供分区层到WAS前端的接口，前端通过客户端以对不同对象的数据单元进行增删改查等操作。客户端通过分区映射表获取分区映射信息，但所有表格的数据内容都在客户端与分区服务器之间之间传送。</p>
+<blockquote>
+<p>减少分区映射表的网络压力，在分布式存储架构设计中，这种维护着全局数据范围分布的节点由于所有的读写操作都会经过这个节点，为了提高性能都不会传递数据本身。</p>
+</blockquote>
+<h4 id="分区服务器（Partition-Server，-PS）："><a href="#分区服务器（Partition-Server，-PS）：" class="headerlink" title="分区服务器（Partition Server， PS）："></a>分区服务器（Partition Server， PS）：</h4><p>PS实现分区的装载/卸除、分区内容的读和写（Bigtable对子表的权限，删除与添加子表权限）、分区的合并和分裂。一般来说，每个PS平均服务10个分区。</p>
+<h4 id="分区管理器（Partition-Manager，PM）："><a href="#分区管理器（Partition-Manager，PM）：" class="headerlink" title="分区管理器（Partition Manager，PM）："></a>分区管理器（Partition Manager，PM）：</h4><p>管理所有的PS，包括分配分区给PS，指导PS实现分区的分裂及合并，监控PS，在PS之间进行负载均衡并实现PS的故障恢复等。每个WAS存储区有多个PM，他们之间通过Lock Server进行选主，持有租约的PM是主PM。</p>
+<blockquote>
+<p>只负责监控与发送命令，具体的分裂合并操作与相关对策交给分区服务器执行。</p>
+</blockquote>
+<h4 id="锁服务（Lock-Service）："><a href="#锁服务（Lock-Service）：" class="headerlink" title="锁服务（Lock Service）："></a>锁服务（Lock Service）：</h4><p>Paxos锁服务用于WAS存储区内选举主PM。另外，每个PS与锁服务之间都维持了租约。锁服务监控租约状态，PS的租约快到期时，会向锁服务重新续约。如果PS出现故障，PM需要首先等待PS上的租约过期后才可以将它原来的服务分区分配出去，PS租约如果过期也需要主动停止读写服务。</p>
+<blockquote>
+<p>为了防止出现多个PS同时读写同一个分区的情况，这部分的操作应该也会类似于Bigtable，PM在确定PS租约过期后向锁服务申请获取下线的PS的锁，如果获取成功则进行分区分配。如果获取失败表示PM出了问题或者PS重新上线</p>
+</blockquote>
+<h3 id="分区数据结构："><a href="#分区数据结构：" class="headerlink" title="分区数据结构："></a>分区数据结构：</h3><p><img src="/img/202104/014.png" width="50%" height="50%"><br>与Bigtable基本一致。用户写操作首先追加到操作日志文件流（即写入操作日志中），接着修改内存表（Memory Table， 在内存中生效，此时数据的写入可以被其他用户看到），等到内存表到达一定大小后执行快照（checkpoinnt，对应bigtable的Minor Compaction）。</p>
+<p>分区服务器定期将多个小快照文件合并成更大的快照文件（对应Bigtable的Major Compaction）以减少读取所需要的文件数量。分区服务器会对每个快照文件维护热点行数据的缓存（Row Page Cache，对应Bigtable中的Block Cache和Key Value Cache），通过布隆过滤器过滤对快照文件呢不存在行的随机读请求。</p>
+<p>与Bigtable的不同：</p>
+<ol>
+<li>WAS中每个分区拥有一个专门的操作日志，而Bigtable中同一个TabletServer共用一个操作日志，通过<tableid>将数据进行划分</tableid></li>
+<li>WAS中每个分区维护各自的元数据（例如分区包含哪些快照文件，持久化成元数据文件流），分区管理器只管理每个分区与所在的分区服务之间的映射关系；也就是说分区之间的元数据不可见，相互独立，也不会互相交互。而Bigtable维护了两级元数据，分别子元数据表与根表，在一定的情况下TabletServer之间会交换元数据信息。</li>
+<li>WAS专门映入了Blob数据文件流用于支持Blob数据类型的文件。Bigtable只支持半结构化与结构化数据，Blob相关的服务直接由GFS提供。</li>
+</ol>
+<p>由于Blob数据量大，因此操作日志只记录Blob数据在数据流层中的索引信息，</p>
+<h3 id="负载均衡："><a href="#负载均衡：" class="headerlink" title="负载均衡："></a>负载均衡：</h3><p>PM记录每个PS以及它服务的每个分区的负载。</p>
+<p>影响负载的因素包括：</p>
+<ol>
+<li>每秒事务数</li>
+<li>平均等待事务个数</li>
+<li>节流率：控制器调节或延迟终端生成的速率，以优化网络吞吐量和CPU的使用</li>
+<li>CPU使用率</li>
+<li>网络使用率</li>
+<li>请求延时</li>
+<li>每个分区的数据大小</li>
+</ol>
+<p>PS与PM通过心跳定时将这些信息发往PM，由PM决定PS是否要进行负载均衡。</p>
+<p>对分区进行负载的两个阶段：</p>
+<ol>
+<li>卸载：PM首先发送一个卸载指令给PS，PS会执行一次快照操作。一旦完成后，PS停止待迁移分区的读写服务并告知PM卸载成功。如果卸载过程中PS出现异常，PM需要查询锁服务进行确认。</li>
+<li>加载：PM发送加载指令给新的PS并且更新PM维护的分区映射表结构，将分区指向新的PS。新的PS加载分区并且开始提供服务。由于卸载时执行了一次快照操作，加载时需要回放的操作日志很少，保证了加载的快速。</li>
+<li>在新的PS没有回复加载完成之前，PM中的对元数据的修改是对用户不可见的，常用的做法是写入REDO日志中但是没有在内存中生效。</li>
+</ol>
+<h3 id="分裂与合并："><a href="#分裂与合并：" class="headerlink" title="分裂与合并："></a>分裂与合并：</h3><p>有两种可能导致WAS对某个分区执行分裂操作：一种是分区太大，另一种是分区的负载过高。</p>
+<p>PM发起分裂操作，由PS确认分裂点。（因为PM没有持有PS的分区详细信息）。</p>
+<p>如果是基于分区大小的分裂操作，PS维护了每个分区的大小以及大致的中间位置，并将这个中间位置作为分裂点；如果是基于负载的分裂操作，PS自适应地计算分区中哪个主键范围的负载最高，并通过它来确定分裂点。</p>
+<p>把分区B分裂成为新分区C和D的步骤如下：</p>
+<ol>
+<li>PM告知PS将分区B分裂为C和D</li>
+<li>PS对B执行快照操作，接着停止分区B的读写服务</li>
+<li>PS发起一个“MultiModify”操作将分区B的元数据，操作日志及行数据流复制到C和D。这一步之需要拷贝每个文件的extent指针列表，不需要拷贝extent的内容。接着PS分别往C和D的元数据流写入新的分区范围</li>
+<li>PS开始对C和D这两个分区提供读写服务</li>
+<li>PS通知PM分裂成功，PM相应地更新分区映射表及元数据信息。接着PM会把C或者D中的其中一个分区迁移到另外一个不同的PS<blockquote>
+<p>MultiModify：在一次调用中实现多步修改操作。</p>
+</blockquote>
+</li>
+</ol>
+<p>合并操作需要选择两个连续的负载较低的分区。</p>
+<p>把分区C和D合并成分区E的步骤如下：</p>
+<ol>
+<li>PM迁移C或者D，使得这两个分区被同一个PS服务。接着PM通知PS将分区C和D合并成E。</li>
+<li>PS分别对分区C和D执行快照操作，接着停止分区C和D的读写服务</li>
+<li>PS发起一个“MultiModify”操作合并分区C和D的操作日志及数据流，生成E的操作日志和行数据流。这里也只需要修改extent指针。</li>
+<li>PS对E构造新的元数据流，包含新的操作日志文件、行数据文件，C和D合并后的新的分区范围以及操作日志回放点和行数据文件索引信息</li>
+<li>PS加载新分区E并提供读写服务</li>
+<li>PS通知PM合并成功，接着PM相应地更新分区映射表及元数据。<blockquote>
+<p>备份的作用是防止节点宕机导致数据丢失。</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="讨论："><a href="#讨论：" class="headerlink" title="讨论："></a>讨论：</h2><p>WAS整体架构借鉴GFS+Bigtable并有所创新，与其不同点在于：</p>
+<ol>
+<li>Chunk大小选择。GFS中每个Chunk大小为64MB，WAS每个extent大小提高到1GB</li>
+<li>元数据层次。Bigtable中元数据包含元数据表与根表两级，WAS中只有一级元数据</li>
+<li>GFS中多个Chunk副本之间是弱一致的，不保证每个Chunk的不同副本之间每个字节都相同，而WAS能保证这点</li>
+</ol>
+<p>Bigtable每个Tablet Server的所有子表共享一个日志文件从而提高写入性能，WAS将每个范围分区的操作写入到不同的操作日志文件。</p>
+<p>PS:2021-04-06 AWS粗看跟之前的分布式表格架构十分不同，但将其拆分后其实并没有脱离分布式存储的设计，只不过比起GFS-Bigtable-Megastore-Spannenr这种过渡式的设计，AWS一步到位采用成熟的成体系的结构，GFS除了为Bigtable提供子表存储外还能对外提供Blob存储服务，而AWS无论是Blob存储还是子表存储都同一经过上层的定位服务，这种一体化的设计使得各层模块之间全面衔接，与谷歌的一层一层改进孰优孰劣不好区分。</p>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+</html>
