@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        为什么磁盘采用4KB的页 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#前置概念"><span class="toc-text">前置概念:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#正文"><span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么选4KB而不是2KB或者8KB呢？"><span class="toc-text">为什么选4KB而不是2KB或者8KB呢？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#扩展阅读"><span class="toc-text">扩展阅读</span></a></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        为什么磁盘采用4KB的页
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2021-05-09 17:29:29</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#杂谈" title="杂谈">杂谈</a>
+        <span>/</span>
+        
+        <a class="tag" href="/tags/#存储" title="存储">存储</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <h2 id="前置概念"><a href="#前置概念" class="headerlink" title="前置概念:"></a>前置概念:</h2><p>页表是一种特殊的数据结构，放在系统空间的页表区，存放逻辑页与物理页帧的对应关系。 每一个进程都拥有一个自己的页表，PCB表中有指针指向页表。</p>
+<center><br><img src="/img/202105/001.png" width="50%" height="50%"><br></center>
+
+<p>逻辑地址转换成物理地址的过程是：用页号p去检索页表，从页表中得到该页的物理块号，把它装入物理地址寄存器中。同时，将页内地址d直接送入物理地址寄存器的块内地址字段中。这样，物理地址寄存器中的内容就是由二者拼接成的实际访问内存的地址，从而完成了从逻辑地址到物理地址的转换。</p>
+<p>用固定大小的页(Page)来描述逻辑地址空间，用相同大小的页框(Frame)来描述物理内存空间，由操作系统实现从逻辑页到物理页框的页面映射，同时负责对所有页的管理和进程运行的控制。</p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>在使用4KB作为磁盘的分页前，大部分磁盘驱动器厂商采用的是512B的分页。美国国家半导体32016机器上的页大小为512字节，对于16MB内存大小的计算机来说可以处理32768个页面。即使每个页面只需要16字节的开销，整体就需要512KB的内存空间，即内存的1/32。</p>
+<p>对于操作系统来说，现在Linux每逻辑分页的开销为64字节，当然，在32位系统中linux对每页的开销为32字节。</p>
+<p>4KB磁盘驱动已经在90年代就已经出现了。但是在2009年，西部数据才正式主推4KB的磁盘分页驱动器。</p>
+<p>在90年代，人们发现随着磁盘驱动器容量的扩大512字节领域的意义越来越小，在以MB为单位统计磁盘大小的时候512字节是在技术因素与保持最小浪费空间中所达成的良好平衡。</p>
+<p>在进行硬盘驱动器设计时需要平衡三个因素：面密度、读取驱动器盘片时的信噪比（SNR）以及错误检查和纠正（ECC）。当面密度增加，扇区变小，其SNR降低。为了保持可靠性，需要对ECC进行改进，而改进的方式就是使用更多的位数。</p>
+<center><br><img src="/img/202105/002.png" width="50%" height="50%"><br>各种面密度的SNR<br></center>
+
+<p>在这种时候，磁盘驱动商们需要往面密度中添加尽可能多的ECC，否则无法保证数据的可靠性。因此，提高ECC校验块的大小就成了最好的解决办法。对于大块，ECC在更大的数据块上使用效率更高，虽然对于单个大块比在512上需要的空间更多，但是平均下来的空间利用率比512要小得多。</p>
+<center><br><img src="/img/202105/003.png" width="50%" height="50%"><br></center>
+
+<p>对于4K扇区来说需要100字节的ECC数据，而对于8位操作系统上的512扇区来说需要320字节的数据（40 x 8）。而且随着数据量的增多，每次发生错误的错误数据规模也在增加，对于4KB的错误数据来说，需要擦除8个512规模的扇区，而4KB扇区只需要擦除一个。</p>
+<h3 id="为什么选4KB而不是2KB或者8KB呢？"><a href="#为什么选4KB而不是2KB或者8KB呢？" class="headerlink" title="为什么选4KB而不是2KB或者8KB呢？"></a>为什么选4KB而不是2KB或者8KB呢？</h3><p>有一个因素是在x86处理器上正常内存页面也为4KB（当然也有4MB）。x86页面大小又导致文件系统簇（文件系统中最小的存储单元）变为4KB，因为4KB簇恰好适合内存页面。在数据总量增长的同时，对于小文件以及小的簇的需求也在逐渐减少，即小于4KB的文件少，浪费空间。这也导致NTFS，EXT3和HFS+在现代磁盘驱动器上均默认4KB簇，因此4KB物理扇区与4KB逻辑簇完美映射，而4KB文件系统与4KB内存页面完美映射。因此，目前4KB是磁盘驱动器的完美分页大小。</p>
+<center><br><img src="/img/202105/004.png" width="50%" height="50%"><br></center>
+
+<p>采用4KB扇区的另一个好处除了适应现代操作系统以外还能够支持磁盘驱动商设计出更大的磁盘。Western Digital据此可以轻松设计超过2TB的驱动器。</p>
+<p>从理论上说Western Digital估计4K扇区的使用将使它们在格式化效率上立即提高7％-11％。ECC突发纠错能力有望提高50％，总体错误率能力提高2个数量级。</p>
+<center><br><img src="/img/202105/005.png" width="50%" height="50%"><br></center>
+
+<p>但是4KB并不能立即全面推广，因为并不是所有的计算机都能支持4KB规模，因此需要有一个过渡期使用512仿真技术，该技术可以使高级格式驱动器（4KB）以具有512B扇区的形式向驱动器控制器和操作系统公开，而实际上它们将具有4K扇区。</p>
+<center><br><img src="/img/202105/006.png" width="50%" height="50%"><br></center>
+
+<p>但是这样做会有一个缺点：512B的数据与4KB的数据会有错位。其中的原因在于除数据本身外还带有数据对应的ECC数据，这会导致一个逻辑簇中最终将跨越4KB，这将会导致性能问题，其中最受影响的是随机写入，因为随机写入过程中需要对磁盘进行寻址计算同时还要对数据按分区计算ECC。</p>
+<center><br><img src="/img/202105/007.png" width="50%" height="50%"><br></center>
+
+<p>因此，对于一个读-修改-写（RMW）采用更新往往比采用直接写效率要高。（这与写入SSD的脏块类似）</p>
+<center><br><img src="/img/202105/008.png" width="50%" height="50%"><br></center>
+
+<h2 id="扩展阅读"><a href="#扩展阅读" class="headerlink" title="扩展阅读"></a>扩展阅读</h2><p><a href="https://zonedstorage.io/introduction/zoned-storage/" target="_blank" rel="noopener">分区存储</a></p>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+</html>
