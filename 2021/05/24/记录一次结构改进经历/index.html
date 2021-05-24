@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="咸鱼回响的博客">
+    <meta name="keyword"  content="博客">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        记录一次结构改进经历 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> 望之天迴，即之云昏 </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/head.jpg" />
+        </div>
+        <div class="name">
+            <i>咸鱼回响</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#原先情况"><span class="toc-text">原先情况</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Layout相关"><span class="toc-text">Layout相关</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#改进方法"><span class="toc-text">改进方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Layout相关-1"><span class="toc-text">Layout相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Timer相关"><span class="toc-text">Timer相关</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最终情况如下"><span class="toc-text">最终情况如下</span></a></li></ol></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> 望之天迴，即之云昏 </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        记录一次结构改进经历
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2021-05-24 20:26:01</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#存储" title="存储">存储</a>
+        <span>/</span>
+        
+        <a class="tag" href="/tags/#杂谈" title="杂谈">杂谈</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <p>记录的是我的个人项目<a href="https://github.com/dust1/epidemic" target="_blank" rel="noopener">Epidemic</a>的改进经历，一个阶段写完之后发现问题还是很多，在有针对地画出UML图后就连我这种新手也能对一些问题一目了然。果然设计系统的前期准备工作还是不充分以及还是代码写的少。</p>
+<h2 id="原先情况"><a href="#原先情况" class="headerlink" title="原先情况"></a>原先情况</h2><p>在一个阶段写完后主要遇到有以下几个情况：</p>
+<ol>
+<li>不同类之间存在相同元素与相同函数</li>
+<li>对类的引用设计有问题，导致某个类需要使用另一个类的时候需要重新修改整个类的构造函数，并且在传递的过程中需要经过一两个中间类</li>
+<li>对定时任务设计不理想，系统中有两种任务调度：定时任务与异步任务</li>
+</ol>
+<p>这是原先的UML图例：<br><img src="/img/202105/010.jpg" width="100%" height="100%"></p>
+<h3 id="Layout相关"><a href="#Layout相关" class="headerlink" title="Layout相关"></a>Layout相关</h3><p>可以发现，RouterLayout与StorageLayout之间还存在公共参数。同时定时任务只关联RouterLayout，导致StorageLayout需要执行异步或者定时任务的时候十分困难，在实际的实现中代码十分丑陋。</p>
+<p>同时对于最主要的两个基类RouterLayout与StorageLayout，其中有很多方法设计的不合理。比如RouterLayout的findFriend，该方法的含义为<code>判断路由节点是否为第一次启动，如果是则从配置文件中的关联节点获取集群中的与它接近的路由节点填充路由表</code>，这种定义的函数应该要在RouterLayout启动的时候就要执行。</p>
+<p>还有StorageLayout中的store函数，其中的参数是GRPCs中定义的Request，这就使得StorageLayout与RPC模块过于耦合，不利于模块的拆分，不符合软件设计的高内聚低耦合原则。跟这个情况类似的还有RouterLayout的ping函数。</p>
+<p>FileStorageLayout中的两个<code>RandomAccessFile</code>类型的参数，原本的意思是设置这两个参数减少文件写入过程中对目标文件的定位过程，但实际上已经有了一个writeName参数可以用于快速定位，所花费的只有对象创建的开销，而这个开销对比IO来说可以忽略不计；</p>
+<p>getVersion与public参数version之间的冲突，两者的功能重复，需要删除一个；</p>
+<p>RouterLayout中的persistence()函数用于持久化，但在后续的设计中以及参考其他文件系统的实现中发现，持久化的操作不需要放在主对象中，而是最好放在守护进程中，减少对对象的占用。</p>
+<p>strSizeToLong该方法与StorageLayout类的定义格格不入，不符合DDD原则。</p>
+<p>ping函数的使用情况对于StorageLayout来说表示根据给入的新节点检查是否有距离该节点更近的文件，如果存在则将其放入Re-Publishing队列中等待定时推送；对于RouterLayout来说表示检查该节点是否已存在与当前路由表中，如果不存在则将其加入。两者虽然都是对一个ping过来的节点执行操作，但是实现的逻辑完全不同。因此需要将其拆分为两个不同的函数用于区分。或者将其重新命名成具有可识别性的新函数。</p>
+<p>RouterLayout中的SNAPSHOT_FILENAME参数表示路由表持久化的名称，这个参数不应该放在RouterLayout这种抽象基类中，因为不同的路由实现会有不同的持久化方式，为了兼容多种不同实现，需要将其下移。</p>
+<h2 id="改进方法"><a href="#改进方法" class="headerlink" title="改进方法"></a>改进方法</h2><h3 id="Layout相关-1"><a href="#Layout相关-1" class="headerlink" title="Layout相关"></a>Layout相关</h3><p>各种修改方法如下：</p>
+<ol>
+<li>在StorageLayout与RouterLayout的基础上继续抽象一个抽象类BaseLayout</li>
+<li>将StorageLayout与RouterLayout各自的storagePath与routerPath抽象为path参数并放置在BaseLayout中</li>
+<li>将config参数上移到BaseLayout中</li>
+<li>将version以及versionFileName上移到BaseLayout中，同时也意味着在BaseLayout中实现版本的校验</li>
+<li>将StorageLayout与RouterLayout持久化相关的消息头上移到BaseLayout中</li>
+<li>将isCompatibleVersion函数上移到BaseLayout中</li>
+<li>将RouterLayout与StorageLayout中的ping函数删除并用新的haveNewNode替代，该方法存在BaseLayout中</li>
+<li>删除FileStorageLayout中的两个RandomAccessFile参数</li>
+<li>删除getVersion参数</li>
+<li>删除RouterLayout的persistence函数</li>
+<li>删除strSizeToLong函数，将其功能交给config实现</li>
+<li>将RouterLayout的SNAPSHOT_FILENAME参数下移给其实现</li>
+<li>删除StorageLayout与StorageLayout的load函数，其功能由BaseLayout的before函数替代。</li>
+<li>删除StorageLayout的chunkSize参数，该参数的获取由config提供</li>
+<li>将StorageLayout的find函数修改为findFile</li>
+</ol>
+<p>最终结构如下：<br><img src="/img/202105/011.png" width="100%" height="100%"></p>
+<h3 id="Timer相关"><a href="#Timer相关" class="headerlink" title="Timer相关"></a>Timer相关</h3><p>首先是对这一块功能进行分析，在系统中涉及到的主要有三个功能：</p>
+<ol>
+<li>持久化路由节点</li>
+<li>定时与路由表中的节点进行通信，确认其中有那些节点已经不可达</li>
+<li>定时执行Re-Publishing操作，将文件推送给距离更近的节点</li>
+</ol>
+<p>其中第一点由于有到达一定数量就触发以及操作日志，因此并不需要将路由表完全持久化到磁盘，因为没有持久化到磁盘的也会被写入操作日志，在重启的时候对操作日志进行恢复即可。因此这一步操作可以放置在线程组中进行。</p>
+<p>第2与第3点可以作为两个守护线程分别执行。</p>
+<p>第2点需要获取RouterLayout的路由表信息。第3点需要获取StorageLayout的待Re-Publishing文件列表。虽然都需要对应Layout的数据，但是两者确实完全不同的内在。对于第2条来说，执行检查的时候需要获取到当前RouterLayout维护的整张路由表的备份然后进行操作，每一次操作总是要获取到一次完整数据；而对于第3点来说，只需要满足Re-Publishing条件的文件信息即可，并不需要每次都读取全部文件信息。因此这两者的实现是完全不一样的。</p>
+<ul>
+<li>第2点：需要获取到RouterLayout的对象引用，并在合适的时候获取路由表的复制。</li>
+<li>第3点：需要建立与StorageLayout的单项通信队列，当要执行Re-Publishing的时候从队列中获取满足条件的文件信息即可</li>
+</ul>
+<p>对于RouterLayout来说实际维护路由表的类是KademliaBucket，因此定时任务调用的也应该是这个对象。</p>
+<h3 id="最终情况如下"><a href="#最终情况如下" class="headerlink" title="最终情况如下"></a>最终情况如下</h3><p><img src="/img/202105/012.jpg" width="100%" height="100%"></p>
+<p>恩，比原来清晰很多，接下里就是按照这个修改代码了。</p>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/dust1">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span>/</span>
+        
+        <span><a href="https://www.baidu.com">百度</a></span>
+        <span>/</span>
+        
+    </p>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+</html>
