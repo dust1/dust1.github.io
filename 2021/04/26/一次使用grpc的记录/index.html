@@ -1,151 +1,221 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="咸鱼回响的博客">
-    <meta name="keyword"  content="博客">
-    <link rel="shortcut icon" href="/img/favicon.ico">
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.7.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
-    <title>
-        
-        一次使用grpc的记录 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
-        
-    </title>
+<link rel="stylesheet" href="/css/main.css">
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/aircloud.css">
-    <link rel="stylesheet" href="/css/gitment.css">
-    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
-    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
-    <!-- ga & ba script hoook -->
-    <script></script>
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"niexiaotao.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="最近在设计一个P2P分布式存储系统，网络路由方面采用的是Kalelima协议，在这个协议的实现中主要有四个RPCs：  Ping：节点发起ping请求，主要用来检测与其他节点网络连接是否通顺 Store：存储请求，参数为&amp;lt;key, value&amp;gt;键值对，key是value的SHA1值，value是要保存的数据。 FindNode：寻找节点，参数是一个节点SHA1值，返回的是一个三元组&amp;l">
+<meta name="keywords" content="grpc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一次使用grpc的记录">
+<meta property="og:url" content="http://niexiaotao.cn/2021/04/26/一次使用grpc的记录/index.html">
+<meta property="og:site_name" content="咸鱼回响">
+<meta property="og:description" content="最近在设计一个P2P分布式存储系统，网络路由方面采用的是Kalelima协议，在这个协议的实现中主要有四个RPCs：  Ping：节点发起ping请求，主要用来检测与其他节点网络连接是否通顺 Store：存储请求，参数为&amp;lt;key, value&amp;gt;键值对，key是value的SHA1值，value是要保存的数据。 FindNode：寻找节点，参数是一个节点SHA1值，返回的是一个三元组&amp;l">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://niexiaotao.cn/img/202104/025.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202104/026.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202104/027.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202104/028.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202104/029.png">
+<meta property="og:updated_time" content="2021-05-29T16:48:37.783Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一次使用grpc的记录">
+<meta name="twitter:description" content="最近在设计一个P2P分布式存储系统，网络路由方面采用的是Kalelima协议，在这个协议的实现中主要有四个RPCs：  Ping：节点发起ping请求，主要用来检测与其他节点网络连接是否通顺 Store：存储请求，参数为&amp;lt;key, value&amp;gt;键值对，key是value的SHA1值，value是要保存的数据。 FindNode：寻找节点，参数是一个节点SHA1值，返回的是一个三元组&amp;l">
+<meta name="twitter:image" content="http://niexiaotao.cn/img/202104/025.png">
+
+<link rel="canonical" href="http://niexiaotao.cn/2021/04/26/一次使用grpc的记录/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>一次使用grpc的记录 | 咸鱼回响</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
 </head>
 
-<body>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
 
-<div class="site-nav-toggle" id="site-nav-toggle">
-    <button>
-        <span class="btn-bar"></span>
-        <span class="btn-bar"></span>
-        <span class="btn-bar"></span>
-    </button>
-</div>
-
-<div class="index-about">
-    <i> 望之天迴，即之云昏 </i>
-</div>
-
-<div class="index-container">
-    
-    <div class="index-left">
-        
-<div class="nav" id="nav">
-    <div class="avatar-name">
-        <div class="avatar ">
-            <img src="/img/head.jpg" />
-        </div>
-        <div class="name">
-            <i>咸鱼回响</i>
-        </div>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-    <div class="contents" id="nav-content">
-        <ul>
-            <li >
-                <a href="/">
-                    <i class="iconfont icon-shouye1"></i>
-                    <span>主页</span>
-                </a>
-            </li>
-            <li >
-                <a href="/tags">
-                    <i class="iconfont icon-biaoqian1"></i>
-                    <span>标签</span>
-                </a>
-            </li>
-            <li >
-                <a href="/archive">
-                    <i class="iconfont icon-guidang2"></i>
-                    <span>存档</span>
-                </a>
-            </li>
-            <li >
-                <a href="/about/">
-                    <i class="iconfont icon-guanyu2"></i>
-                    <span>关于</span>
-                </a>
-            </li>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">咸鱼回响</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">望之天迴，即之云昏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archive/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
             
-            <li>
-                <a id="search">
-                    <i class="iconfont icon-sousuo1"></i>
-                    <span>搜索</span>
-                </a>
-            </li>
-            
-        </ul>
-    </div>
-    
-        <div id="toc" class="toc-article">
-    
-</div>
-    
-</div>
 
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://niexiaotao.cn/2021/04/26/一次使用grpc的记录/">
 
-<div class="search-field" id="search-field">
-    <div class="search-container">
-        <div class="search-input">
-            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
-            <input id="search-input"/>
-            <span id="begin-search">搜索</span>
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="咸鱼回响">
+      <meta itemprop="description" content="咸鱼回响的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="咸鱼回响">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一次使用grpc的记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-26 21:07:54" itemprop="dateCreated datePublished" datetime="2021-04-26T21:07:54+08:00">2021-04-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-05-30 00:48:37" itemprop="dateModified" datetime="2021-05-30T00:48:37+08:00">2021-05-30</time>
+              </span>
+
+          
+
         </div>
-        <div class="search-result-container" id="search-result-container">
+      </header>
 
-        </div>
-    </div>
-</div>
-
-        <div class="index-about-mobile">
-            <i> 望之天迴，即之云昏 </i>
-        </div>
-    </div>
     
-    <div class="index-middle">
-        <!-- Main Content -->
-        
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
-
-<div class="post-container">
-    <div class="post-title">
-        一次使用grpc的记录
-    </div>
-
-    <div class="post-meta">
-        <span class="attr">发布于：<span>2021-04-26 21:07:54</span></span>
-        
-        <span class="attr">标签：/
-        
-        <a class="tag" href="/tags/#grpc" title="grpc">grpc</a>
-        <span>/</span>
-        
-        
-        </span>
-        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
-</span>
-</span>
-    </div>
-    <div class="post-content ">
+      
         <p>最近在设计一个P2P分布式存储系统，网络路由方面采用的是Kalelima协议，在这个协议的实现中主要有四个RPCs：</p>
 <ul>
 <li>Ping：节点发起ping请求，主要用来检测与其他节点网络连接是否通顺</li>
 <li>Store：存储请求，参数为&lt;key, value&gt;键值对，key是value的SHA1值，value是要保存的数据。</li>
 <li>FindNode：寻找节点，参数是一个节点SHA1值，返回的是一个三元组&lt;ip, 端口, 节点id&gt;集合</li>
-<li>FindValue：寻找值，参数是一个文件的SHA1值，如果不存在该文件，则返回距离这个文件最近的一个三元组&lt;ip, 端口, 节点id&gt;集合，如果存在文件，则直接返回文件的数据内容</li>
+<li>FindValue：寻找值，参数是一个文件的SHA1值，如果不存在该文件，则返回距离这个文件最近的一个三元组&lt;ip, 端口, 节点id&gt;集合，如果存在文件，则直接返回文件的数据内容<a id="more"></a>
+我对.proto的设计如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">syntax = &quot;proto3&quot;;</span><br><span class="line"></span><br><span class="line">option java_multiple_files = true;</span><br><span class="line">option java_package = &quot;com.dust.grpc.kalelima&quot;;</span><br><span class="line">option java_outer_classname = &quot;KalelimaServiceProto&quot;;</span><br><span class="line"></span><br><span class="line">// 定义的一个服务</span><br><span class="line">service KalelimaService &#123;</span><br><span class="line">  // Ping函数</span><br><span class="line">  rpc Ping(PingPackage) returns (PingPackage) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 存储</span><br><span class="line">  rpc Store(StoreRequest) returns (StoreResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 寻找节点</span><br><span class="line">  rpc FindNode(FindRequest) returns (stream FindNodeResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 寻找值</span><br><span class="line">  rpc findValue(FindRequest) returns (stream FindValueResponse) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//ping函数发起的请求，携带发起者的id以及发起时间，收到ping之后的节点将id修改成自身id，时间不变原样返回</span><br><span class="line">message PingPackage &#123;</span><br><span class="line">    string nodeId = 1;</span><br><span class="line">    int32 timestamp = 2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//存储请求，携带有一个sha1编码的key和数据对象。其中key还是该对象的checksum</span><br><span class="line">message StoreRequest &#123;</span><br><span class="line">    string key = 1;</span><br><span class="line">    bytes data = 2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//存储响应，code = 1表示成功；code = 0表示失败。当code = 0的时候errmsg才会有值</span><br><span class="line">message StoreResponse &#123;</span><br><span class="line">    int32 code = 1;</span><br><span class="line">    string errmsg = 2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//寻找请求，key既可以表示节点id，又可以表示文件id。具体根据请求的接口来判断</span><br><span class="line">message FindRequest &#123;</span><br><span class="line">    string key = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//寻找节点返回，返回的是一个三元组&lt;IP地址、端口、节点id&gt;列表</span><br><span class="line">message FindNodeResponse &#123;</span><br><span class="line">    string host = 1;</span><br><span class="line">    int32 port = 2;</span><br><span class="line">    string nodeId = 3;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//寻找文件呢返回，如果文件不存在则返回离这个文件最近的三元组&lt;IP地址、端口、节点id&gt;列表，否则直接返回值</span><br><span class="line">message FindValueResponse &#123;</span><br><span class="line">    string host = 1;</span><br><span class="line">    int32 port = 2;</span><br><span class="line">    string nodeId = 3;</span><br><span class="line"></span><br><span class="line">    bytes data = 4;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
 </ul>
-<p>我对.proto的设计如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">syntax = &quot;proto3&quot;;</span><br><span class="line"></span><br><span class="line">option java_multiple_files = true;</span><br><span class="line">option java_package = &quot;com.dust.grpc.kalelima&quot;;</span><br><span class="line">option java_outer_classname = &quot;KalelimaServiceProto&quot;;</span><br><span class="line"></span><br><span class="line">// 定义的一个服务</span><br><span class="line">service KalelimaService &#123;</span><br><span class="line">  // Ping函数</span><br><span class="line">  rpc Ping(PingPackage) returns (PingPackage) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 存储</span><br><span class="line">  rpc Store(StoreRequest) returns (StoreResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 寻找节点</span><br><span class="line">  rpc FindNode(FindRequest) returns (stream FindNodeResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 寻找值</span><br><span class="line">  rpc findValue(FindRequest) returns (stream FindValueResponse) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//ping函数发起的请求，携带发起者的id以及发起时间，收到ping之后的节点将id修改成自身id，时间不变原样返回</span><br><span class="line">message PingPackage &#123;</span><br><span class="line">    string nodeId = 1;</span><br><span class="line">    int32 timestamp = 2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//存储请求，携带有一个sha1编码的key和数据对象。其中key还是该对象的checksum</span><br><span class="line">message StoreRequest &#123;</span><br><span class="line">    string key = 1;</span><br><span class="line">    bytes data = 2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//存储响应，code = 1表示成功；code = 0表示失败。当code = 0的时候errmsg才会有值</span><br><span class="line">message StoreResponse &#123;</span><br><span class="line">    int32 code = 1;</span><br><span class="line">    string errmsg = 2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//寻找请求，key既可以表示节点id，又可以表示文件id。具体根据请求的接口来判断</span><br><span class="line">message FindRequest &#123;</span><br><span class="line">    string key = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//寻找节点返回，返回的是一个三元组&lt;IP地址、端口、节点id&gt;列表</span><br><span class="line">message FindNodeResponse &#123;</span><br><span class="line">    string host = 1;</span><br><span class="line">    int32 port = 2;</span><br><span class="line">    string nodeId = 3;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//寻找文件呢返回，如果文件不存在则返回离这个文件最近的三元组&lt;IP地址、端口、节点id&gt;列表，否则直接返回值</span><br><span class="line">message FindValueResponse &#123;</span><br><span class="line">    string host = 1;</span><br><span class="line">    int32 port = 2;</span><br><span class="line">    string nodeId = 3;</span><br><span class="line"></span><br><span class="line">    bytes data = 4;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>然后在生成代码的时候问题来了，这里官方会给出两种生成方式：1、使用protoc编译器生成；2、使用maven插件生成</p>
 <p>一开始我觉得改xml麻烦就直接通过protoc生成，生成的结果让我有点疑惑：<br><img src="/img/202104/025.png" width="50%" height="50%"><br>我的Service呢？我这么大的一个Service呢？其中的<code>KalelimaServiceProto</code>并不是一个服务文件的接口，而是类似于描述文件的东西。</p>
 <p>百度之后发现是缺少了一行命令<code>option java_generic_services = true;</code>加上后终于有Service了。<br><img src="/img/202104/026.png" width="50%" height="50%"></p>
@@ -158,79 +228,191 @@
 <p>因此如果只要grpc的话需要自己手动实现自己的RPC。<br><img src="/img/202104/029.png" width="50%" height="50%"><br>为了这个我浪费了快3小时。</p>
 <p>最后还是老老实实用grpc，至于自己实现RPCs，就要等到后面一个版本了，将Vertx与protobuf结合感觉不要太香。</p>
 
-        
-        <br />
-        <div id="comment-container">
-        </div>
-        <div id="disqus_thread"></div>
-
-        <div id="lv-container">
-        </div>
-
     </div>
-</div>
 
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/grpc/" rel="tag"># grpc</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/19/分布式存储笔记3-5：分布式数据库系统（Google-Spanner）/" rel="prev" title="分布式存储笔记3-5：分布式数据库系统（Google Spanner）">
+      <i class="fa fa-chevron-left"></i> 分布式存储笔记3-5：分布式数据库系统（Google Spanner）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/05/09/为什么磁盘采用4KB的页/" rel="next" title="为什么磁盘采用4KB的页">
+      为什么磁盘采用4KB的页 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
-</div>
-
-
-<footer class="footer">
-    <ul class="list-inline text-center">
-        
-        
-
-        
-
-        
-
-        
-        <li>
-            <a target="_blank"  href="https://github.com/dust1">
-                            <span class="fa-stack fa-lg">
-                                <i class="iconfont icon-github"></i>
-                            </span>
-            </a>
-        </li>
-        
-
-        
-
-    </ul>
+      </footer>
     
-    <p>
-        <span>/</span>
-        
-        <span><a href="https://www.baidu.com">百度</a></span>
-        <span>/</span>
-        
-    </p>
-    
-    <p>
-        <span id="busuanzi_container_site_pv">
-            <span id="busuanzi_value_site_pv"></span>PV
-        </span>
-        <span id="busuanzi_container_site_uv">
-            <span id="busuanzi_value_site_uv"></span>UV
-        </span>
-        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
-</footer>
+  </article>
+  
+  
+  
 
 
 
-
-</body>
+          </div>
+          
 
 <script>
-    // We expose some of the variables needed by the front end
-    window.hexo_search_path = "search.json"
-    window.hexo_root = "/"
-    window.isPost = true
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
 </script>
-<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
-<script src="/js/index.js"></script>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">咸鱼回响</p>
+  <div class="site-description" itemprop="description">咸鱼回响的博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archive/">
+        
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/dust1" title="GitHub → https://github.com/dust1" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">咸鱼回响</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 构建
+  </div>
+
+        
 
 
 
 
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
 </html>

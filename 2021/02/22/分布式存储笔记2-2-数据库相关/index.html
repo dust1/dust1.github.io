@@ -1,148 +1,227 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="咸鱼回响的博客">
-    <meta name="keyword"  content="博客">
-    <link rel="shortcut icon" href="/img/favicon.ico">
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.7.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
-    <title>
-        
-        分布式存储笔记2-2 数据库相关 - 咸鱼回响的博客 | 咸鱼回响&#39;s Blog
-        
-    </title>
+<link rel="stylesheet" href="/css/main.css">
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/aircloud.css">
-    <link rel="stylesheet" href="/css/gitment.css">
-    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
-    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
-    <!-- ga & ba script hoook -->
-    <script></script>
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"niexiaotao.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。   NoSQL=Not Only SQL">
+<meta name="keywords" content="存储">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式存储笔记2-2 数据库相关">
+<meta property="og:url" content="http://niexiaotao.cn/2021/02/22/分布式存储笔记2-2-数据库相关/index.html">
+<meta property="og:site_name" content="咸鱼回响">
+<meta property="og:description" content="这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。   NoSQL=Not Only SQL">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/009.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/010.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/011.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/012.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/013.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/014.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/015.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/016.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/017.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/018.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/019.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/020.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/021.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/022.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/023.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202102/024.png">
+<meta property="og:updated_time" content="2021-05-29T16:47:36.069Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式存储笔记2-2 数据库相关">
+<meta name="twitter:description" content="这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。   NoSQL=Not Only SQL">
+<meta name="twitter:image" content="http://niexiaotao.cn/img/202102/009.png">
+
+<link rel="canonical" href="http://niexiaotao.cn/2021/02/22/分布式存储笔记2-2-数据库相关/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分布式存储笔记2-2 数据库相关 | 咸鱼回响</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
 </head>
 
-<body>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
 
-<div class="site-nav-toggle" id="site-nav-toggle">
-    <button>
-        <span class="btn-bar"></span>
-        <span class="btn-bar"></span>
-        <span class="btn-bar"></span>
-    </button>
-</div>
-
-<div class="index-about">
-    <i> 望之天迴，即之云昏 </i>
-</div>
-
-<div class="index-container">
-    
-    <div class="index-left">
-        
-<div class="nav" id="nav">
-    <div class="avatar-name">
-        <div class="avatar ">
-            <img src="/img/head.jpg" />
-        </div>
-        <div class="name">
-            <i>咸鱼回响</i>
-        </div>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-    <div class="contents" id="nav-content">
-        <ul>
-            <li >
-                <a href="/">
-                    <i class="iconfont icon-shouye1"></i>
-                    <span>主页</span>
-                </a>
-            </li>
-            <li >
-                <a href="/tags">
-                    <i class="iconfont icon-biaoqian1"></i>
-                    <span>标签</span>
-                </a>
-            </li>
-            <li >
-                <a href="/archive">
-                    <i class="iconfont icon-guidang2"></i>
-                    <span>存档</span>
-                </a>
-            </li>
-            <li >
-                <a href="/about/">
-                    <i class="iconfont icon-guanyu2"></i>
-                    <span>关于</span>
-                </a>
-            </li>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">咸鱼回响</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">望之天迴，即之云昏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archive/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
             
-            <li>
-                <a id="search">
-                    <i class="iconfont icon-sousuo1"></i>
-                    <span>搜索</span>
-                </a>
-            </li>
-            
-        </ul>
-    </div>
+
     
-        <div id="toc" class="toc-article">
-    <ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#事务与并发控制："><span class="toc-text">事务与并发控制：</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#事务"><span class="toc-text">事务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#并发控制"><span class="toc-text">并发控制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#数据库锁"><span class="toc-text">数据库锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#写时复制："><span class="toc-text">写时复制：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多版本并发控制（MVCC）："><span class="toc-text">多版本并发控制（MVCC）：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#故障恢复："><span class="toc-text">故障恢复：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#操作日志："><span class="toc-text">操作日志：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#重做日志："><span class="toc-text">重做日志：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#优化手段："><span class="toc-text">优化手段：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#成组提交"><span class="toc-text">成组提交</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#检查点"><span class="toc-text">检查点</span></a></li></ol>
-</div>
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://niexiaotao.cn/2021/02/22/分布式存储笔记2-2-数据库相关/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="咸鱼回响">
+      <meta itemprop="description" content="咸鱼回响的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="咸鱼回响">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式存储笔记2-2 数据库相关
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-02-22 22:07:40" itemprop="dateCreated datePublished" datetime="2021-02-22T22:07:40+08:00">2021-02-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-05-30 00:47:36" itemprop="dateModified" datetime="2021-05-30T00:47:36+08:00">2021-05-30</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
     
-</div>
-
-
-<div class="search-field" id="search-field">
-    <div class="search-container">
-        <div class="search-input">
-            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
-            <input id="search-input"/>
-            <span id="begin-search">搜索</span>
-        </div>
-        <div class="search-result-container" id="search-result-container">
-
-        </div>
-    </div>
-</div>
-
-        <div class="index-about-mobile">
-            <i> 望之天迴，即之云昏 </i>
-        </div>
-    </div>
     
-    <div class="index-middle">
-        <!-- Main Content -->
-        
+    
+    <div class="post-body" itemprop="articleBody">
 
-
-<div class="post-container">
-    <div class="post-title">
-        分布式存储笔记2-2 数据库相关
-    </div>
-
-    <div class="post-meta">
-        <span class="attr">发布于：<span>2021-02-22 22:07:40</span></span>
-        
-        <span class="attr">标签：/
-        
-        <a class="tag" href="/tags/#存储" title="存储">存储</a>
-        <span>/</span>
-        
-        
-        </span>
-        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
-</span>
-</span>
-    </div>
-    <div class="post-content ">
+      
         <p><hr><br>这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。</p>
 <hr>
 
-<p>NoSQL=Not Only SQL</p>
-<p>关系数据库在海量数据场景面临以下挑战：</p>
+<p>NoSQL=Not Only SQL<br><a id="more"></a><br>关系数据库在海量数据场景面临以下挑战：</p>
 <ul>
 <li>事务：关系模型要求多个SQL操作满足ACID特性，但是在分布式系统中，如果要满足该特性，需要用到两段提交协议，这个协议性能很低，且不能容忍服务器故障。</li>
 <li>连表：传统数据库设计需要满足范式需求，第三范式规定两张关联的表中除了主键外不允许出现其他冗余字段，但是随着表数据增加，连表的开销也就随之增大。为了避免这个问题往往采用数据冗余的方法。</li>
@@ -216,79 +295,192 @@
 <p>这里应该是如下流程：<br><img src="/img/202102/023.png" width="50%" height="50%"><br>checkpoint保存的是当前内存中数据的状态，可能会有一些修改操作，但由于REDO日志存储的是修改后的结果，就算再执行这些修改操作，数据依旧是以REDO中的为准，不会出现多次执行后结果变化的问题。</p>
 <p>加法操作、追加操作不具有冥等性，因此在checkpoint的时候不应该保存这些操作的状态，为此有两种方式：<br><img src="/img/202102/024.png" width="50%" height="50%"><br>要么停止服务（进行the world）要么在状态完美的瞬间创建一个快照，持久化的就是这个快照。</p>
 
-        
-        <br />
-        <div id="comment-container">
-        </div>
-        <div id="disqus_thread"></div>
-
-        <div id="lv-container">
-        </div>
-
     </div>
-</div>
 
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/存储/" rel="tag"># 存储</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/02/21/分布式存储笔记2-1-单机存储系统/" rel="prev" title="分布式存储笔记2.1 单机存储系统">
+      <i class="fa fa-chevron-left"></i> 分布式存储笔记2.1 单机存储系统
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/24/分布式存储笔记3-总揽/" rel="next" title="分布式存储笔记3 总揽">
+      分布式存储笔记3 总揽 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
-</div>
-
-
-<footer class="footer">
-    <ul class="list-inline text-center">
-        
-        
-
-        
-
-        
-
-        
-        <li>
-            <a target="_blank"  href="https://github.com/dust1">
-                            <span class="fa-stack fa-lg">
-                                <i class="iconfont icon-github"></i>
-                            </span>
-            </a>
-        </li>
-        
-
-        
-
-    </ul>
+      </footer>
     
-    <p>
-        <span>/</span>
-        
-        <span><a href="https://www.baidu.com">百度</a></span>
-        <span>/</span>
-        
-    </p>
-    
-    <p>
-        <span id="busuanzi_container_site_pv">
-            <span id="busuanzi_value_site_pv"></span>PV
-        </span>
-        <span id="busuanzi_container_site_uv">
-            <span id="busuanzi_value_site_uv"></span>UV
-        </span>
-        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
-</footer>
+  </article>
+  
+  
+  
 
 
 
-
-</body>
+          </div>
+          
 
 <script>
-    // We expose some of the variables needed by the front end
-    window.hexo_search_path = "search.json"
-    window.hexo_root = "/"
-    window.isPost = true
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
 </script>
-<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
-<script src="/js/index.js"></script>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#事务与并发控制："><span class="nav-number">1.</span> <span class="nav-text">事务与并发控制：</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务"><span class="nav-number"></span> <span class="nav-text">事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#并发控制"><span class="nav-number"></span> <span class="nav-text">并发控制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库锁"><span class="nav-number"></span> <span class="nav-text">数据库锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#写时复制："><span class="nav-number"></span> <span class="nav-text">写时复制：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多版本并发控制（MVCC）："><span class="nav-number"></span> <span class="nav-text">多版本并发控制（MVCC）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#故障恢复："><span class="nav-number"></span> <span class="nav-text">故障恢复：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#操作日志："><span class="nav-number"></span> <span class="nav-text">操作日志：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重做日志："><span class="nav-number"></span> <span class="nav-text">重做日志：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#优化手段："><span class="nav-number"></span> <span class="nav-text">优化手段：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#成组提交"><span class="nav-number">1.</span> <span class="nav-text">成组提交</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#检查点"><span class="nav-number">2.</span> <span class="nav-text">检查点</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">咸鱼回响</p>
+  <div class="site-description" itemprop="description">咸鱼回响的博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archive/">
+        
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/dust1" title="GitHub → https://github.com/dust1" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">咸鱼回响</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 构建
+  </div>
+
+        
 
 
 
 
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
 </html>
