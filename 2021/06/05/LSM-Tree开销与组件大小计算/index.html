@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.7.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"niexiaotao.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="如何准确地估算LSM-Tree中各个组件地阈值大小是一个数学问题。但是在实际计算过程中为了简化计算，所求出的最终结果会是一个近似值而不是准确的数值。  对于计算机来说差的那点数值在计算时间的表现上并不明显。">
+<meta name="keywords" content="分布式存储">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LSM-Tree开销与组件大小计算">
+<meta property="og:url" content="http://niexiaotao.cn/2021/06/05/LSM-Tree开销与组件大小计算/index.html">
+<meta property="og:site_name" content="咸鱼回响">
+<meta property="og:description" content="如何准确地估算LSM-Tree中各个组件地阈值大小是一个数学问题。但是在实际计算过程中为了简化计算，所求出的最终结果会是一个近似值而不是准确的数值。  对于计算机来说差的那点数值在计算时间的表现上并不明显。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/004.png">
+<meta property="og:updated_time" content="2021-06-05T17:15:23.137Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LSM-Tree开销与组件大小计算">
+<meta name="twitter:description" content="如何准确地估算LSM-Tree中各个组件地阈值大小是一个数学问题。但是在实际计算过程中为了简化计算，所求出的最终结果会是一个近似值而不是准确的数值。  对于计算机来说差的那点数值在计算时间的表现上并不明显。">
+<meta name="twitter:image" content="http://niexiaotao.cn/img/202106/004.png">
+
+<link rel="canonical" href="http://niexiaotao.cn/2021/06/05/LSM-Tree开销与组件大小计算/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>LSM-Tree开销与组件大小计算 | 咸鱼回响</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">咸鱼回响</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">望之天回,即之云昏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archive/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://niexiaotao.cn/2021/06/05/LSM-Tree开销与组件大小计算/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="咸鱼回响">
+      <meta itemprop="description" content="咸鱼回响的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="咸鱼回响">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LSM-Tree开销与组件大小计算
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-05 17:53:04" itemprop="dateCreated datePublished" datetime="2021-06-05T17:53:04+08:00">2021-06-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-06 01:15:23" itemprop="dateModified" datetime="2021-06-06T01:15:23+08:00">2021-06-06</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>如何准确地估算LSM-Tree中各个组件地阈值大小是一个数学问题。但是在实际计算过程中为了简化计算，所求出的最终结果会是一个近似值而不是准确的数值。</p>
+<blockquote>
+<p>对于计算机来说差的那点数值在计算时间的表现上并不明显。</p>
+</blockquote>
+<a id="more"></a>
+<blockquote>
+<p>题外话：我发现论文中的数学推导很多数据都不知道是从哪里来的，虽有说有估算的成分但这没头没尾的是在难受。前面的公式推导还好，后面实际计算基本都是连蒙带猜，毫无数学严谨。</p>
+</blockquote>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>首先需要确定影响组件大小的因素以及对他们的假设：</p>
+<ul>
+<li>π：磁盘以multi-page blocks为单位读写一个page时的开销</li>
+<li>p：磁盘随机读写一个page的开销</li>
+<li>M：从C0中merge到C1中的一个page-sized的叶节点中的记录的平均数目</li>
+<li>d：1MB磁盘存储开销</li>
+<li>m：1MB内存存储开销</li>
+<li>H：每秒H个磁盘页面访问的的IO传输需求</li>
+<li>S：数据存储总量</li>
+</ul>
+<h2 id="开销的计算"><a href="#开销的计算" class="headerlink" title="开销的计算"></a>开销的计算</h2><blockquote>
+<p>对于磁盘来说，如果磁盘容量是瓶颈，则在磁盘填满时应用程序只使用了磁盘磁臂所提供的IO能力的一部分；反过来，如果我们发现在添加数据时，磁盘磁臂已经被充分使用，但是磁 盘还有剩余空间，这就意味着IO能力是瓶颈。</p>
+</blockquote>
+<p>这个结论很重要，因为对于我们来说，在任何时候这两种开销总会有一种成为访问瓶颈。因此应用程序针对磁盘的访问开销D就是：</p>
+<blockquote>
+<p>D = max(H·p, S·d) -&gt; 访问开销=max（数据存储总开销，数据访问的IO开销）</p>
+</blockquote>
+<p>在没有缓存的情况下D就是应用程序支持数据S访问的总开销T。如果在S不变的情况下，应用程序针对磁盘的总开销随着IO的访问频率H成线性增长。当IO的开销<code>H·p</code>超过磁盘开销<code>S·d</code>后可以引入内存缓存来取代磁盘IO。这个时候就表示数据的访问频率高到IO使用率达到100%但是依旧有大量的请求没有得到IO。那么在这种情况下磁盘的开销就又只取决于所需的磁盘存储空间，此时访问数据的开销B就可以简单地表示为内存的开销与磁盘存储的开销：</p>
+<blockquote>
+<p>B = S·m + S·d -&gt; 相当于将磁盘中的所有数据都载入内存</p>
+</blockquote>
+<p>此时用于支持应用程序的数据访问的总开销T就是由D和B的最小值决定的：</p>
+<blockquote>
+<p>T = min(max(H·p, S·d), S·m + S·d)</p>
+</blockquote>
+<p>由此可以画出数据访问总开销与访问H/S的关系，其中<code>COST-TOT=T</code><br><img src="/img/202106/004.png" width="50%" height="50%"></p>
+<h2 id="组件大小的计算"><a href="#组件大小的计算" class="headerlink" title="组件大小的计算"></a>组件大小的计算</h2><p>设：</p>
+<ul>
+<li>S<sub>i</sub>：表示组件Ci的大小</li>
+<li>S：表示LSM-Tree所有组件大小之和，S=S<sub>0</sub>+S<sub>1</sub>+…S<sub>k</sub></li>
+<li>S<sub>p</sub>：页大小（以bytes为单位）</li>
+<li>R：针对C<sub>0</sub>的插入速率，单位bytes/秒。为了方便计算，这个速率是相对平稳的数值，即一个常量</li>
+<li>H：每秒H个磁盘页面访问的的IO传输需求</li>
+<li>r<sub>i</sub>：相临两个组件大小只比。r<sub>i</sub> = S<sub>i</sub>/S<sub>i-1</sub> (i=1,2…k)</li>
+<li>所有的组件C<sub>i</sub>都有一个相对固定的大小（因为删除会和会将插入抵消掉，因此实际的C<sub>i</sub>大小是会变化的）</li>
+<li>不同组件的blocks将会以混合的方式使用不同的磁盘，以达到磁盘磁臂利用率的平衡</li>
+</ul>
+<p>这样最小化H就等价于最小化总的磁盘磁臂开销</p>
+<blockquote>
+<p>前提这是是IO开销大于磁盘存储开销的情况</p>
+</blockquote>
+<p>由此我们可以得到一个问题：<code>对于给定的R，找到可以使总的IO请求率H最小化的ri值</code>。<br>对于S，我们可以得到：</p>
+<blockquote>
+<p>S = S<sub>0</sub> + r<sub>1</sub>·S<sub>0</sub> + r<sub>1</sub>·r<sub>2</sub>·S<sub>0</sub>+…</p>
+</blockquote>
+<p>在总S固定不变的前提下，由于r<sub>i</sub>的变化会使的问题复杂化，但是当假设S<sub>k</sub>也是固定不变的时候，由于S与S<sub>k</sub>是固定的，则当所有的r<sub>i</sub>值等于某个常数r时，就可以取得最小值。此时可以用S与S<sub>0</sub>来表示r:</p>
+<blockquote>
+<p>S = S<sub>0</sub> + r.S<sub>0</sub> + r<sup>2</sup>.S<sub>0</sub> + . . . + r<sup>k</sup>.S<sub>0</sub></p>
+</blockquote>
+<p>我们假设数据在到达C<sub>k</sub>之前都不会被删除，因此对于C<sub>0</sub>的数据插入速率与C<sub>i-1</sub>到C<sub>i</sub>的数据移出速率应该是一样的（0 &lt; i ≤ k）。<br>当C<sub>i-1</sub>为磁盘组件的情况，从C<sub>i-1</sub>到C<sub>i</sub>的rolling merge过程将会包含从C<sub>i-1</sub>中以每秒R/S<sub>p</sub>个page的multi-page block读取。该合并过程还会包含从C<sub>i</sub>中以每秒r<sub>i</sub>·(R/S<sub>p</sub>)个page的multi-page block读取（这是因为在merge过程中在C<sub>i</sub>中扫描的page数量是C<sub>i-1</sub>的r<sub>i</sub>倍）。最后，数据还会以每秒(r+1)·(R/S<sub>p</sub>)个page的multi-page磁盘写入来将属于C<sub>i</sub>的新merge出来的数据写入。（由于merge引起导致C<sub>i</sub>组件的增大，因此数据成为了(r+1)·(R/S<sub>p</sub>)个page）。将所有的组件的C<sub>i</sub>对应值相加，就可以得到总的multi-page IO大小H（以每秒的page数为单位）：</p>
+<blockquote>
+<p>H=(R/S<sub>p</sub>)·((2·r<sub>1</sub>+2) + (2·r<sub>2</sub>+2) + … +(2·r<sub>k-1</sub>+2) + (2·r<sub>k</sub>+1))</p>
+</blockquote>
+<p>每一项的(2·r<sub>i</sub>+k)代表了在组件C<sub>i</sub>上的所有IO:</p>
+<ol>
+<li>R/S<sub>p</sub>：从C<sub>i-1</sub>到C<sub>i</sub>的merge读入属于C<sub>i-1</sub>中的数据</li>
+<li>r<sub>i</sub>·(R/S<sub>p</sub>)：从C<sub>i-1</sub>到C<sub>i</sub>的merge读入属于C<sub>i</sub>中的数据</li>
+<li>(r+1)·(R/S<sub>p</sub>)：将merge的结果写入</li>
+</ol>
+<p>对于C<sub>0</sub>没有读取前一个组件的开销，对于C<sub>k</sub>也没有最后。因此该公式可以简化为：</p>
+<blockquote>
+<p>H=(2R/S<sub>p</sub>)(Σ(r<sub>i</sub>)+k-1/2)，(1≤i≤k)</p>
+</blockquote>
+<p>化简后得：</p>
+<blockquote>
+<p>H=(2R/S<sub>p</sub>)·(k·(1+r)-1/2)</p>
+</blockquote>
+<p>由此我们得到了两个重要的公式：</p>
+<blockquote>
+<p>公式1：S = S<sub>0</sub> + r.S<sub>0</sub> + r<sup>2</sup>.S<sub>0</sub> + . . . + r<sup>k</sup>.S<sub>0</sub><br>公式2：H = (2R/S<sub>p</sub>)·(k·(1+r)-1/2)</p>
+</blockquote>
+<p>根据公式1可得：r会伴随着S<sub>0</sub>的减小而增大；根据公式2可得：H与r成正比。<br>得：H会随着S<sub>0</sub>的减小而增大</p>
+<h2 id="当LSM-Tree为两组件时"><a href="#当LSM-Tree为两组件时" class="headerlink" title="当LSM-Tree为两组件时"></a>当LSM-Tree为两组件时</h2><p>应用程序针对数据访问的总开销分为内存开销与磁盘开销，内存开销就是存储C<sub>0</sub>的存储开销，表达式为：</p>
+<blockquote>
+<p>m·S<sub>0</sub></p>
+</blockquote>
+<p>存储开销是由访问IO开销与磁盘存储开销的最大值决定的，在这里的IO开销基于multi-page blcok访问频率H（pages/秒），则应用程序针对数据访问的总开销T：</p>
+<blockquote>
+<p>T = m·S<sub>0</sub> + max(d·S<sub>1</sub>, π·H)</p>
+</blockquote>
+<p>由于考虑的是两组件的情况，所以k=1，r=S<sub>1</sub>/S<sub>0</sub>，令：</p>
+<blockquote>
+<p>s = m·S<sub>0</sub>/d·S<sub>1</sub> = 内存开销与S1数据的存储开销之比为s<br>t = 2·((R/S<sub>p</sub>)/S<sub>1</sub>)·(π/d)·(m/d)<br>C = T/(d·S<sub>1</sub>) = 总开销与S<sub>1</sub>数据的存储开销之比</p>
+</blockquote>
+<p>将公式2替换后得到：</p>
+<blockquote>
+<p>C = s + max[1, t(d/m)(r + 1/2)</p>
+</blockquote>
+<p>又r = S<sub>1</sub>/S<sub>0</sub><br>得：</p>
+<blockquote>
+<p>C = s + max[1, t(d/m)(S<sub>1</sub>/S<sub>0</sub> + 1/2)</p>
+</blockquote>
+<p>假设S<sub>1</sub>/S<sub>0</sub>得比值会很大，则可以将1/2消除求近似值：</p>
+<blockquote>
+<p>C ≈ s + max[1, t(d/m)(S<sub>1</sub>/S<sub>0</sub>)</p>
+</blockquote>
+<p>化简得：</p>
+<blockquote>
+<p>C ≈ s + max[1, t/s]</p>
+</blockquote>
+<p>由于磁盘访问得开销是数据访问的IO开销与存储开销的最大值，因此这也意味着：</p>
+<blockquote>
+<p>t/s ≈ π·H / d·S<sub>1</sub></p>
+</blockquote>
+<p>这样，相对于开销C，就是变量t和s的函数。变量t和s的定义如下：</p>
+<ul>
+<li>t：t实际上是应用程序所需的multi-page block IO频度的某种形式化表示。对于t来说，π/d体现的是磁盘IO与空间开销之比，m/d体现的是内存开销与磁盘开销之比，这两个值是两个常量。而((R/S<sub>p</sub>)/S<sub>1</sub>)则体现的是数据的访问密度（单位：页/bytes），如果R越大，则t越大。</li>
+<li>s：s代表了为实现LSM-tree我们所需要提供的内存大小。</li>
+</ul>
+<p>为确定S<sub>0</sub>的大小，最简单地规则就是，沿着s=t这个分界线，此时C = s+1。同时磁盘存储和IO能力都已被完全利用。（当s=t时，由于t/s ≈ π·H / d·S<sub>1</sub>，说明此时π·H = d·S<sub>1</sub>，表示磁盘存储空间所具有的IO能力被完全使用）。<br>当t≤1时，在s=t时可以取得最小值；对于t&gt;1，C的最小值是沿着曲线s=t<sup>1/2</sup>的，此时C=2·t<sup>1/2</sup>，带入等式可得：</p>
+<blockquote>
+<p>公式3：T<sub>min</sub> = 2[(m·S<sub>1</sub>) · (2·π·R/S<sub>p</sub>)]<sup>1/2</sup></p>
+</blockquote>
+<p>由上可得，在t≥1的情况下，LSM-tree的总开销是足以将所有LSM数据保存下来的所需内存的开销(m·S<sub>1</sub>)和用于支持将插入数据写入到磁盘所需的multi-page block IO的磁盘开销(2·π·R/S<sub>p</sub>)的几何平均数的2倍。<br>总开销中的一半将会被用于S<sub>0</sub>的内存开销，剩下的一半用于对于S<sub>1</sub>的IO访问开销。<br>这里没有体现磁盘存储开销，因为当t≥1的情况下，IO访问的开销已经大于或等于磁盘存储开销，使的磁盘访问开销的主导是IO而不是容量。</p>
+<p>在t≤1（数据较冷）的情况下，最小成本出现在s=t，可知C=t+1≤2。这意味在这种情况下总开销总是不会超过用于将S1存储在磁盘上的开销的两倍。在这种情况下，我们根据磁盘的存储要求来调整磁盘大小，然后使用其所有IO容量来最小化内存使用。</p>
+<h3 id="两组件时的例子"><a href="#两组件时的例子" class="headerlink" title="两组件时的例子"></a>两组件时的例子</h3><p>首先提供的数据如下：</p>
+<ul>
+<li>插入速率R为16,000bytes/秒</li>
+<li>1条索引记录为16字节</li>
+<li>一个page的大小为4KB</li>
+</ul>
+<p>忽略其他开销，在20天之后产生的数据将是576,000,000条记录，总大小为9.2GB。对于一个两组件的LSM-Tree来说，我们需要一个大小为9.2GB的S<sub>1</sub>用于存储数据，开销就是d·S<sub>1</sub>=9600。得H=9600/π=3700 pages/秒。结合公式2，解出r=460，根据r=S<sub>1</sub>/S<sub>0</sub>，当S<sub>1</sub>为9.2GB的时候S<sub>0</sub>=20MB。此时t=0.22。</p>
+<blockquote>
+<p>这里的计算都是估算值，并不是一个准确的值，毕竟对于计算机来说可以接受一定的误差范围内的时间开销<br>这里我实在不知道怎么算出的576,000,000，每秒速率为16000bytes，20天后不应该是16000·60·60·24·20=27648000000吗？</p>
+</blockquote>
+<p>通过这个例子我们可以知道，在两组件LSM-tree的情况下计算C<sub>0</sub>，需要的必须参数有：</p>
+<ol>
+<li>数据插入速率R</li>
+<li>每条索引的大小</li>
+<li>在C<sub>1</sub>的叶子节点中，每个page的大小</li>
+<li>磁盘以multi-page blocks为单位读写一个page时的开销</li>
+<li>1MB磁盘存储开销</li>
+</ol>
+<h2 id="当LSM-Tree为三组件时"><a href="#当LSM-Tree为三组件时" class="headerlink" title="当LSM-Tree为三组件时"></a>当LSM-Tree为三组件时</h2><p>当R增长10倍，意味着t也增大10倍，从0.22变为2.2，现在t就是大于1的了。利用公式2来计算出两组件LSM-tree的最小开销为$27,000，其中一半用于13.5GB的磁盘，一半用于135MB的内存。此时，仍有4.3GB的磁盘空间未被使用，加上用于缓存的2MB内存，总开销是$27,200。</p>
+<p>插入频率R=160,000bytes/秒，意味着每秒需要有40个页面(每个页面4KB)从C0 merge到C1。因为C1大小大概是C0的68倍，因此将C0中的一个页面的merge需要读写C1中的68个页面，每秒就是5440(C0每秒40个，40·68·2=5440)个页面。这也是13.5个磁盘在使用multi-page block IO的情况下所能提供的IO能力。</p>
+<p>对于使用一个三组件LSM-tree来处理这种R=160,000bytes/秒的情况，可以按照两组件的那种方式先计算出最大的那个磁盘组件的一个开销以及IO频率的一个开销平衡点。由于r=S<sub>1</sub>/S<sub>0</sub>，i=1，2。对于三组件来说k=2，带入公式2得：</p>
+<blockquote>
+<p>3700+3700/r=(2·160,000/4000)·(2·(1+r)-1/2)</p>
+</blockquote>
+<p>我们可以计算出r=23并且S0=17MB。</p>
+<p>内存组件C0大小为17MB，稍小的那个磁盘组件大小C1是它的23倍，大概是400MB，C2又比C1大23倍，是9.2GB。那么每个页面在从C0 merge到C1时，将会引入23个页面读和23个页面写操作，这样每秒就需要读写1840(40<em>23</em>2)个页面。类似的，每秒也需要有40个页面从C1 merge到C2，每个页面也会引入23个页面读和23个页面写操作，这样每秒也会需要读写1840(40<em>23</em>2)个页面。这样总的IO频率就是3680，刚好是9.2G的磁盘在使用multi-page block IO的情况下所能提供的IO能力。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/分布式存储/" rel="tag"># 分布式存储</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/03/初探LSM-Tree/" rel="prev" title="初探LSM-Tree">
+      <i class="fa fa-chevron-left"></i> 初探LSM-Tree
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开销的计算"><span class="nav-number">2.</span> <span class="nav-text">开销的计算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组件大小的计算"><span class="nav-number">3.</span> <span class="nav-text">组件大小的计算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#当LSM-Tree为两组件时"><span class="nav-number">4.</span> <span class="nav-text">当LSM-Tree为两组件时</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#两组件时的例子"><span class="nav-number">4.1.</span> <span class="nav-text">两组件时的例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#当LSM-Tree为三组件时"><span class="nav-number">5.</span> <span class="nav-text">当LSM-Tree为三组件时</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">咸鱼回响</p>
+  <div class="site-description" itemprop="description">咸鱼回响的博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archive/">
+        
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/dust1" title="GitHub → https://github.com/dust1" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">咸鱼回响</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 构建
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -98,7 +98,7 @@
       <h1 class="site-title">咸鱼回响</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
-      <p class="site-subtitle" itemprop="description">望之天迴，即之云昏</p>
+      <p class="site-subtitle" itemprop="description">望之天回,即之云昏</p>
   </div>
 
   <div class="site-nav-right">
@@ -150,6 +150,155 @@
 
           <div class="content index posts-expand">
             
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://niexiaotao.cn/2021/05/09/为什么磁盘采用4KB的页/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="咸鱼回响">
+      <meta itemprop="description" content="咸鱼回响的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="咸鱼回响">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/09/为什么磁盘采用4KB的页/" class="post-title-link" itemprop="url">为什么磁盘采用4KB的页</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-05-09 17:29:29" itemprop="dateCreated datePublished" datetime="2021-05-09T17:29:29+08:00">2021-05-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-05-30 00:48:29" itemprop="dateModified" datetime="2021-05-30T00:48:29+08:00">2021-05-30</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前置概念"><a href="#前置概念" class="headerlink" title="前置概念:"></a>前置概念:</h2><p>页表是一种特殊的数据结构，放在系统空间的页表区，存放逻辑页与物理页帧的对应关系。 每一个进程都拥有一个自己的页表，PCB表中有指针指向页表。<br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/05/09/为什么磁盘采用4KB的页/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://niexiaotao.cn/2021/04/26/一次使用grpc的记录/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="咸鱼回响">
+      <meta itemprop="description" content="咸鱼回响的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="咸鱼回响">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/04/26/一次使用grpc的记录/" class="post-title-link" itemprop="url">一次使用grpc的记录</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-26 21:07:54" itemprop="dateCreated datePublished" datetime="2021-04-26T21:07:54+08:00">2021-04-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-05-30 00:48:37" itemprop="dateModified" datetime="2021-05-30T00:48:37+08:00">2021-05-30</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>最近在设计一个P2P分布式存储系统，网络路由方面采用的是Kalelima协议，在这个协议的实现中主要有四个RPCs：</p>
+<ul>
+<li>Ping：节点发起ping请求，主要用来检测与其他节点网络连接是否通顺</li>
+<li>Store：存储请求，参数为&lt;key, value&gt;键值对，key是value的SHA1值，value是要保存的数据。</li>
+<li>FindNode：寻找节点，参数是一个节点SHA1值，返回的是一个三元组&lt;ip, 端口, 节点id&gt;集合</li>
+<li>FindValue：寻找值，参数是一个文件的SHA1值，如果不存在该文件，则返回距离这个文件最近的一个三元组&lt;ip, 端口, 节点id&gt;集合，如果存在文件，则直接返回文件的数据内容
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/04/26/一次使用grpc的记录/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -379,159 +528,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://niexiaotao.cn/2021/04/06/分布式存储笔记3-4：分布式表格系统（Windows-Azure-Storage）/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="咸鱼回响">
-      <meta itemprop="description" content="咸鱼回响的博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="咸鱼回响">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/06/分布式存储笔记3-4：分布式表格系统（Windows-Azure-Storage）/" class="post-title-link" itemprop="url">分布式存储笔记3-4：分布式表格系统（Windows Azure Storage）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-06 21:40:40" itemprop="dateCreated datePublished" datetime="2021-04-06T21:40:40+08:00">2021-04-06</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-05-30 00:48:02" itemprop="dateModified" datetime="2021-05-30T00:48:02+08:00">2021-05-30</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><hr><br>这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。</p>
-<hr>
-
-<p>Windows Azure Storage = WAS</p>
-<p>WAS包含三种数据存储服务：Windows Azure Blob、Windows Azure Table、Windows Azure Queue。三种数据存储共享一套底层架构。<br>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/06/分布式存储笔记3-4：分布式表格系统（Windows-Azure-Storage）/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://niexiaotao.cn/2021/04/01/分布式存储笔记3-4-分布式表格系统（Google-Megastore）/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="咸鱼回响">
-      <meta itemprop="description" content="咸鱼回响的博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="咸鱼回响">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/01/分布式存储笔记3-4-分布式表格系统（Google-Megastore）/" class="post-title-link" itemprop="url">分布式存储笔记3-4 分布式表格系统（Google Megastore）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-04-01 21:30:33" itemprop="dateCreated datePublished" datetime="2021-04-01T21:30:33+08:00">2021-04-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-05-30 00:47:57" itemprop="dateModified" datetime="2021-05-30T00:47:57+08:00">2021-05-30</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><hr><br>这是一篇在阅读《大规模分布式存储系统：原理解析与架构实战》时的阅读笔记，由于长时间碎片阅读的关系导致在做这种读书笔记的时候接近复制粘贴。虽然其中会有一小部分自己的想法但都十分零碎，希望后续能改进。</p>
-<hr>
-
-<p>Megastore在Bigtable系统之上提供呢有好的数据库功能支持，增强易用性。Megastore是介于传统的关系型数据库和NoSQL数据库之间的存储技术。</p>
-<blockquote>
-<p>从Bigtable的单表应用向着传统数据库方向发展，使得一个分布式存储系统对外表现为传统的关系型数据库，不说是方便用户使用，应该是在功能上逐渐拥有传统数据的功能：跨表事务、多表联查等<br>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/01/分布式存储笔记3-4-分布式表格系统（Google-Megastore）/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -601,14 +597,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archive/">
         
-          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-count">33</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.7.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"niexiaotao.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="前言LSM-Tree，全称The Log-Structured Merge-Tree（日志结构合并树）。">
+<meta name="keywords" content="分布式存储">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初探LSM-Tree">
+<meta property="og:url" content="http://niexiaotao.cn/2021/06/03/初探LSM-Tree/index.html">
+<meta property="og:site_name" content="咸鱼回响">
+<meta property="og:description" content="前言LSM-Tree，全称The Log-Structured Merge-Tree（日志结构合并树）。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/001.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/005.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/002.png">
+<meta property="og:updated_time" content="2021-06-05T17:07:28.032Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="初探LSM-Tree">
+<meta name="twitter:description" content="前言LSM-Tree，全称The Log-Structured Merge-Tree（日志结构合并树）。">
+<meta name="twitter:image" content="http://niexiaotao.cn/img/202106/001.png">
+
+<link rel="canonical" href="http://niexiaotao.cn/2021/06/03/初探LSM-Tree/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>初探LSM-Tree | 咸鱼回响</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">咸鱼回响</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">望之天回,即之云昏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archive/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://niexiaotao.cn/2021/06/03/初探LSM-Tree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="咸鱼回响">
+      <meta itemprop="description" content="咸鱼回响的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="咸鱼回响">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          初探LSM-Tree
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-03 18:28:13" itemprop="dateCreated datePublished" datetime="2021-06-03T18:28:13+08:00">2021-06-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-06 01:07:28" itemprop="dateModified" datetime="2021-06-06T01:07:28+08:00">2021-06-06</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>LSM-Tree，全称The Log-Structured Merge-Tree（日志结构合并树）。<br><a id="more"></a><br>Log-Structured源自Ousterhout和Rosenblum在1991年发表的经典论文&lt;&lt;<a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.41.8933" target="_blank" rel="noopener">The Design and Implementation of a Log-Structured File System</a> &gt;&gt;,这篇论文提出了一种新的磁盘存储管理方式，在这种结构下，针对磁盘内容的所有更新将会被顺序地写入一个类日志的结构中，从而加速文件写入和回收速度。该日 志包含了一些索引信息以保证文件可以快速地读出。日志会被划分为多个段来进行管理。这种方式非常适合于存在大量小文件写入的场景。<br>The Log-Structured Merge-Tree (LSM-Tree)就是设计用于来为那些长期具有很高记录更新(插入或删除)频率的文件来提供低成本的索引机制。LSM-Tree通过使用某种算法，该算法会对索引变更进行延迟及批量处理，并通过一种类似于归并排序的方式联合使用一个基于内存的组件和一个或多个磁盘组件。</p>
+<h2 id="LSM-Tree相关概念"><a href="#LSM-Tree相关概念" class="headerlink" title="LSM-Tree相关概念"></a>LSM-Tree相关概念</h2><h3 id="索引组件"><a href="#索引组件" class="headerlink" title="索引组件"></a>索引组件</h3><p>LSM-Tree由两个或多个类树的数据结构组件构成。一个两组件的LSM-Tree如下所示：<br><img src="/img/202106/001.png" width="50%" height="50%"><br>其中，C0-Tree驻留在内存中，而C1-Tree保存在磁盘上。</p>
+<h4 id="C0-内存组件"><a href="#C0-内存组件" class="headerlink" title="C0/内存组件"></a>C0/内存组件</h4><p>C0并不一定需要B树结构，因为C0不会持久化到磁盘中(或者说在使用C0树的过程中永远不会从磁盘中读取)。因此一棵AVL(平衡二叉搜索树)就可以满足需求，但依然需要保持插入节点的顺序。<br>当C0增长到它的阈值大小时，它会从最左边的一系列记录开始删除节点。</p>
+<h4 id="C1-磁盘组件"><a href="#C1-磁盘组件" class="headerlink" title="C1/磁盘组件"></a>C1/磁盘组件</h4><p>C1具有一个类似B树的目录结构，这种结构可以在牺牲一定CPU效率的前提下减少树的高度，从LSM-Tree中体现出来的就是减少磁盘IO的开销，这也是LSM-Tree最大的优点。</p>
+<blockquote>
+<p>Q:为什么采用B树或者类似B树的目录结构呢？<br>A:为了将叶子节点按顺序排序，使的叶子节点的数据是连续的，减少磁盘臂的移动开销。</p>
+</blockquote>
+<p>每个磁盘组件都是由以B树类型的结构组织的page-sized的节点组成，同时在根节点下的各层的节点都是按照key的大小顺序排列的，同时这些节点又会被放置到mutil-page block中。<br>它的意思是B树中的多个节点组成一个mutil-page block结构，在B树中可以获取到这个mutil-page block结构，然后就可以直接获取到这个mutil-page block下所有的节点，这样的好处就是在执行rolling merge的时候不需要重建检索一遍B树，而是通过遍历mutil-page block来批量获取节点。</p>
+<h3 id="multi-page-block"><a href="#multi-page-block" class="headerlink" title="multi-page block"></a>multi-page block</h3><p>一个抽象的概念，在LSM-Tree中，每条数据的索引在基于磁盘的组件中表现的就是B树的节点。多条索引记录组成mutil-page block。结构图如下：<br><img src="/img/202106/005.png" width="50%" height="50%"><br>在大多数情况，每个mutil-page block都装满了节点，但是也有些情况一个multi-page block只有少数节点组成，这个节点通常是上次rolling merge所合并的最后一个节点，因为受到删除操作的影响，最终进入filling block的数据量大小是不可控的。</p>
+<h4 id="emptying-block"><a href="#emptying-block" class="headerlink" title="emptying block"></a>emptying block</h4><p>一组合并前所有节点组成的队列，每当进行一次合并后将其中的节点抛出。</p>
+<h4 id="filling-block"><a href="#filling-block" class="headerlink" title="filling block"></a>filling block</h4><p>完成数据合并后的最终结果，其中的数据是连续的，当它被填满后会被刷入磁盘中，写入时会在磁盘中新开辟存储空间，并不会覆盖旧的数据。这是为了出现异常时快速恢复</p>
+<h3 id="rolling-merge"><a href="#rolling-merge" class="headerlink" title="rolling merge"></a>rolling merge</h3><p>LSM-Tree中的C0存在内存中，而内存大小的成本是很大的，因此当C0的大小达到一定阈值后要被持久化到磁盘中，在LSM-Tree中，C0在持久化到磁盘前需要和C1的数据进行一次合并，这个过程就被成为rolling merge。<br>在这个过程中会将C0的部分或者全部数据删除并合并到C1中。<br>我们可以把整个两组件LSM-tree的rolling merge过程想象成一个具有一定步长的游标循环往复地穿越在C0和C1的键值对上，不断地从C0中取出数据放入到磁盘上才C1中。该rolling merge游标在C1树的叶节点和更上层的目录级都会有一个逻辑上的位置。</p>
+<h2 id="插入、删除、查询流程"><a href="#插入、删除、查询流程" class="headerlink" title="插入、删除、查询流程"></a>插入、删除、查询流程</h2><h3 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h3><p>当数据插入的LSM-Tree的时候，它会执行两个操作：将其追加写入一个特殊的日志文件中用于异常/重启恢复；将其加入C0中。<br>当C0大小达到阈值的时候进行rolling merge，将C0的一部分数据移入C1中。</p>
+<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><p>当某一个记录要被删除时，如果目标索引不在C0中，则在C0中创建这个索引并加上删除标记，后续如果有其他用户需要对索引进行查询或者更新操作就可以直接返回，而不用在磁盘中查询。<br>实际的删除操作并不会立刻生效，而是会在C0记录中添加一条删除记录，这条记录会随着rolling merge往大的组件移动，一旦遇到对应的要删除的数据对象则执行数据清除工作。</p>
+<blockquote>
+<p>如果要对原数据进行修改，在LSM-Tree中可以看成两条连续的记录，分别是删除、添加。<br>之所以要这样是因为有些更新操作会修改数据的ID，而不是其他数据，这样操作的后果就是目录中针对该数据的索引需要变更，而为了单条数据去扫描整个目录是十分愚蠢的，因此将这种更新操作转化为连续的两步删除与添加操作。</p>
+</blockquote>
+<h4 id="断言式删除"><a href="#断言式删除" class="headerlink" title="断言式删除"></a>断言式删除</h4><p>这是LSM-Tree中的批量删除的方式，它会在记录中添加比如：<code>删除创建时间超过20天的记录</code>这样的断言，当这条断言随着rolling merge移动到大的组件中时，那些符合条件的被载入内存的数据将会被清除。</p>
+<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><p>在执行等值匹配查询时，磁盘组件Ci的一个节点可能是存在于单独的一个内存页中，或者是通过它所在的muti-page block而缓存在内存中。</p>
+<p>当在LSM-Tree中进行精确匹配查找或者随机查找时，步骤如下：</p>
+<ol>
+<li>首先会到C0中查找所需的那个值或者域</li>
+<li>如果C0中没有结果，则从C1中查找</li>
+</ol>
+<p>与B树相比，这样的查找方式在一定条件下会有额外的IO开销与CPU开销，因为LSM-Tree的查找需要经过内存与磁盘。但是这两步简单的操作可以有很多优化方式：</p>
+<ol>
+<li>如果生成逻辑可以保证索引值时唯一的，比如时间戳。则一个匹配查找已经在一个早期的Ci组件中找到的时候就可以宣告完成。因为越早的组件它的数据就越新，虽然旧的组件也会有这条数据，但那是已经过期的了。</li>
+<li>如果查询条件里使用了最近时间戳，那么可以让那些查找到的值不要向最大的组件中移动，因为这些组件通常时间比较前。一个查询操作可能需要随着rolling merge一直传播到最大的组件，但如果在查询条件中加上时间限制，由于LSM-Tree的记录都是顺序的，因此在监测到有记录的时间戳已经超过查询条件后就可以直接结束查询。</li>
+<li>当merge扫描到(Ci, Ci+1)对时，可以将最近常访问的值继续保留在Ci中，因为merge完成后原始数据会在内存中保留一段时间，这短时间内可以为常用数据提供快速查找<blockquote>
+<p>第三点在短期事务UNDO日志中就有所使用，对于短期事务，在中断发生时通常都是针对相对近期的数据的访问，这样大部分的索引就都会仍然处于内存中。</p>
+</blockquote>
+</li>
+<li>通过记录每个事物的启动时间，就可以保证所有最近的t0秒内发生的事物的所有日志都可以在C0中找到，而不需要磁盘访问。类似于第2条的优化方式，也是按照时间将查询的范围缩小。</li>
+</ol>
+<h3 id="long-latency-find"><a href="#long-latency-find" class="headerlink" title="long-latency find"></a>long-latency find</h3><p>对于那些需要等待很长时间的查询操作来说，通过向C0中插入一个<code>find note entry</code>，当它被移入更大的组件中时如果遇到符合条件的数据则会记录下来，随着rolling merge的进行，查询也会生效，直到到达最大组件，本次long-latency find所对应的那些匹配的ID记录就生成完毕了。</p>
+<h2 id="rolling-merge-1"><a href="#rolling-merge-1" class="headerlink" title="rolling merge"></a>rolling merge</h2><p>通常，一个具有C<sub>0</sub>、C<sub>1</sub>…C<sub>k</sub>个组件大小不断增长的LSM-Tree，其中C<sub>0</sub>组件是放在内存中，其他组件都是在磁盘中驻留。当C<sub>i-1</sub>超过阈值时，会由(C<sub>i-1</sub>,C<sub>i</sub>)之间的异步的rolling merge过程负责将记录从小的组件移到更大的组件中。</p>
+<p>当C0的大小达到一定阈值的时候会进行异步rolling merge，此时将C0中的部分或全部数据与C1的节点进行合并，然后将接入重新写入C1。当C1大小达到一定阈值后也会启动rolling merge操作将数据转移到C2中。以此类推。<br>每次进行rolling merge的时候会处理多个操作：将B树中针对单条操作的IO开销通过批处理进行分摊。<br>rolling merge的执行顺序如下：</p>
+<ol>
+<li>读取一个包含了C1-Tree中叶子节点的multi-page block，将C1的一系列记录加载进缓存中<blockquote>
+<p>这里的multi-page block就是前面的emptying block，因为这些数据会和C0的叶子节点进行合并。而合并的结果将会被保存在filling block中。</p>
+</blockquote>
+</li>
+<li>每次merge直接从缓存中以磁盘页的大小读取C1的叶子节点，将来自叶子节点的记录与从C0-Tree中拿到的叶子节点级的记录进行merge</li>
+<li>在C1-Tree中创建保存merge结果的叶子节点，这些新的叶子节点会被放在C1的最右边</li>
+<li>将新的节点刷入磁盘，这些信息会被放入新的磁盘位置，然后将C1的指针指向这个位置。</li>
+</ol>
+<p>Ci树的变更如下：<br><img src="/img/202106/002.png" width="50%" height="50%"></p>
+<p>从图中可以看到，C1与C0合并之后原有的旧节点会被删除。但是在实际合并过程中这些节点的删除时间在新的节点被刷入磁盘后，在合并的时候并不会被删除，这是为了保证在合并时这些数据依然能对外提供服务。以及在合并时发生异常后的恢复工作。直到后续新增的数据足够多使的涵盖这些block的checkpoint过期后才能回收。否则提前回收的化如果要将LSM-Tree恢复到这些block还生效的时间点，恢复就会失败。</p>
+<blockquote>
+<p>对于节点的删除，通常来说就是覆盖写。并不会执行物理删除，因为覆盖写的效率比随机写高很多 。</p>
+</blockquote>
+<p>由于C1与C0的叶子节点都是顺序排序，因此在C1读取到中间的时候可能就知道C0中已经没有节点可以进行merge了，但是为了保持C1中叶子节点顺序，每次rolling merge都需要将C1整个读取一遍。因此一次rolling merge结束的标志是读取到C1的最大索引段。</p>
+<blockquote>
+<p>这里的整个读取并不是说将C1一次性读取，而是将C1分批次读入内存中。</p>
+</blockquote>
+<p>虽然在写入的时候是批处理，但是在进行合并的时候是以单个索引节点为单位。在此时会发生的情况如下：</p>
+<ol>
+<li>首先会创建一个新的基于C1的子节点组件</li>
+<li>从emptying block获取C1的一个索引节点</li>
+<li>从C0中读取小于该索引或者跟这个索引是连续的数据将其合并并放入filling block中</li>
+<li>如果C0中有关于删除C1这条记录的删除操作，则将其直接抛弃。这也是LSM-Tree中的删除操作</li>
+<li>当filling block满了之后(达到C1节点的大小阈值)将其刷入磁盘中</li>
+</ol>
+<p>每一次rolling merge，更大的组件中的数据量总是会发生变化，当它的组件大小超过阈值后也会触发rolling merge将其与下一个更大的组件合并。</p>
+<blockquote>
+<p>从我学习java的角度出发，这种方式有点类似于JVM的垃圾回收机制，C0就是新生代、C1以及之后的更大的节点就是S0与S1、最大的组件就是老年代。<br>当然这有点牵强，因为数据在LSM-Tree的移动依据是创建时间，而对象在堆中的移动依据更大程度在于是否有被引用。</p>
+</blockquote>
+<h2 id="组件大小估算"><a href="#组件大小估算" class="headerlink" title="组件大小估算"></a>组件大小估算</h2><p>估算组件大小主要影响因素有两个：磁盘IO开销与数据插入频率。具体推导过程<a href="/2021/06/05/LSM-Tree开销与组件大小计算">点击此链接</a></p>
+<h2 id="如何处理并发"><a href="#如何处理并发" class="headerlink" title="如何处理并发"></a>如何处理并发</h2><p>在任何情况下，所有未被锁住的Ci组件的节点都是可以始终被访问的，磁盘访问也可以执行以定位内存中的节点，即使该节点是正在进行rolling merge的muti-page block的一部分。<br>在考虑各种因素的情况下，LSM-Tree的并发要处理三个问题：</p>
+<ol>
+<li>查询操作不能同时去访问另一个进程的rolling merge正在修改的磁盘组件的节点内容</li>
+<li>针对C0组件的查询和插入操作也不能与正在进行的rolling merge的同时对树的相同部分进行访问</li>
+<li>从C<sub>i-1</sub>到C<sub>i</sub>的rolling 的由表有时需要越过从Ci到Ci+1的rollinng merge的由表，因为数据从Ci-1移出速度 &gt;= 从Ci移出的速率，这意味着Ci-1所关联的游标的循环周期要更快。因此无论如何，所采用的并发访问机制必须允许这种交错发生，而不能降至要求在交会点，一个进程必须阻塞在另一个进程之后。</li>
+</ol>
+<p>第一个和第二个问题可以概括为：正在merge过程中发生修改或者合并的结果，在合并完成前不能被查询与插入操作“看到”。第三个问题在于数据从C<sub>i-1</sub>移入C<sub>i</sub>与C<sub>i</sub>将数据移入C<sub>i+1</sub>时，两个游标在扫描的过程中会发生交叉，如果都是查询还好，但是C<sub>i-1</sub>移入的游标还负责将合并结果插入C<sub>i</sub>中，这就要求在合并完成前新插入的数据不能被C<sub>i</sub>到C<sub>i+1</sub>的rolling merge游标“看到”，更严格来说，就算C<sub>i-1</sub>的rolling merge完成，但是C<sub>i</sub>的rolling merge还没完成的情况下，它依然不能看到合并的新节点。</p>
+<p>节点是LSM-tree中用于避免基于磁盘的组件的并发访问冲突的加锁单位。正在因rolling merge而被更新的节点会被加上写锁，同时正在因查询而被读取的节点将会被加上读锁。有专门的目录机制用于解决死锁的问题。</p>
+<p>由于C<sub>0</sub>存在内存当中，因此它的数据结构并没有特殊的要求。在2-3树的情况下，我们可以用写锁锁住一个包含了merge到C1中的某个节点的受影响的边界内的所有记录的(2-3)树目录节点下的子树；同时用读锁锁住查找操作所涉及的查找路径上的所有节点，这种不同类型的访问就是互斥的。</p>
+<blockquote>
+<p>2-3树就是最简单的B树</p>
+</blockquote>
+<p>无论是在内存中还是在磁盘上，在LSM-Tree中的所有组件的节点都是顺序排列的，那么在C<sub>0</sub>属于2-3树的情况下，在选取每一批参与rolling merge的multi-page block的时候，可以在2-3树中选取一个节点，以该节点为root节点的子树都是本次要被rolling merge的节点。那么，可以在这个节点上加上写锁；同时，在查找的时候，所有涉及的节点都要被加上读锁。不同类型的锁是互斥的。<br>当节点中的所有节点都已经参与rolling merge，且所有新节点都已经写入新的组件中之后才释放写锁；当被查找的叶子节点被扫描后就释放读锁，这样就能让一个更快的游标越过更慢的游标。</p>
+<p>假设正在执行两个磁盘组件之间的rolling merge，将记录从C<sub>i-1</sub>(又称为该rolling merge过程的内组件)移到C<sub>i</sub>(又称为该rolling merge过程的外组件)。<br>游标在C<sub>i-1</sub>的叶级节点中具有明确定义的内部组件位置，指向它即将向外迁移到C<sub>i</sub>的下一个条目的位置，同时在C<sub>i-1</sub>的更高层的目录上沿着到达该叶子节点的访问路径都有一个对应位置。同时在C<sub>i</sub>组件的叶子节点与到达该叶子节点的访问路径中，该游标也有一个位置。在一次rolling merge过程中，游标会读取C<sub>i-1</sub>与C<sub>i</sub>中的待合并的节点，为了提供并发能力，通常这些节点都是批量地载入内存中并放置在emptying block中。当merge发生后会从emptying block中取出C<sub>i-1</sub>与C<sub>i</sub>的节点并执行合并，直到合并完成并刷入磁盘这段时间内都会对这些数据加上写锁。</p>
+<h3 id="锁的释放"><a href="#锁的释放" class="headerlink" title="锁的释放"></a>锁的释放</h3><ul>
+<li>读锁：一旦叶节点上的条目被扫描完了，就会释放</li>
+<li>写锁：滚动游标使用的写锁会在合并到更大的组件后背释放</li>
+</ul>
+<h2 id="checkpoing与恢复"><a href="#checkpoing与恢复" class="headerlink" title="checkpoing与恢复"></a>checkpoing与恢复</h2><h3 id="checkpoint"><a href="#checkpoint" class="headerlink" title="checkpoint"></a>checkpoint</h3><p>当新的记录被插入的LSM-Tree的C0组件后，它会在C<sub>0</sub>达到阈值后通过rolling merge刷入磁盘，在这期间系统发生异常并重启的话对于一些缓存在内存中的数据来说就是不安全的。<br>因此LSM-Tree也面临一个经典的恢复问题：重构那些已经存在于内存中的而在系统crash丢失的内容。<br>针对这些新记录的事务型插入日志已经被常态性地写出到一个顺序性的日志文件中，因此只需要简单地将这些插入日志(日志里包含了所有field的值插入记录所对应的RID)作为索引值恢复的基础即可。这种用于索引恢复的新方式必须内建到系统恢复算法中，同时它也会影响到对于这种事务型插入历史日志的存储空间回收时间，在恢复发生时回收会被延迟。<br>对于LSM-Tree来说，需要准确定义checkpoint的格式以及如何确定从顺序型日志中的哪里开始往下读取并回放日志。<br>在LSM-Tree中，在T<sub>0</sub>时刻要创建checkpoint，它会等待所有正在进行中的merge步骤，保证所有节点的写锁都被释放；然后将新纪录的插入延迟到checkpoint完成，此时没有C<sub>0</sub>中的读锁也不会被占用。然后通过以下步骤创建checkpoint：</p>
+<ol>
+<li>将C<sub>0</sub>组件的内容写入到一个已知的磁盘位置；之后，针对C<sub>0</sub>组件的记录插入就又可以开始了，但是merge步骤将会继续被延迟</li>
+<li>将所有磁盘组件在内存中的脏页flush到磁盘，这些其实就是磁盘组件位于内存的缓存数据。</li>
+<li>创建一个具有如下信息的特殊的checkpoint日志：<ol>
+<li>日志序列号（Log Sequence Number，LSN<sub>0</sub>），即T<sub>0</sub>时刻最后插入的索引行</li>
+<li>所有组件的根节点的磁盘地址</li>
+<li>上面这些组件中的所有merge游标的位置</li>
+<li>当前关于新的multi-page block的动态分配信息</li>
+</ol>
+</li>
+</ol>
+<p>当将C<sub>0</sub>写入磁盘后，不需要等其他步骤完成就可以恢复针对C<sub>0</sub>的插入，因此在创建checkpoint的时候暂停时间并不会很长；同时也会影响到新插入到C<sub>0</sub>的记录被持久化到磁盘的时间会有所延迟。</p>
+<h3 id="恢复"><a href="#恢复" class="headerlink" title="恢复"></a>恢复</h3><p>当系统崩溃恢复后会执行以下操作：</p>
+<ol>
+<li>在日志中定位一个检查点；</li>
+<li>将之前写入硬盘的C<sub>0</sub>和其它组件在内存中缓存的multi-page block加载到内存中；</li>
+<li>将日志中在LSN<sub>0</sub>之后的部分读入内存，执行其中索引条目的插入操作；</li>
+<li>读取检查点日志中硬盘部件（C<sub>1</sub>~C<sub>k</sub>）的根的位置和合并游标，启动rolling merge，覆盖检查点之后的多页块</li>
+<li>当检查点之后的所有新索引条目都已插入至LSM-tree且被索引后，恢复即完成。</li>
+</ol>
+<p>一次checkpoint恢复后可以做到：复原C<sub>0</sub>的数据、复原磁盘组件在内存中的缓存、复原所有磁盘组件正在进行的merge步骤。最后一点包含了：所有组件所有merge游标的位置、所有组件merge过程中的emptying block与filling block信息。</p>
+<p>在恢复过程中的一个细节是如何处理目录变化，在创建checkpoint的时候，当filling-page block满了并刷入内存后立刻更新磁盘目录树中的上级节点指针，使得所有刷入磁盘的目录数据都是merge完成后的新数据。当checkpoint创建后持久化到磁盘中的filling-page block很有可能未满，不过这没有关系，在恢复的时候会将这部分信息全部读入内存中，所要做的就是在filling-page block满了并写入磁盘后重新修改目录树的指针，将其指向这个磁盘位置即可。这个修改指针的操作实际上并没有多余的IO开销，他是随着merge的进行顺便修改。</p>
+<h2 id="相关阅读"><a href="#相关阅读" class="headerlink" title="相关阅读"></a>相关阅读</h2><ol>
+<li>防止死锁发生的目录锁机制：<a href="https://link.springer.com/article/10.1007/BF00263762" target="_blank" rel="noopener">B树并发</a></li>
+<li>用于事务隔离的key range锁：<a href="https://sigmod.org/publications/dblp/db/books/dbtext/bernstein87.html" target="_blank" rel="noopener">数据库系统的并发控制和恢复</a></li>
+<li>关于phantom update的问题：Jim Gray and Andreas Reuter, “Transaction Processing, Concepts and Techniques”,Morgan Kaufmann 1992.</li>
+<li>关于垃圾收集的问题：<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.117.5365&amp;rep=rep1&amp;type=pdf" target="_blank" rel="noopener">日志结构文件系统的设计与实现</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/分布式存储/" rel="tag"># 分布式存储</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/05/29/结构优化-续/" rel="prev" title="结构优化-续">
+      <i class="fa fa-chevron-left"></i> 结构优化-续
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/06/05/LSM-Tree开销与组件大小计算/" rel="next" title="LSM-Tree开销与组件大小计算">
+      LSM-Tree开销与组件大小计算 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LSM-Tree相关概念"><span class="nav-number">2.</span> <span class="nav-text">LSM-Tree相关概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#索引组件"><span class="nav-number">2.1.</span> <span class="nav-text">索引组件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#C0-内存组件"><span class="nav-number">2.1.1.</span> <span class="nav-text">C0/内存组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#C1-磁盘组件"><span class="nav-number">2.1.2.</span> <span class="nav-text">C1/磁盘组件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#multi-page-block"><span class="nav-number">2.2.</span> <span class="nav-text">multi-page block</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#emptying-block"><span class="nav-number">2.2.1.</span> <span class="nav-text">emptying block</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#filling-block"><span class="nav-number">2.2.2.</span> <span class="nav-text">filling block</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rolling-merge"><span class="nav-number">2.3.</span> <span class="nav-text">rolling merge</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入、删除、查询流程"><span class="nav-number">3.</span> <span class="nav-text">插入、删除、查询流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#插入"><span class="nav-number">3.1.</span> <span class="nav-text">插入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除"><span class="nav-number">3.2.</span> <span class="nav-text">删除</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#断言式删除"><span class="nav-number">3.2.1.</span> <span class="nav-text">断言式删除</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询"><span class="nav-number">3.3.</span> <span class="nav-text">查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#long-latency-find"><span class="nav-number">3.4.</span> <span class="nav-text">long-latency find</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rolling-merge-1"><span class="nav-number">4.</span> <span class="nav-text">rolling merge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组件大小估算"><span class="nav-number">5.</span> <span class="nav-text">组件大小估算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何处理并发"><span class="nav-number">6.</span> <span class="nav-text">如何处理并发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁的释放"><span class="nav-number">6.1.</span> <span class="nav-text">锁的释放</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#checkpoing与恢复"><span class="nav-number">7.</span> <span class="nav-text">checkpoing与恢复</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#checkpoint"><span class="nav-number">7.1.</span> <span class="nav-text">checkpoint</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#恢复"><span class="nav-number">7.2.</span> <span class="nav-text">恢复</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关阅读"><span class="nav-number">8.</span> <span class="nav-text">相关阅读</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">咸鱼回响</p>
+  <div class="site-description" itemprop="description">咸鱼回响的博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archive/">
+        
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/dust1" title="GitHub → https://github.com/dust1" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">咸鱼回响</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 构建
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
