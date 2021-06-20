@@ -36,10 +36,18 @@
 <meta property="og:image" content="http://niexiaotao.cn/img/202106/011.png">
 <meta property="og:image" content="http://niexiaotao.cn/img/202106/012.png">
 <meta property="og:image" content="http://niexiaotao.cn/img/202106/013.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/012.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/017.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/018.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/019.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/020.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/021.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/022.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/023.png">
 <meta property="og:image" content="http://niexiaotao.cn/img/202106/014.png">
 <meta property="og:image" content="http://niexiaotao.cn/img/202106/015.png">
 <meta property="og:image" content="http://niexiaotao.cn/img/202106/016.png">
-<meta property="og:updated_time" content="2021-06-17T14:29:01.576Z">
+<meta property="og:updated_time" content="2021-06-20T08:10:00.654Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LevelDB学习（上）：前置知识">
 <meta name="twitter:description" content="前言：在完成Epidemic第一阶段后，我发现在数据存储部分的设计没有学习到更多知识，因此通过对LevelDB的学习了解一下在实际项目中对于数据的存储是如何设计与实现的。">
@@ -199,7 +207,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-17 22:29:01" itemprop="dateModified" datetime="2021-06-17T22:29:01+08:00">2021-06-17</time>
+                <time title="修改时间：2021-06-20 16:10:00" itemprop="dateModified" datetime="2021-06-20T16:10:00+08:00">2021-06-20</time>
               </span>
 
           
@@ -262,19 +270,19 @@
 <li>链表中的元素按顺序存储</li>
 </ul>
 <ol>
-<li><p>在搜索链表时，可能要检查每个节点：<br><img src="/img/202106/008.png" width="50%" height="50%"></p>
+<li><p>在搜索链表时，可能要检查每个节点：<br><img src="/img/202106/008.png" alt=""></p>
 </li>
-<li><p>如果链表按顺序排列，给每两个节点一个指向链表中后两个节点的指针，由此在原有的基础上构建出原长度的1/2长的链表，此时我们只需要检查n/2+1个节点：<br><img src="/img/202106/009.png" width="50%" height="50%"></p>
+<li><p>如果链表按顺序排列，给每两个节点一个指向链表中后两个节点的指针，由此在原有的基础上构建出原长度的1/2长的链表，此时我们只需要检查n/2+1个节点：<br><img src="/img/202106/009.png" alt=""></p>
 </li>
-<li><p>按照上述步骤继续增加间隔，此时是新增每四个节点建立一个指针，检查链表只需要n/4+2：<br><img src="/img/202106/010.png" width="50%" height="50%"></p>
+<li><p>按照上述步骤继续增加间隔，此时是新增每四个节点建立一个指针，检查链表只需要n/4+2：<br><img src="/img/202106/010.png" alt=""></p>
 </li>
-<li><p>如果每个节点前面有一个指针指向2i节点，则必须检查的节点数量可以减少到log<sub>2</sub>n：<br><img src="/img/202106/011.png" width="50%" height="50%"></p>
+<li><p>如果每个节点前面有一个指针指向2i节点，则必须检查的节点数量可以减少到log<sub>2</sub>n：<br><img src="/img/202106/011.png" alt=""></p>
 </li>
 </ol>
 <blockquote>
 <p>但是这种数据结构只方便用于快速搜索，无法有效地插入删除。</p>
 </blockquote>
-<p>具有k个前向指针的节点称为k级节点。如果每个第2i个节点前面都有一个指针2i节点，那么节点的级别有简单的模式分布：50%是级别1，25%是级别2，12.5%是级别3，以此类推。如果节点的级别是随机选择的，但是比例相同如下：<br><img src="/img/202106/012.png" width="50%" height="50%"><br>此时一个节点的第i个前向指针不是指向前面的2i个节点，而是志向下一个i级或者更高级别的节点。此时插入删除只需要局部修改；节点的级别是在插入节点时随机选择的，永远不需要改变。某些级别的安排会导致执行时间很短，但这种安排会很少见。因为这些数据结构是带有跳过中间节点的额外指针的链表，所以我们将其称为跳表。</p>
+<p>具有k个前向指针的节点称为k级节点。如果每个第2i个节点前面都有一个指针2i节点，那么节点的级别有简单的模式分布：50%是级别1，25%是级别2，12.5%是级别3，以此类推。如果节点的级别是随机选择的，但是比例相同如下：<br><img src="/img/202106/012.png" alt=""><br>此时一个节点的第i个前向指针不是指向前面的2i个节点，而是志向下一个i级或者更高级别的节点。此时插入删除只需要局部修改；节点的级别是在插入节点时随机选择的，永远不需要改变。某些级别的安排会导致执行时间很短，但这种安排会很少见。因为这些数据结构是带有跳过中间节点的额外指针的链表，所以我们将其称为跳表。</p>
 <blockquote>
 <p>在分配节点等级阶段就引入随机，但是在宏观上却保持一个准确值，在这里体现的就是跳表的比例正确，但是跳表节点出现的地点随机，这样在一个小表中可以方便地进行插入删除操作，对整体的读取速度影响较小，因为在宏观上多级节点数量比例是正确的。</p>
 </blockquote>
@@ -286,16 +294,17 @@
 <blockquote>
 <p>在初始化阶段创建一个NIL与初始节点</p>
 </blockquote>
-<h4 id="搜索算法"><a href="#搜索算法" class="headerlink" title="搜索算法"></a>搜索算法</h4><p><img src="/img/202106/013.png" width="50%" height="50%"></p>
-<ol>
-<li>首先获取跳表中的header节点设置为x</li>
-<li>遍历所有key小于要搜索元素key的节点</li>
-<li>如果遍历完成后无法得到有效节点，则前往下一层</li>
-<li>如果在第一层也无法找到对应节点则返回失败</li>
-</ol>
-<h4 id="插入与删除算法"><a href="#插入与删除算法" class="headerlink" title="插入与删除算法"></a>插入与删除算法</h4><p><img src="/img/202106/014.png" width="50%" height="50%"><br>若要插入，则可以直接采用搜索+拼接的方式。</p>
-<p>伪代码如下：<br><img src="/img/202106/015.png" width="50%" height="50%"><br>维护向量更新，以便当搜索完成（准备执行拼接）时，update[i]包含指向第i级或更高级别的最右侧节点的指针，该节点位于插入位置的左侧。</p>
-<h4 id="随机选择Level"><a href="#随机选择Level" class="headerlink" title="随机选择Level"></a>随机选择Level</h4><p>Level是在不参考元素数量的情况下随机生成：<br><img src="/img/202106/016.png" width="50%" height="50%"><br>这里设置了一个初始值newLevel，并通过随机数生成函数判断生成的随机数是否小于p，如果小于p则newLevel+1，返回newLevel与MaxLevel的最小值。<br>这里通过随机数概率的形式获取一个随机的Level。</p>
+<h4 id="搜索算法"><a href="#搜索算法" class="headerlink" title="搜索算法"></a>搜索算法</h4><p>这是搜索的伪代码，这部分图片需要和上面的跳表结构对照着理解。<br><img src="/img/202106/013.png" alt=""><br><img src="/img/202106/012.png" alt=""><br>首先是list的定义，list表示跳表最左边的那一系列head集合，查询时的迭代顺序从上到下，也就是这样：<br><img src="/img/202106/017.png" alt=""></p>
+<blockquote>
+<p>注意，这里我排的顺序是反的，按照伪代码来说正确level顺序应该是从上往下表示为：3、2、1、0。问题不大～</p>
+</blockquote>
+<p>而list -&gt; level就是当前x所在的节点的层数，迭代是从0开始往下，而其中的forward[i]表示的是当前节点所指向的节点。<br>让我们从上面的跳表中查询21吧，首先x=list-&gt;header,他现在位于header的第一位：<br><img src="/img/202106/018.png" alt=""><br>它的level为4，但是当i为0，即在最开始的位置的时候，forward[0]-&gt;kay = 6，此时6 &lt; 21，所以在这一区间的所有值都小于等于6（表示为(-∞, 6]），因此直接跳到6所在的节点。<br><img src="/img/202106/019.png" alt=""><br>然后在6中i还是为0，但这时候forward[0]所指向的值为NIL，表示已经到了末尾（表示为[6, +∞)）。在这一区间是可能存在21的，因此需要让i+1，去查找下一层的节点。<br><img src="/img/202106/020.png" alt=""><br>此时forward[1]所指向的值为25，这表示已经寻找到了一个区间[6, 25]，而我们的21是存在这个区间内的，因此继续往下级寻找<br><img src="/img/202106/021.png" alt=""><br>此时forward[2]所指向的值为9，在[6, 9]不满足条件，在伪代码中表现为<code>forward[2]-&gt;key &lt; searchKey</code>，因此将指针指向9所在的节点。<br><img src="/img/202106/022.png" alt=""><br>这样，通过不断细化区间，最终在最后一级的链表中确定一条值包含要查询的key的链表，通过顺序查找来确定这条子链表中是否包含21.<br><img src="/img/202106/023.png" alt=""></p>
+<h4 id="插入与删除算法"><a href="#插入与删除算法" class="headerlink" title="插入与删除算法"></a>插入与删除算法</h4><p><img src="/img/202106/014.png" alt=""><br>若要插入，则可以直接采用搜索+拼接的方式。</p>
+<p>伪代码如下：<br><img src="/img/202106/015.png" alt=""><br>维护向量更新，以便当搜索完成（准备执行拼接）时，update[i]包含指向第i级或更高级别的最右侧节点的指针，该节点位于插入位置的左侧。<br>插入时最重要的一点就是随机生成的level函数。</p>
+<h4 id="随机选择Level"><a href="#随机选择Level" class="headerlink" title="随机选择Level"></a>随机选择Level</h4><p>Level是在不参考元素数量的情况下随机生成：<br><img src="/img/202106/016.png" alt=""><br>这里设置了一个初始值newLevel，并通过随机数生成函数判断生成的随机数是否小于p，如果小于p则newLevel+1，返回newLevel与MaxLevel的最小值。<br>这里通过随机数概率的形式获取一个随机的Level。</p>
+<blockquote>
+<p>注意这里的p，表示生成的[0, 1)的随机数小于p的时候level+1，在伪代码中作者给的是0.5，在redis中给出的是0.25，但是我在其他地方听人说最佳的比例应该是2.7这个自然对数，用在这里就是0.27？</p>
+</blockquote>
 <h2 id="LSM-Tree"><a href="#LSM-Tree" class="headerlink" title="LSM-Tree"></a>LSM-Tree</h2><p>见这篇文章：<a href="/2021/06/03/初探LSM-Tree/#more">初探LSM-Tree</a></p>
 <h2 id="Env"><a href="#Env" class="headerlink" title="Env"></a>Env</h2><p>include/leveldb/env.h中包含了关于文件目录操作及其他相关函数调用的封装，比如文件锁，线程创建及启动等。通过Env类，将系统相关的底层调用和操作进行了封装。这样用户就可以通过实现自己的Env，将LevelDB架在不同的文件系统上。用户只需要实现自己的Env，然后通过Options在OpenDB时传递给它，这样这些相应的操作就会使用用户自己的实现了。</p>
 <p>LevelDB提供了针对底层文件系统操作的自定义配置。</p>
