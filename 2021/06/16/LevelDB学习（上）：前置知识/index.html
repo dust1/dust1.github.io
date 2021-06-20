@@ -47,7 +47,7 @@
 <meta property="og:image" content="http://niexiaotao.cn/img/202106/014.png">
 <meta property="og:image" content="http://niexiaotao.cn/img/202106/015.png">
 <meta property="og:image" content="http://niexiaotao.cn/img/202106/016.png">
-<meta property="og:updated_time" content="2021-06-20T08:10:00.654Z">
+<meta property="og:updated_time" content="2021-06-20T09:14:28.231Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LevelDB学习（上）：前置知识">
 <meta name="twitter:description" content="前言：在完成Epidemic第一阶段后，我发现在数据存储部分的设计没有学习到更多知识，因此通过对LevelDB的学习了解一下在实际项目中对于数据的存储是如何设计与实现的。">
@@ -207,7 +207,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-20 16:10:00" itemprop="dateModified" datetime="2021-06-20T16:10:00+08:00">2021-06-20</time>
+                <time title="修改时间：2021-06-20 17:14:28" itemprop="dateModified" datetime="2021-06-20T17:14:28+08:00">2021-06-20</time>
               </span>
 
           
@@ -303,7 +303,7 @@
 <p>伪代码如下：<br><img src="/img/202106/015.png" alt=""><br>维护向量更新，以便当搜索完成（准备执行拼接）时，update[i]包含指向第i级或更高级别的最右侧节点的指针，该节点位于插入位置的左侧。<br>插入时最重要的一点就是随机生成的level函数。</p>
 <h4 id="随机选择Level"><a href="#随机选择Level" class="headerlink" title="随机选择Level"></a>随机选择Level</h4><p>Level是在不参考元素数量的情况下随机生成：<br><img src="/img/202106/016.png" alt=""><br>这里设置了一个初始值newLevel，并通过随机数生成函数判断生成的随机数是否小于p，如果小于p则newLevel+1，返回newLevel与MaxLevel的最小值。<br>这里通过随机数概率的形式获取一个随机的Level。</p>
 <blockquote>
-<p>注意这里的p，表示生成的[0, 1)的随机数小于p的时候level+1，在伪代码中作者给的是0.5，在redis中给出的是0.25，但是我在其他地方听人说最佳的比例应该是2.7这个自然对数，用在这里就是0.27？</p>
+<p>注意这里的p，表示生成的[0, 1)的随机数小于p的时候level+1，在伪代码中作者给的是0.5，在redis中给出的是0.25，但是我在其他地方听人说最佳的比例应该是2.7这个自然对数，用在这里就是0.27？<br>补充：在查询计算复杂度时，期望复杂度为log<sub>a</sub>N,其中a = p<sup>-p</sup>，在p=e时取得最小值。</p>
 </blockquote>
 <h2 id="LSM-Tree"><a href="#LSM-Tree" class="headerlink" title="LSM-Tree"></a>LSM-Tree</h2><p>见这篇文章：<a href="/2021/06/03/初探LSM-Tree/#more">初探LSM-Tree</a></p>
 <h2 id="Env"><a href="#Env" class="headerlink" title="Env"></a>Env</h2><p>include/leveldb/env.h中包含了关于文件目录操作及其他相关函数调用的封装，比如文件锁，线程创建及启动等。通过Env类，将系统相关的底层调用和操作进行了封装。这样用户就可以通过实现自己的Env，将LevelDB架在不同的文件系统上。用户只需要实现自己的Env，然后通过Options在OpenDB时传递给它，这样这些相应的操作就会使用用户自己的实现了。</p>
