@@ -20,18 +20,18 @@
     var CONFIG = {"hostname":"niexiaotao.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
   </script>
 
-  <meta name="description" content="本篇文章主要查看在LevelDB中增删查操作是如何进行的，由于LevelDB在执行这些操作的时候会运行很多后台任务或者其他一些细节操作，但这里只进行到主流程为止，其他具体的细节操作如：调度压缩、日志记录、memtable生效等操作放在后面学习。 查询查询操作在LevelDB中的接口为：1virtual Status Get(const ReadOptions&amp;amp; options, const">
+  <meta name="description" content="本篇文章主要查看在LevelDB中增删查操作是如何进行的，由于LevelDB在执行这些操作的时候会运行很多后台任务或者其他一些细节操作，但这里只进行到主流程为止，其他具体的细节操作如：调度压缩、日志记录、memtable生效等操作放在后面学习。">
 <meta name="keywords" content="存储">
 <meta property="og:type" content="article">
 <meta property="og:title" content="LevelDB学习：增加&#x2F;删除&#x2F;查询">
 <meta property="og:url" content="http://niexiaotao.cn/2021/06/26/LevelDB学习：增加-删除-查询/index.html">
 <meta property="og:site_name" content="咸鱼回响">
-<meta property="og:description" content="本篇文章主要查看在LevelDB中增删查操作是如何进行的，由于LevelDB在执行这些操作的时候会运行很多后台任务或者其他一些细节操作，但这里只进行到主流程为止，其他具体的细节操作如：调度压缩、日志记录、memtable生效等操作放在后面学习。 查询查询操作在LevelDB中的接口为：1virtual Status Get(const ReadOptions&amp;amp; options, const">
+<meta property="og:description" content="本篇文章主要查看在LevelDB中增删查操作是如何进行的，由于LevelDB在执行这些操作的时候会运行很多后台任务或者其他一些细节操作，但这里只进行到主流程为止，其他具体的细节操作如：调度压缩、日志记录、memtable生效等操作放在后面学习。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2021-06-26T16:35:17.262Z">
+<meta property="og:updated_time" content="2021-06-26T16:36:48.095Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LevelDB学习：增加&#x2F;删除&#x2F;查询">
-<meta name="twitter:description" content="本篇文章主要查看在LevelDB中增删查操作是如何进行的，由于LevelDB在执行这些操作的时候会运行很多后台任务或者其他一些细节操作，但这里只进行到主流程为止，其他具体的细节操作如：调度压缩、日志记录、memtable生效等操作放在后面学习。 查询查询操作在LevelDB中的接口为：1virtual Status Get(const ReadOptions&amp;amp; options, const">
+<meta name="twitter:description" content="本篇文章主要查看在LevelDB中增删查操作是如何进行的，由于LevelDB在执行这些操作的时候会运行很多后台任务或者其他一些细节操作，但这里只进行到主流程为止，其他具体的细节操作如：调度压缩、日志记录、memtable生效等操作放在后面学习。">
 
 <link rel="canonical" href="http://niexiaotao.cn/2021/06/26/LevelDB学习：增加-删除-查询/">
 
@@ -187,7 +187,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-27 00:35:17" itemprop="dateModified" datetime="2021-06-27T00:35:17+08:00">2021-06-27</time>
+                <time title="修改时间：2021-06-27 00:36:48" itemprop="dateModified" datetime="2021-06-27T00:36:48+08:00">2021-06-27</time>
               </span>
 
           
@@ -201,7 +201,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>本篇文章主要查看在LevelDB中增删查操作是如何进行的，由于LevelDB在执行这些操作的时候会运行很多后台任务或者其他一些细节操作，但这里只进行到主流程为止，其他具体的细节操作如：调度压缩、日志记录、memtable生效等操作放在后面学习。</p>
+        <p>本篇文章主要查看在LevelDB中增删查操作是如何进行的，由于LevelDB在执行这些操作的时候会运行很多后台任务或者其他一些细节操作，但这里只进行到主流程为止，其他具体的细节操作如：调度压缩、日志记录、memtable生效等操作放在后面学习。<br><a id="more"></a></p>
 <h2 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h2><p>查询操作在LevelDB中的接口为：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">virtual</span> Status <span class="title">Get</span><span class="params">(<span class="keyword">const</span> ReadOptions&amp; options, <span class="keyword">const</span> Slice&amp; key, <span class="built_in">std</span>::<span class="built_in">string</span>* value)</span> </span>= <span class="number">0</span>;</span><br></pre></td></tr></table></figure></p>
 <p>三个参数分别为：</p>
 <ul>
