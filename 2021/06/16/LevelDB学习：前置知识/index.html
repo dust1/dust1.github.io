@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.7.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"niexiaotao.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="前言：在完成Epidemic第一阶段后，我发现在数据存储部分的设计没有学习到更多知识，因此通过对LevelDB的学习了解一下在实际项目中对于数据的存储是如何设计与实现的。">
+<meta name="keywords" content="存储">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LevelDB学习：前置知识">
+<meta property="og:url" content="http://niexiaotao.cn/2021/06/16/LevelDB学习：前置知识/index.html">
+<meta property="og:site_name" content="咸鱼回响">
+<meta property="og:description" content="前言：在完成Epidemic第一阶段后，我发现在数据存储部分的设计没有学习到更多知识，因此通过对LevelDB的学习了解一下在实际项目中对于数据的存储是如何设计与实现的。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/006.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/007.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/008.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/009.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/010.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/011.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/012.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/013.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/012.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/017.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/018.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/019.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/020.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/021.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/022.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/023.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/014.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/015.png">
+<meta property="og:image" content="http://niexiaotao.cn/img/202106/016.png">
+<meta property="og:updated_time" content="2021-06-26T15:54:35.599Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LevelDB学习：前置知识">
+<meta name="twitter:description" content="前言：在完成Epidemic第一阶段后，我发现在数据存储部分的设计没有学习到更多知识，因此通过对LevelDB的学习了解一下在实际项目中对于数据的存储是如何设计与实现的。">
+<meta name="twitter:image" content="http://niexiaotao.cn/img/202106/006.png">
+
+<link rel="canonical" href="http://niexiaotao.cn/2021/06/16/LevelDB学习：前置知识/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>LevelDB学习：前置知识 | 咸鱼回响</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">咸鱼回响</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">望之天回,即之云昏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archive/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://niexiaotao.cn/2021/06/16/LevelDB学习：前置知识/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="咸鱼回响">
+      <meta itemprop="description" content="咸鱼回响的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="咸鱼回响">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LevelDB学习：前置知识
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-16 21:14:48" itemprop="dateCreated datePublished" datetime="2021-06-16T21:14:48+08:00">2021-06-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-26 23:54:35" itemprop="dateModified" datetime="2021-06-26T23:54:35+08:00">2021-06-26</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h2><p>在完成<a href="https://www.github.com/dust1/epidemic" target="_blank" rel="noopener">Epidemic</a>第一阶段后，我发现在数据存储部分的设计没有学习到更多知识，因此通过对LevelDB的学习了解一下在实际项目中对于数据的存储是如何设计与实现的。<br><a id="more"></a><br>由于LevelDB是我接触的新领域，因此在学习LevelDB之前需要补充一下前置知识，这样方便后续对LevelDB结构设计与源码阅读的理解。</p>
+<h2 id="Varint"><a href="#Varint" class="headerlink" title="Varint"></a>Varint</h2><p>Varint 是一种紧凑的表示数字的方法。它用一个或多个字节来表示一个数字，值越小的数字使用越少的字节数。这能减少用来表示数字的字节数。<br>在编程中表示整数的类型通常是int32,int64。但是我们在使用的时候并不会完全利用所有的位数，比如1，2，300等数字，这样的话会浪费大量的位数，因此对于很小的int32位数字，可以用1个byte来表示。但这样的缺点就是大数字需要5个byte表示。不过在系统中小数字还是占大多数的，因此采用Varint从整理来看能节省更多的存储开销。</p>
+<h3 id="Varint格式"><a href="#Varint格式" class="headerlink" title="Varint格式"></a>Varint格式</h3><p>Varint中的每个byte的最高位bit有特殊的含义：</p>
+<ul>
+<li>1：后续的byte也是该数字的一部分</li>
+<li>0：统计结束</li>
+</ul>
+<p>因此1个byte中用于存储数字的位数为7位，在Varint中1个byte最高能表示的数字大小为：127，超过这个值就需要用2个byte表示。<br>注意的一点是Varint采用小端字节序，对于二进制来说左边才是低位。</p>
+<h3 id="Varint编解码"><a href="#Varint编解码" class="headerlink" title="Varint编解码"></a>Varint编解码</h3><p>取一个数字300，用二进制表示为：0000 0001 0010 1100。将其用Varint编码后得：1010 1100 0000 0010。由于每个byte的首位都有特殊含义，在第一个byte中首字节是1，表示后续的byte也是该数字的一部分，因此得到的结果为：_010 1100 _000 0010。由于是小端字节序，所以在重新排序后得到结果为：_000 0010 _010 1100，去掉Varint的特殊位后得到：0001 0010 1100。<br><img src="/img/202106/006.png" width="50%" height="50%"></p>
+<h3 id="对于有符号的数字"><a href="#对于有符号的数字" class="headerlink" title="对于有符号的数字"></a>对于有符号的数字</h3><p>从上可知Varint并不能表示负数，因此Google采用zigzag编码来替代。zigzag采用正数和负数交错的方式来同时表示无符号数来表示有符号数字，如图所示：<br><img src="/img/202106/007.png" width="50%" height="50%"><br>使用zigzag编码，绝对值小的数字，无论正负都可以采用较少的byte来表示，充分利用了Varint这种技术。</p>
+<h3 id="Varint实现"><a href="#Varint实现" class="headerlink" title="Varint实现"></a>Varint实现</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">encoder</span><span class="params">(<span class="keyword">int</span> num)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> result = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (num &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">byte</span> n = (<span class="keyword">byte</span>) (num &amp; <span class="number">0b1111111</span>);</span><br><span class="line">        num &gt;&gt;= <span class="number">7</span>;</span><br><span class="line">        result &lt;&lt;= <span class="number">8</span>;</span><br><span class="line">        <span class="keyword">if</span> (num &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            result += n ^ <span class="number">0b10000000</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            result += n;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">decoder</span><span class="params">(<span class="keyword">int</span> num)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> result = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (num &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        result &lt;&lt;= <span class="number">7</span>;</span><br><span class="line">        <span class="keyword">byte</span> n = (<span class="keyword">byte</span>) (num &amp; <span class="number">0b11111111</span>);</span><br><span class="line">        <span class="comment">// int tag = (n &amp; 0b10000000) &gt;&gt; 7;</span></span><br><span class="line">        <span class="comment">//System.out.println("tag:" + tag);</span></span><br><span class="line">        <span class="keyword">byte</span> m = (<span class="keyword">byte</span>) (n &amp; <span class="number">0b1111111</span>);</span><br><span class="line">        result ^= m;</span><br><span class="line">        num &gt;&gt;= <span class="number">8</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="CRC"><a href="#CRC" class="headerlink" title="CRC"></a>CRC</h2><p>CRC校验用于检验文件与请求的完整性。并且在校验值不匹配的情况下，可以针对数据损坏采取纠正措施。<br>之所以称为 CRC，是因为校验（数据验证）值是一种冗余（它在不添加信息的情况下扩展消息）并且该算法基于循环码。CRC 很受欢迎，因为它们易于在二进制硬件中实现，易于数学分析，并且特别擅长检测由传输通道中的噪声引起的常见错误。由于校验值具有固定长度，生成它的函数偶尔会用作散列函数。<br>CRC基于循环纠错码的理论，通过添加固定长度的校验值对消息进行编码，用于通信网络中的错误检测。CRC 码的规范需要定义一个所谓的生成多项式，该多项式成为多项式长除法中的除数，将消息作为被除数，其中商被丢弃，余数成为结果。<br>通常是n-bit CRC 应用于任意长度的数据块将检测任何不超过n位的单个错误突发，并且它将检测到的所有较长错误突发的分数是(1 − 2−n )。当校验值为n位长时，CRC 称为n位 CRC 。</p>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ol>
+<li>CRC专门用于信道通信上的非人为影响的问题，如果是人为故意的，攻击者可以在修改数据后重新编码CRC，在这种没有身份验证的情况下是无法区分的。</li>
+<li>CRC编码是可逆的，这使得它不适合应用在数字签名中。</li>
+<li>CRC是一个线性函数，具有有限等效保密协议的设计缺陷，容易被反向恢复密钥导致关键信息泄漏。</li>
+</ol>
+<h3 id="计算"><a href="#计算" class="headerlink" title="计算"></a>计算</h3><p>要计算n位的CRC，首先需要将表示输入的位排成一行，并将表示CRC除数（即多项式）的n+1位模式放置在行的左下方。</p>
+<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p>设：</p>
+<ul>
+<li>CRC的位数为3</li>
+<li>多项式为：x<sup>3</sup>+x+1</li>
+<li>消息的位数为14</li>
+</ul>
+<p>首先将多项式用二进制写成系数，得：1 <em> x<sup>3&lt;/<sup>&gt; + 0 </sup></sup></em> x<sup>2</sup> + 1 * x + 1，在这种情况下，系数为1、0、1和1。计算的结果是3位长，因此这是一个3-CRC。但是我们需要4位来说明多项式。<br>等待编码的消息为：11010011101100<br>首先，用CRC对应位数个数的0填充。这样做是为了使字节码具有系统形式。这是计算3位CRC的第一步计算：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">11010011101100 000    &lt;---- 输入右填充3位</span><br><span class="line">1011    &lt;---- 除数（4位） = x3+x+1</span><br><span class="line">-----------------------------------------</span><br><span class="line">01100011101100 000    &lt;---- 结果</span><br><span class="line">该算法作用于每一步中除数上方的位，迭代的结果是多项式与上方位的按位异或（相同为0，不同为1）。这一步完成后将结果重新进行计算，但是在开始的时候将除数右移直到与新的输入左边的1对应：</span><br><span class="line">11010011101100 000 &lt;--- 输入右填充 3 位</span><br><span class="line">1011 &lt;--- 除数</span><br><span class="line">01100011101100 000 &lt;--- 结果（注意前四位是与下面除数的异或，其余位不变）</span><br><span class="line"> 1011 &lt;--- 除数...</span><br><span class="line">00111011101100 000</span><br><span class="line">  1011</span><br><span class="line">00010111101100 000</span><br><span class="line">   1011</span><br><span class="line">00000001101100 000 &lt;--- 请注意，除数移动以与被除数中的下一个 1 对齐（因为该步骤的商为零）</span><br><span class="line">       1011（换句话说，它不一定每次迭代移动一位）</span><br><span class="line">00000000110100 000</span><br><span class="line">        1011</span><br><span class="line">00000000011000 000</span><br><span class="line">         1011</span><br><span class="line">00000000001110 000</span><br><span class="line">          1011</span><br><span class="line">00000000000101 000</span><br><span class="line">           101 1</span><br><span class="line">-----------------</span><br><span class="line">00000000000000 100 &lt;--- 余数（3 位）。</span><br></pre></td></tr></table></figure></p>
+<p>除法算法在此处停止，因为正体的消息中已经全部为0.<br>由于除数每次都移动到结果最左端1的位置，最终的结果是待编码的位数都为0，最终结果中唯一可以为非0的区域是输入右边填充的n位，而这n位就是CRC的结果。</p>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> value 待编码的树</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> fnc 除数</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">check</span><span class="params">(<span class="keyword">int</span> value, <span class="keyword">int</span> fnc)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//后期待编码的数字的长度</span></span><br><span class="line">    <span class="keyword">int</span> valueLen = readIntLen(value);</span><br><span class="line">    <span class="comment">//CRC的位数</span></span><br><span class="line">    <span class="keyword">int</span> fncLen = readIntLen(fnc) - <span class="number">1</span>;</span><br><span class="line">    <span class="comment">// 往右填充后的值</span></span><br><span class="line">    <span class="keyword">int</span> n = value &lt;&lt; fncLen;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; valueLen; i++) &#123;</span><br><span class="line">        <span class="keyword">int</span> nLen = readIntLen(n);</span><br><span class="line">        <span class="keyword">if</span> (nLen &lt;= fncLen) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//除数要移动的位数</span></span><br><span class="line">        <span class="keyword">int</span> moveLen = nLen - fncLen - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> nFnc = (fnc &lt;&lt; moveLen);</span><br><span class="line">        n = n ^ nFnc;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 获取n的长度，</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> n 计算到从最高位的1为止</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">readIntLen</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> result = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (n &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        n &gt;&gt;= <span class="number">1</span>;</span><br><span class="line">        result += <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Snappy压缩"><a href="#Snappy压缩" class="headerlink" title="Snappy压缩"></a>Snappy压缩</h2><p>Snappy是一个压缩/解压库。它的目标不是最大压缩，也不是与其他任何压缩库兼容。它的目标是为了实现最快压缩与合理压缩。<br>Snappy具有以下属性:</p>
+<ul>
+<li>快速：压缩速度为 250 MB/秒及以上，无需汇编代码。</li>
+<li>稳定：在过去几年，Snappy 在 Google 的生产环境中压缩和解压了数 PB 的数据。Snappy 比特流格式是稳定的，不会在版本之间发生变化。</li>
+<li>健壮：Snappy 解压器的设计不会在遇到损坏或恶意输入时崩溃。</li>
+</ul>
+<p>可以说，Snappy最大的优点就在于快速压缩。</p>
+<h3 id="LevelDB中的使用"><a href="#LevelDB中的使用" class="headerlink" title="LevelDB中的使用"></a>LevelDB中的使用</h3><p>在LevelDB中，默认就开启了Snappy压缩，用于对写入的数据进行快速压缩，这可以在保证写入速率的情况下节省空间。<br>对于LevelDB来说，这些优化方案不能够牺牲读写速度，因此采用Snappy，在保证速度的同时还能够获取一定的磁盘空间。</p>
+<h2 id="互斥锁"><a href="#互斥锁" class="headerlink" title="互斥锁"></a>互斥锁</h2><p>互斥锁是悲观锁的一种，当线程在获取竞争资源时无论是读还是写，都需要先获取到该资源的锁。它能保证在同一时刻竞争资源只会被一个线程修改。</p>
+<h2 id="跳表-Skip-list"><a href="#跳表-Skip-list" class="headerlink" title="跳表(Skip list)"></a>跳表(Skip list)</h2><p>跳表是使用概率平衡而不是严格强制平衡的数据结构。因此，跳表的插入和删除算法比平衡树的等效算法简单得多，速度也快得多。<br>二叉树在插入随机顺序的元素的时候工作的很好，但是一旦按顺序插入元素，他就会退化为链表导致性能下降。由此产生了平衡树算法，在执行操作的时候重新排列树以保持平衡。<br>跳表是平衡树的概率替代方案。它通过随机数生成器来平衡树。在理论上跳表也是能够退化为链表（多个随机数生成为顺序的情况），但是这种情况发生的比例很低，且没有任何输入序列能够连续产生最坏情况。（随机主元素的快速排序）<br>跳表具有类似于随机插入构建的搜索树的平衡性，但实际使用中不需要随机插入。</p>
+<h3 id="跳表与平衡树的优势"><a href="#跳表与平衡树的优势" class="headerlink" title="跳表与平衡树的优势"></a>跳表与平衡树的优势</h3><ol>
+<li>跳表的实现比平衡树更简单；</li>
+<li>通过概率去平衡数据结构比明确地保持平衡更容易；</li>
+<li>跳表随着数据的插入操作速度是恒定增加的；</li>
+<li>跳表比平衡树节省空间。</li>
+</ol>
+<h3 id="实现推理"><a href="#实现推理" class="headerlink" title="实现推理"></a>实现推理</h3><p>设：</p>
+<ul>
+<li>给定一个长度为n的链表</li>
+<li>链表中的元素按顺序存储</li>
+</ul>
+<ol>
+<li><p>在搜索链表时，可能要检查每个节点：<br><img src="/img/202106/008.png" alt=""></p>
+</li>
+<li><p>如果链表按顺序排列，给每两个节点一个指向链表中后两个节点的指针，由此在原有的基础上构建出原长度的1/2长的链表，此时我们只需要检查n/2+1个节点：<br><img src="/img/202106/009.png" alt=""></p>
+</li>
+<li><p>按照上述步骤继续增加间隔，此时是新增每四个节点建立一个指针，检查链表只需要n/4+2：<br><img src="/img/202106/010.png" alt=""></p>
+</li>
+<li><p>如果每个节点前面有一个指针指向2i节点，则必须检查的节点数量可以减少到log<sub>2</sub>n：<br><img src="/img/202106/011.png" alt=""></p>
+</li>
+</ol>
+<blockquote>
+<p>但是这种数据结构只方便用于快速搜索，无法有效地插入删除。</p>
+</blockquote>
+<p>具有k个前向指针的节点称为k级节点。如果每个第2i个节点前面都有一个指针2i节点，那么节点的级别有简单的模式分布：50%是级别1，25%是级别2，12.5%是级别3，以此类推。如果节点的级别是随机选择的，但是比例相同如下：<br><img src="/img/202106/012.png" alt=""><br>此时一个节点的第i个前向指针不是指向前面的2i个节点，而是志向下一个i级或者更高级别的节点。此时插入删除只需要局部修改；节点的级别是在插入节点时随机选择的，永远不需要改变。某些级别的安排会导致执行时间很短，但这种安排会很少见。因为这些数据结构是带有跳过中间节点的额外指针的链表，所以我们将其称为跳表。</p>
+<blockquote>
+<p>在分配节点等级阶段就引入随机，但是在宏观上却保持一个准确值，在这里体现的就是跳表的比例正确，但是跳表节点出现的地点随机，这样在一个小表中可以方便地进行插入删除操作，对整体的读取速度影响较小，因为在宏观上多级节点数量比例是正确的。</p>
+</blockquote>
+<h3 id="算法详情"><a href="#算法详情" class="headerlink" title="算法详情"></a>算法详情</h3><p>每个元素由一个节点表示，节点的级别在插入节点时随机选择，而不考虑数据结构中的元素数量。第i级节点有i个前向指针，索引从1到i。在节点中不需要存储节点的级别。级别上限为某个适当的常量MaxLevel。列表的级别是列表中当前的最大级别（如果列表为空，则为1）。<br>列表的标题在第一级到MaxLevel有前向指针。级别高于列表当前最大级别的标头的前向指针指向NIL</p>
+<blockquote>
+<p>NIL类似于一个null节点，用来标识检索结束</p>
+</blockquote>
+<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>一个元素NIL被分配并被赋予一个大于任何合法键的键。所有跳过列表的所有级别都以NIL终止。<br>初始化一个新列表，使列表的级别等于1，并且列表头的所有前向指针都指向NIL。</p>
+<blockquote>
+<p>在初始化阶段创建一个NIL与初始节点</p>
+</blockquote>
+<h4 id="搜索算法"><a href="#搜索算法" class="headerlink" title="搜索算法"></a>搜索算法</h4><p>这是搜索的伪代码，这部分图片需要和上面的跳表结构对照着理解。<br><img src="/img/202106/013.png" alt=""><br><img src="/img/202106/012.png" alt=""><br>首先是list的定义，list表示跳表最左边的那一系列head集合，查询时的迭代顺序从上到下，也就是这样：<br><img src="/img/202106/017.png" alt=""></p>
+<blockquote>
+<p>注意，这里我排的顺序是反的，按照伪代码来说正确level顺序应该是从上往下表示为：3、2、1、0。问题不大～</p>
+</blockquote>
+<p>而list -&gt; level就是当前x所在的节点的层数，迭代是从0开始往下，而其中的forward[i]表示的是当前节点所指向的节点。<br>让我们从上面的跳表中查询21吧，首先x=list-&gt;header,他现在位于header的第一位：<br><img src="/img/202106/018.png" alt=""><br>它的level为4，但是当i为0，即在最开始的位置的时候，forward[0]-&gt;kay = 6，此时6 &lt; 21，所以在这一区间的所有值都小于等于6（表示为(-∞, 6]），因此直接跳到6所在的节点。<br><img src="/img/202106/019.png" alt=""><br>然后在6中i还是为0，但这时候forward[0]所指向的值为NIL，表示已经到了末尾（表示为[6, +∞)）。在这一区间是可能存在21的，因此需要让i+1，去查找下一层的节点。<br><img src="/img/202106/020.png" alt=""><br>此时forward[1]所指向的值为25，这表示已经寻找到了一个区间[6, 25]，而我们的21是存在这个区间内的，因此继续往下级寻找<br><img src="/img/202106/021.png" alt=""><br>此时forward[2]所指向的值为9，在[6, 9]不满足条件，在伪代码中表现为<code>forward[2]-&gt;key &lt; searchKey</code>，因此将指针指向9所在的节点。<br><img src="/img/202106/022.png" alt=""><br>这样，通过不断细化区间，最终在最后一级的链表中确定一条值包含要查询的key的链表，通过顺序查找来确定这条子链表中是否包含21.<br><img src="/img/202106/023.png" alt=""></p>
+<h4 id="插入与删除算法"><a href="#插入与删除算法" class="headerlink" title="插入与删除算法"></a>插入与删除算法</h4><p><img src="/img/202106/014.png" alt=""><br>若要插入，则可以直接采用搜索+拼接的方式。</p>
+<p>伪代码如下：<br><img src="/img/202106/015.png" alt=""><br>维护向量更新，以便当搜索完成（准备执行拼接）时，update[i]包含指向第i级或更高级别的最右侧节点的指针，该节点位于插入位置的左侧。<br>插入时最重要的一点就是随机生成的level函数。</p>
+<h4 id="随机选择Level"><a href="#随机选择Level" class="headerlink" title="随机选择Level"></a>随机选择Level</h4><p>Level是在不参考元素数量的情况下随机生成：<br><img src="/img/202106/016.png" alt=""><br>这里设置了一个初始值newLevel，并通过随机数生成函数判断生成的随机数是否小于p，如果小于p则newLevel+1，返回newLevel与MaxLevel的最小值。<br>这里通过随机数概率的形式获取一个随机的Level。</p>
+<blockquote>
+<p>注意这里的p，表示生成的[0, 1)的随机数小于p的时候level+1，在伪代码中作者给的是0.5，在redis中给出的是0.25，但是我在其他地方听人说最佳的比例应该是2.7这个自然对数，用在这里就是0.27？<br>补充：在查询计算复杂度时，期望复杂度为log<sub>a</sub>N,其中a = p<sup>-p</sup>，在p=e时取得最小值。</p>
+</blockquote>
+<h2 id="LSM-Tree"><a href="#LSM-Tree" class="headerlink" title="LSM-Tree"></a>LSM-Tree</h2><p>见这篇文章：<a href="/2021/06/03/初探LSM-Tree/#more">初探LSM-Tree</a></p>
+<h2 id="Env"><a href="#Env" class="headerlink" title="Env"></a>Env</h2><p>include/leveldb/env.h中包含了关于文件目录操作及其他相关函数调用的封装，比如文件锁，线程创建及启动等。通过Env类，将系统相关的底层调用和操作进行了封装。这样用户就可以通过实现自己的Env，将LevelDB架在不同的文件系统上。用户只需要实现自己的Env，然后通过Options在OpenDB时传递给它，这样这些相应的操作就会使用用户自己的实现了。</p>
+<p>LevelDB提供了针对底层文件系统操作的自定义配置。</p>
+<h2 id="快照（Snapshot）"><a href="#快照（Snapshot）" class="headerlink" title="快照（Snapshot）"></a>快照（Snapshot）</h2><p>LevelDB支持Snapshot，用户需要首先创建某一个时刻的Snapshot，之后在读取时设置ReadOptions::snapshot就可以读取之前那个时刻的Snapshot，实际上通过Snapshot维护了关于整个key-value存储状态的一致性的只读视图。<br>Snapshot关联了一个sequence number，每次创建Snapshot之后该编号都递增。当系统要回滚到某个时刻的时候在读取数据时跳过大于该sequence number的所有记录。但是实际大于该sequence number的所有记录并不会被删除，而是会被标记为compact，方便版本回归到最新。<br>sequence number会被记录在versions_中。每次用户执行一个更新操作时，它都会+1，所以说sequence number在这里体现的不是操作发生的时间，而是对操作的计数，当然sequence number越大也说明操作越新。</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>在了解了前置知识后我对LevelDB抱有很多疑问，因此后面就带着这些问题去学习LevelDB：</p>
+<ul>
+<li>SSTable大小如何划分</li>
+<li>rolling merge过程是如何实现的，是跟论文原文一样将C0部分/全部数据跟C1全部数据组合还是如何</li>
+<li>磁盘组件索引在内存中是如何展现的，即这部分数据在内存中是以什么形式展示的</li>
+<li>rolling merge过程中对并发访问是如何解决的</li>
+<li>checkpoint是如何创建以及使用的</li>
+<li>查询/添加/删除操作的具体实现步骤</li>
+<li>sstable的具体结构实现</li>
+<li>memtable到sstable的数据结构转换过程</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/存储/" rel="tag"># 存储</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/05/LSM-Tree开销与组件大小计算/" rel="prev" title="LSM-Tree开销与组件大小计算">
+      <i class="fa fa-chevron-left"></i> LSM-Tree开销与组件大小计算
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/06/26/LevelDB学习：增加-删除-查询/" rel="next" title="LevelDB学习：增加/删除/查询">
+      LevelDB学习：增加/删除/查询 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Varint"><span class="nav-number">2.</span> <span class="nav-text">Varint</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Varint格式"><span class="nav-number">2.1.</span> <span class="nav-text">Varint格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Varint编解码"><span class="nav-number">2.2.</span> <span class="nav-text">Varint编解码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对于有符号的数字"><span class="nav-number">2.3.</span> <span class="nav-text">对于有符号的数字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Varint实现"><span class="nav-number">2.4.</span> <span class="nav-text">Varint实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CRC"><span class="nav-number">3.</span> <span class="nav-text">CRC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点"><span class="nav-number">3.1.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#计算"><span class="nav-number">3.2.</span> <span class="nav-text">计算</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#例子"><span class="nav-number">3.2.1.</span> <span class="nav-text">例子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码"><span class="nav-number">3.2.2.</span> <span class="nav-text">代码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snappy压缩"><span class="nav-number">4.</span> <span class="nav-text">Snappy压缩</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LevelDB中的使用"><span class="nav-number">4.1.</span> <span class="nav-text">LevelDB中的使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#互斥锁"><span class="nav-number">5.</span> <span class="nav-text">互斥锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#跳表-Skip-list"><span class="nav-number">6.</span> <span class="nav-text">跳表(Skip list)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#跳表与平衡树的优势"><span class="nav-number">6.1.</span> <span class="nav-text">跳表与平衡树的优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现推理"><span class="nav-number">6.2.</span> <span class="nav-text">实现推理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#算法详情"><span class="nav-number">6.3.</span> <span class="nav-text">算法详情</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化"><span class="nav-number">6.3.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#搜索算法"><span class="nav-number">6.3.2.</span> <span class="nav-text">搜索算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#插入与删除算法"><span class="nav-number">6.3.3.</span> <span class="nav-text">插入与删除算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#随机选择Level"><span class="nav-number">6.3.4.</span> <span class="nav-text">随机选择Level</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LSM-Tree"><span class="nav-number">7.</span> <span class="nav-text">LSM-Tree</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Env"><span class="nav-number">8.</span> <span class="nav-text">Env</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#快照（Snapshot）"><span class="nav-number">9.</span> <span class="nav-text">快照（Snapshot）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题"><span class="nav-number">10.</span> <span class="nav-text">问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">咸鱼回响</p>
+  <div class="site-description" itemprop="description">咸鱼回响的博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archive/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/dust1" title="GitHub → https://github.com/dust1" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">咸鱼回响</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 构建
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
