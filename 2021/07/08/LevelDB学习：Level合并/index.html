@@ -29,7 +29,7 @@
 <meta property="og:description" content="本来是想了解第一次merge过程中memtable如何转化为sstable的，结果代码找错了一路看下来是讲如何进行level合并的。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://niexiaotao.cn/img/202107/001.png">
-<meta property="og:updated_time" content="2021-07-11T09:44:50.021Z">
+<meta property="og:updated_time" content="2021-07-11T15:55:11.647Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LevelDB学习：Level合并">
 <meta name="twitter:description" content="本来是想了解第一次merge过程中memtable如何转化为sstable的，结果代码找错了一路看下来是讲如何进行level合并的。">
@@ -194,7 +194,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-07-11 17:44:50" itemprop="dateModified" datetime="2021-07-11T17:44:50+08:00">2021-07-11</time>
+                <time title="修改时间：2021-07-11 23:55:11" itemprop="dateModified" datetime="2021-07-11T23:55:11+08:00">2021-07-11</time>
               </span>
 
           
@@ -282,7 +282,7 @@
 <blockquote>
 <p>sequence number的定义如下：<code>static const SequenceNumber kMaxSequenceNumber = ((0x1ull &lt;&lt; 56) - 1);</code>，可以看到其大小为7 bytes。<br>value type定义如下：<code>kTypeValue = 0x1</code>，针对1位的最小操作大小为1byte。</p>
 </blockquote>
-<p>SequenceNumber是所有基于op log系统的关键数据，它唯一指定了不同操作的时间顺序。<br>把user key方前面的原因是针对同一个user key的所有操作可以看到sequenceNumber顺序连续存放。这样在进行合并的时候可以快速获取该user key最新的状态，而不用遍历所有操作。</p>
+<p>SequenceNumber是所有基于op log系统的关键数据，它唯一指定了不同操作的时间顺序。<br>把user key放前面的原因是针对同一个user key的所有操作可以看到sequenceNumber顺序连续存放。这样在进行合并的时候可以快速获取该user key最新的状态，而不用遍历所有操作。</p>
 <h4 id="Size-Compaction"><a href="#Size-Compaction" class="headerlink" title="Size Compaction"></a>Size Compaction</h4><p>Size Compaction是levelDB的核心Compact过程，其主要是为了均衡各个level的数据，从而保证读写的性能均衡。<br>它的触发条件在代码中表现为：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">bool</span> size_compaction = (current_-&gt;compaction_score_ &gt;= <span class="number">1</span>);</span><br></pre></td></tr></table></figure></p>
 <p>其中<code>compaction_score_</code>参数由<code>Finalize()</code>初始化，表示接下来的压缩level以及压缩score。当score小于1的时候表示当前level下的压缩并不是必须的。<br>在<code>VersionSet::Finalize</code>函数中，会计算每个level的大小并得到要进行压缩所要达到的最大level与score。</p>
 <p>其中，level0与其他文件的计算并不一样。在LevelDB中通过限制levle0的文件数量而不是字节大小来调整level0的分布情况。主要原因在于：</p>
