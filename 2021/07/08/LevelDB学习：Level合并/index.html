@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.7.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"niexiaotao.cn","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="本来是想了解第一次merge过程中memtable如何转化为sstable的，结果代码找错了一路看下来是讲如何进行level合并的。">
+<meta name="keywords" content="存储">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LevelDB学习：Level合并">
+<meta property="og:url" content="http://niexiaotao.cn/2021/07/08/LevelDB学习：Level合并/index.html">
+<meta property="og:site_name" content="咸鱼回响">
+<meta property="og:description" content="本来是想了解第一次merge过程中memtable如何转化为sstable的，结果代码找错了一路看下来是讲如何进行level合并的。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://niexiaotao.cn/img/202107/001.png">
+<meta property="og:updated_time" content="2021-07-11T09:44:50.021Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LevelDB学习：Level合并">
+<meta name="twitter:description" content="本来是想了解第一次merge过程中memtable如何转化为sstable的，结果代码找错了一路看下来是讲如何进行level合并的。">
+<meta name="twitter:image" content="http://niexiaotao.cn/img/202107/001.png">
+
+<link rel="canonical" href="http://niexiaotao.cn/2021/07/08/LevelDB学习：Level合并/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>LevelDB学习：Level合并 | 咸鱼回响</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">咸鱼回响</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">望之天回,即之云昏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archive/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://niexiaotao.cn/2021/07/08/LevelDB学习：Level合并/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="咸鱼回响">
+      <meta itemprop="description" content="咸鱼回响的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="咸鱼回响">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LevelDB学习：Level合并
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-08 21:36:58" itemprop="dateCreated datePublished" datetime="2021-07-08T21:36:58+08:00">2021-07-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-11 17:44:50" itemprop="dateModified" datetime="2021-07-11T17:44:50+08:00">2021-07-11</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本来是想了解第一次merge过程中memtable如何转化为sstable的，结果代码找错了一路看下来是讲如何进行level合并的。<br><a id="more"></a><br>会调用合并函数的接口如下：</p>
+<ol>
+<li>MakeRoomForWrite - 为写入腾出空间</li>
+<li>Get - 根据key查询数据</li>
+<li>Open - 根据name打开数据库</li>
+<li>RecordReadSample - 记录在指定内部密钥读取的字节样本。</li>
+</ol>
+<p>为什么会这样安排我认为有两个方面：</p>
+<ol>
+<li>LevelDB这种基于LSM-Tree实现的数据库所应用的场景是写多读少的场景，因此上面这几个的操作不会太频繁，在其中加入合并操作对系统的影响较小。</li>
+<li>LSM-Tree的写入是追加写，它的写入效率是很高的，在极端情况下如果没有查询功能就是日志系统，这种情况下写入的效率跟存储结构关系不大，无论数据是采用何种方式存储的，它都是追加写。而查询操作为了保证效率就对数据结构有一定要求，这也是LSM-Tree分出多个不同组件的原因，本质是为了加快查询效率。</li>
+</ol>
+<h2 id="合并前的准备工作"><a href="#合并前的准备工作" class="headerlink" title="合并前的准备工作"></a>合并前的准备工作</h2><p>Level合并涉及到文件的IO操作，这会极大程度地拖慢查询效率。因此在LevelDB中合并操作是在一个新线程中进行的。为合并任务开启线程并执行的功能交给env模块来实现，相关代码位于<code>db_impl.cc</code>的<code>void DBImpl::MaybeScheduleCompaction()</code>函数中。调用如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env_-&gt;Schedule(&amp;DBImpl::BGWork, <span class="keyword">this</span>);</span><br></pre></td></tr></table></figure></p>
+<p>同时在这个方法中还对合并的前提进行校验：<br>通过注解看到，当一下情况发生的时候不执行合并：</p>
+<ol>
+<li>正在合并</li>
+<li>数据库正在被删除，即有了删除标记</li>
+<li>数据库操作出现一个error，为了保证数据不会在error的情况下多次出错，禁止压缩。如果合并就意味着要将异常数据传递到其他Level块</li>
+<li>没有需要压缩的数据，这里的数据在DBImpl中表现为imm_对象为空且当前是最新版本的数据</li>
+</ol>
+<blockquote>
+<p>如果进入env_的Schedule可以看到C++的reinterpret_cast用法，这里主要是为了减少env模块与db模块的耦合程度。对于程序来说转换前后都是DBImpl对象，因此在对象转换过程中并不会出错.<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//env.h</span></span><br><span class="line">void Schedule(void (*f)(void*), void* a) override &#123;</span><br><span class="line">    <span class="keyword">return</span> target_-&gt;Schedule(f, a);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//db_impl.cc</span></span><br><span class="line"><span class="keyword">void</span> DBImpl::BGWork(<span class="keyword">void</span>* db) &#123;</span><br><span class="line">    <span class="keyword">reinterpret_cast</span>&lt;DBImpl*&gt;(db)-&gt;BackgroundCall();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>由于压缩是在一个新的线程中进行，因此为了避免多线程之间数据的不一致性，在进入<code>BackgroundCall</code>之后还需要再加锁进行可行性检查，相关代码位于<code>db_impl.cc</code>文件的<code>void DBImpl::BackgroundCall()</code>函数中，主要部分如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">MutexLock <span class="title">l</span><span class="params">(&amp;mutex_)</span></span>;</span><br><span class="line">assert(background_compaction_scheduled_);</span><br><span class="line"><span class="keyword">if</span> (shutting_down_.load(<span class="built_in">std</span>::memory_order_acquire)) &#123;</span><br><span class="line">    <span class="comment">// No more background work when shutting down.</span></span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (!bg_error_.ok()) &#123;</span><br><span class="line">    <span class="comment">// No more background work after a background error.</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    BackgroundCompaction();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="相关概念"><a href="#相关概念" class="headerlink" title="相关概念"></a>相关概念</h2><p>首先确定一个参数的名称：</p>
+<ul>
+<li>imm_：LevelDB中的已经写满并被设置为只读的memtable，等待持久化操作将其转换为sstable写入磁盘中。</li>
+</ul>
+<h3 id="Compaction介绍"><a href="#Compaction介绍" class="headerlink" title="Compaction介绍"></a>Compaction介绍</h3><p>首先确定LevelDB中对于合并的最终目的是为了消除那些重复记录以及将已被删除的数据清除。这个过程称之为Compact。</p>
+<p>LevelDB的Compaction主要执行三种操作：</p>
+<ol>
+<li>均衡各个level的数据，保证read的性能</li>
+<li>合并delete数据，释放磁盘空间，因为leveldb是采用的延迟（标记）删除；</li>
+<li>合并update的数据，例如put同一个key，新put的会替换旧put的，虽然数据做了update，但是update类似于delete，是采用的延迟（标记）update，实际的update是在compact中完成，并实现空间的释放。<blockquote>
+<p>这种做法与后面的InternalKey的设计相辅相成，只需要将对同一个key的最新操作放在集合之前，就可以快速得到这个key的最新值，而不用迭代所有针对这个key的操作。</p>
+</blockquote>
+</li>
+</ol>
+<p>根据上述，这种针对磁盘文件的Compation有三种模式：Manual Compaction，Size Compaction 和 Seek Compaction。</p>
+<ul>
+<li>Manual Compaction:是人工触发的Compaction，由外部接口调用产生，例如在ceph调用的Compaction都是Manual Compaction。</li>
+<li>Size Compaction:是根据每个level的总文件大小来触发，注意Size Compation的优先级高于Seek Compaction。</li>
+<li>Seek Compaction:每个文件的 seek miss 次数都有一个阈值，如果超过了这个阈值，那么认为这个文件需要Compact。</li>
+</ul>
+<p>针对memtable的操作为一次minor Compaction。这个过程是将memtable持久化为sstable。<br>在<code>DBImpl::BackgroundCompaction</code>中体现了这几种不同Compaction执行的优先级。<br>最高的是minor Compaction：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (imm_ != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    CompactMemTable();</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其次是manual Compaction：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (is_manual) &#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    c = versions_-&gt;PickCompaction();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>最后是size Compaction优先于seek Compaction。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (size_compaction) &#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (seek_compaction) &#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里可以看到对于一次Compact，是不能够执行多个多种Compaction的。<br>如果都在同一个合并任务中进行会发生什么情况呢？首先对于Minor Compaction来说它会将memtable转储为sstable，假设该sstable为level0，然后执行一次manual compaction，该行为至少会将level0与level1的数据进行合并。这样会导致三个问题：</p>
+<ol>
+<li>单次Compact流程过长，虽然这个任务是在一个新的线程中进行的，但是依然会占用系统开销。在频繁插入的情况下会影响到主流程性能。</li>
+<li>无法利用数据在Level0的时候对查询操作的提速，在LSM-Tree中，越靠后的组件文件其大小越大，检索时间越慢。</li>
+<li>增加系统复杂度。memtable持久化为sstable与sstable合并到下一个Level文件之间有一个时间差，如果这个时间差内有查询操作需要到磁盘文件中查询，那么它要查询这个刚生成的sstable还是等待sstable合并到下一个Level之后再查询？</li>
+</ol>
+<h3 id="Minor-Compaction"><a href="#Minor-Compaction" class="headerlink" title="Minor Compaction"></a>Minor Compaction</h3><p>Minor Compaction函数为<code>DBImpl::CompactMemTable()</code>，是将immutable memtable持久化为sstable文件。触发条件是在数据写入LevelDB后会检查memtable的数据大小，如果超过<code>options_.write_buffer_size</code>(默认4MB)就会尝试执行Minor Compaction。<br>从理论上来说，每次memtable生成的sstable都应该位于level0。但在<code>DBImpl::WriteLevel0Table</code>函数中对level的赋值操作却是由<code>PickLevelForMemTableOutput</code>函数计算的。该函数的参数是生成的sstable的user key范围。当level0中有sstable跟这个范围重叠的时候就将新生成的sstable放置在level0，如果user key范围没有重叠，则将其往上推送。但是最高只能推送到level2，这个范围由<code>kMaxMemCompactLevel</code>控制。</p>
+<blockquote>
+<p>如果level0文件生成过多，compaction IO与查找都会比较耗费时间；但如果将sstable推送过高，将导致查询时查询次数过多。因此在折中后将生成的sstabl推送的最高level就是2.</p>
+</blockquote>
+<p>执行流程为：</p>
+<ol>
+<li>将imm持久化为sstable</li>
+<li>根据策略得到这个sstable所在的level</li>
+<li>将这个sstable加入对应的level</li>
+</ol>
+<p><img src="/img/202107/001.png" alt=""></p>
+<h3 id="磁盘Compaction"><a href="#磁盘Compaction" class="headerlink" title="磁盘Compaction"></a>磁盘Compaction</h3><h4 id="Manual-Compaction"><a href="#Manual-Compaction" class="headerlink" title="Manual Compaction"></a>Manual Compaction</h4><p>在<code>DBImpl::CompactRange(const Slice* begin, const Slice* end)</code>函数中可以手动配置发生合并时的行为。它的行为是对指定的key的范围的所有数据全部进行Compact。如果begin与end为空，则会对整个磁盘的所有SSTable进行Compact。<br>由于start与end不一定位于同一个SSTable，甚至不会位于同一层Level，因此在创建手动Compact的时候需要迭代所有Level并获取到进行Compact的最大Level。<br>在代码中开始检查的范围是从Level1开始而不是Level0。这里表明，即使是手动限制了Compact的范围，但依然要保持Compact的初衷：减少数据膨胀，消除重复垃圾数据。如果严格限制在给定的范围内，那么用户如果多次在高level上设置范围，那么产生最快的level0等sstable将长时间得不到压缩，这在LevelDB应对的写多读少的情境下会导致文件爆炸增加。且<code>max_level_with_files</code>默认为1也是表明即使范围位于level0，也会执行一次level0到level1的压缩以减少数据。</p>
+<blockquote>
+<p>这里首次发现了<code>config::kNumLevels</code>，点进去可以看到LevelDB针对LSM-Tree所做的配置与优化，包括level0的弹性数量限制、最高level限制、数据在单次compact中被推送的最高level限制等，每个参数都包含对应的注解。</p>
+</blockquote>
+<p>得到最高level之后执行<code>TEST_CompactMemTable()</code>等待先前的压缩完成。？<br>然后进入<code>DBImpl::TEST_CompactRange(int level, const Slice* begin, const Slice* end)</code>函数。该函数的主要作用在于创建手动压缩对象<code>ManualCompaction</code>，该结构体的定义如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ManualCompaction</span> &#123;</span></span><br><span class="line">  <span class="keyword">int</span> level;</span><br><span class="line">  <span class="keyword">bool</span> done;</span><br><span class="line">  <span class="keyword">const</span> InternalKey* begin;</span><br><span class="line">  <span class="keyword">const</span> InternalKey* end;</span><br><span class="line">  InternalKey tmp_storage;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>创建好ManualCompaction对象后调用<code>MaybeScheduleCompaction</code>函数开始进行压缩。</p>
+<h5 id="关于InternalKey"><a href="#关于InternalKey" class="headerlink" title="关于InternalKey"></a>关于InternalKey</h5><p>InternalKey是由key+MaxSequenceNumber+ValueTypeForSeek组成。其格式为| User key (string) | sequence number (7 bytes) | value type (1 byte) |。</p>
+<blockquote>
+<p>sequence number的定义如下：<code>static const SequenceNumber kMaxSequenceNumber = ((0x1ull &lt;&lt; 56) - 1);</code>，可以看到其大小为7 bytes。<br>value type定义如下：<code>kTypeValue = 0x1</code>，针对1位的最小操作大小为1byte。</p>
+</blockquote>
+<p>SequenceNumber是所有基于op log系统的关键数据，它唯一指定了不同操作的时间顺序。<br>把user key方前面的原因是针对同一个user key的所有操作可以看到sequenceNumber顺序连续存放。这样在进行合并的时候可以快速获取该user key最新的状态，而不用遍历所有操作。</p>
+<h4 id="Size-Compaction"><a href="#Size-Compaction" class="headerlink" title="Size Compaction"></a>Size Compaction</h4><p>Size Compaction是levelDB的核心Compact过程，其主要是为了均衡各个level的数据，从而保证读写的性能均衡。<br>它的触发条件在代码中表现为：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">bool</span> size_compaction = (current_-&gt;compaction_score_ &gt;= <span class="number">1</span>);</span><br></pre></td></tr></table></figure></p>
+<p>其中<code>compaction_score_</code>参数由<code>Finalize()</code>初始化，表示接下来的压缩level以及压缩score。当score小于1的时候表示当前level下的压缩并不是必须的。<br>在<code>VersionSet::Finalize</code>函数中，会计算每个level的大小并得到要进行压缩所要达到的最大level与score。</p>
+<p>其中，level0与其他文件的计算并不一样。在LevelDB中通过限制levle0的文件数量而不是字节大小来调整level0的分布情况。主要原因在于：</p>
+<ol>
+<li>对于较大的写入缓冲区，最好不要在level0进行频繁的Compact操作。因为level0的结构与memtable几乎相同，查询时效率比之后的sstable要高；且作为最新插入的数据，被立刻访问的概率比较大，因此避免频繁地Compactino操作阻碍查询效率。</li>
+<li>在每次调用<code>Get</code>函数时合并level0的文件，避免在level0单个文件较小时执行Compact操作。Compact操作涉及的IO操作比较频繁且对系统的影响较大，小文件level0频繁地Compaction有点得不偿失。</li>
+</ol>
+<p>对于level0来说文件个数阈值kL0_CompactionTrigger = 4，则<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//score = level0的文件个数 / 4</span></span><br><span class="line">score = v-&gt;files_[level].size() / <span class="keyword">static_cast</span>&lt;<span class="keyword">double</span>&gt;(config::kL0_CompactionTrigger);</span><br></pre></td></tr></table></figure></p>
+<p>对于其他level，每个level都有一个阈值，此时score的计算如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取当前level下文件的总大小</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">uint64_t</span> level_bytes = TotalFileSize(v-&gt;files_[level]);</span><br><span class="line"><span class="comment">//score = 当前level下文件的总大小 / 阈值</span></span><br><span class="line">score = <span class="keyword">static_cast</span>&lt;<span class="keyword">double</span>&gt;(level_bytes) / MaxBytesForLevel(options_, level);</span><br></pre></td></tr></table></figure></p>
+<p>所有level的阈值如下：</p>
+<ul>
+<li>0： 10M（level 0可以忽略，其采用的是文件个数计算score）</li>
+<li>1： 10M</li>
+<li>2： 100M</li>
+<li>3： 1000M （ 1G）</li>
+<li>4： 100000M （ 10G）</li>
+<li>5： 1000000M （ 100G）</li>
+</ul>
+<p>Level6并不存在Compact，所以不存在阈值。</p>
+<h5 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h5><p>首先计算的score值，可以得出 max score，从而得出了应该哪一个 level 上进行 Compact，获取操作如上。</p>
+<p>然后分为两个大的步骤：选出本次Compact要进行合并的sstable；选出要合并到的level+1的sstable。假设计算出的level为n。<br><strong>首先是第一部分：</strong><br>在LevelDB上一次执行完Compact之后会保留上一次Compact操作的当前level n下的largest key。遍历给定level n中的所有sstable获取首个sstable中的largest key大于上次largest key的sstable。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; current_-&gt;files_[level].size(); i++) &#123;</span><br><span class="line">    FileMetaData* f = current_-&gt;files_[level][i];</span><br><span class="line">    <span class="keyword">if</span> (compact_pointer_[level].empty() ||</span><br><span class="line">        icmp_.Compare(f-&gt;largest.Encode(), compact_pointer_[level]) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        c-&gt;inputs_[<span class="number">0</span>].push_back(f);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果n为0，则遍历所有sstable并将有重叠的sstable加入Compact文件列表中，对于level0来说，所有的sstable都有可能存在重叠。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (level == <span class="number">0</span>) &#123;</span><br><span class="line">    InternalKey smallest, largest;</span><br><span class="line">    GetRange(c-&gt;inputs_[<span class="number">0</span>], &amp;smallest, &amp;largest);</span><br><span class="line">    current_-&gt;GetOverlappingInputs(<span class="number">0</span>, &amp;smallest, &amp;largest, &amp;c-&gt;inputs_[<span class="number">0</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>然后是第二部分：</strong><br>主要确定leveln+1中参与Compact的文件列表。<br>首先是计算出leveln中参数Compact的smallest与largest的key的范围。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">InternalKey smallest, largest;</span><br><span class="line">GetRange(c-&gt;inputs_[<span class="number">0</span>], &amp;smallest, &amp;largest);</span><br></pre></td></tr></table></figure></p>
+<p>然后，根据计算出来的key范围，从leveln+1中获取范围重叠的sstable文件列表。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">current_-&gt;GetOverlappingInputs(level + <span class="number">1</span>, &amp;smallest, &amp;largest, &amp;c-&gt;inputs_[<span class="number">1</span>]);</span><br></pre></td></tr></table></figure></p>
+<p>最后计算当前的level n 和 n+1参与Compact的两个文件列表的总和，如果小于阈值kExpandedCompactionByteSizeLimit=50M，那么会继续尝试在level n中选择出合适的sst文件。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (expanded0.size() &gt; c-&gt;inputs_[<span class="number">0</span>].size() &amp;&amp;</span><br><span class="line">    inputs1_size + expanded0_size &lt; ExpandedCompactionByteSizeLimit(options_)) &#123;</span><br><span class="line">    InternalKey new_start, new_limit;</span><br><span class="line">    GetRange(expanded0, &amp;new_start, &amp;new_limit);</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;FileMetaData*&gt; expanded1;</span><br><span class="line">    current_-&gt;GetOverlappingInputs(level + <span class="number">1</span>, &amp;new_start, &amp;new_limit, &amp;expanded1);</span><br><span class="line">    AddBoundaryInputs(icmp_, current_-&gt;files_[level + <span class="number">1</span>], &amp;expanded1);</span><br><span class="line">    <span class="keyword">if</span> (expanded1.size() == c-&gt;inputs_[<span class="number">1</span>].size()) &#123;</span><br><span class="line">        smallest = new_start;</span><br><span class="line">        largest = new_limit;</span><br><span class="line">        c-&gt;inputs_[<span class="number">0</span>] = expanded0;</span><br><span class="line">        c-&gt;inputs_[<span class="number">1</span>] = expanded1;</span><br><span class="line">        GetRange2(c-&gt;inputs_[<span class="number">0</span>], c-&gt;inputs_[<span class="number">1</span>], &amp;all_start, &amp;all_limit);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>以上的代码位于<code>version_set.cc</code>的<code>VersionSet::PickCompaction</code>函数中。<br>最终，对于leveln的下一次压缩位置会在计算出本次压缩所涉及的文件范围后立刻得到并设置。这样当当前的key范围出现异常时，下一次的Compaction会在新的范围中进行，从而绕过错误数据。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">compact_pointer_[level] = largest.Encode().ToString();</span><br><span class="line">c-&gt;edit_.SetCompactPointer(level, largest);</span><br></pre></td></tr></table></figure></p>
+<h4 id="Seek-Compation"><a href="#Seek-Compation" class="headerlink" title="Seek Compation"></a>Seek Compation</h4><p>在levelDB中，每一个新的sstable文件，都有一个allowed_seek的初始阈值，表示最多容忍seek miss多少次，每个调用Get seek miss的时候，就会执行减1（allowed_seek–）。其中allowed_seek的初始阈值的计算方式为：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">f-&gt;allowed_seeks = <span class="keyword">static_cast</span>&lt;<span class="keyword">int</span>&gt;((f-&gt;file_size / <span class="number">16384U</span>));</span><br><span class="line"><span class="keyword">if</span> (f-&gt;allowed_seeks &lt; <span class="number">100</span>) f-&gt;allowed_seeks = <span class="number">100</span>;</span><br></pre></td></tr></table></figure></p>
+<p>LevelDB认为如果一个 sst 文件在 level i 中总是没总到，而是在 level i+1 中找到，那么当这种 seek miss 积累到一定次数之后，就考虑将其从 level i 中合并到 level i+1 中，这样可以避免不必要的 seek miss 消耗 read I/O。当然在引入布隆过滤器后，这种查找消耗的 IO 就会变小很多。</p>
+<p>在源码中有详细介绍为何需要有这项机制。<br>假设：</p>
+<ol>
+<li>一次寻道花费10ms</li>
+<li>写入或读取 1MB 花费 10ms (100MB/s)</li>
+<li>1MB 的压缩会产生 25MB 的 IO，包括：<ol>
+<li>从当前level读取1MB</li>
+<li>从level+1读取10～12MB（边界可能未对其）</li>
+<li>将10～12MB的数据写入level+1</li>
+</ol>
+</li>
+</ol>
+<p>这意味着25次查找的成本与压缩1MB数据的成本相同。即，一次查找的成本与压缩40KB数据的成本大致相同。LevelDB在这方面有点保守，在触发压缩之前，每16KB数据允许大约一次搜索。而压缩后对于整个系统的性能来说是有提高的。</p>
+<p>当allowed_seeks递减到小于0了，那么将标记为需要Compact的文件。但是由于Size Compaction的优先级高于Seek Compaction，所以在不存在Size Compaction的时候，且触发了Compaction，那么Seek Compaction才能执行。<br>计算sstable的allowed_seek都是在sstable刚开始新建的时候完成；而每次Get（key）操作都会更新allowed_seek，当allowed_seeks递减到小于0了，那么将标记为需要Compact的文件。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">level = current_-&gt;file_to_compact_level_;</span><br><span class="line">c = <span class="keyword">new</span> Compaction(options_, level);</span><br><span class="line">c-&gt;inputs_[<span class="number">0</span>].push_back(current_-&gt;file_to_compact_);</span><br></pre></td></tr></table></figure></p>
+<p>Seek Compaction与Size Compaction不同点在于他不会有大量sstable要进行合并，每次只会有一个sstable参与。</p>
+<h2 id="合并-DoCompactionWork"><a href="#合并-DoCompactionWork" class="headerlink" title="合并 - DoCompactionWork"></a>合并 - DoCompactionWork</h2><p>合并函数位于<code>DBImpl::DoCompactionWork</code>中。</p>
+<p>首先是设置Compaction的快照。<br>如果没有快照，则删除所有的旧的重复数据；如果有快照，则只有sequenceNumber小于最老的快照的sequenceNumber的旧K/V数据可以删除。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (snapshots_.empty()) &#123;</span><br><span class="line">	compact-&gt;smallest_snapshot = versions_-&gt;LastSequence();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	compact-&gt;smallest_snapshot = snapshots_.oldest()-&gt;sequence_number();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在这之后根据Compaction创建一个迭代器，该迭代器根据Compaction中的输入范围迭代其中的所有user key。这里的输入范围就是在创建的时候需要进行压缩的位于leveln的sstable文件列表。同时会按照key进行分组，每组相同key中的数据则按照sequence number进行排序。<br>对于level0来说，如果存在数据重叠，则重叠的数据整合为一个迭代器。如果不存在重叠或者不是level0的sstable，则为每个sstable创建一个迭代器并将所有迭代连接起来作为一个连接迭代器。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Iterator* input = versions_-&gt;MakeInputIterator(compact-&gt;compaction);</span><br></pre></td></tr></table></figure></p>
+<p>创建迭代器所在的代码位于<code>version_set.cc</code>的<code>VersionSet::MakeInputIterator(Compaction* c)</code>函数。</p>
+<p>然后就是循环遍历迭代器获取key并删除数据。首先解析key是否存在，如果存在则判断当前key是否是首次出现：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!has_current_user_key || user_comparator()-&gt;Compare(ikey.user_key, Slice(current_user_key)) != <span class="number">0</span>)</span><br></pre></td></tr></table></figure></p>
+<p>由于相同的user key是连续顺序排列，在获取的某个user key之后它的数据必然有先后顺序，当获取到的user key已经出现过，并且它的sequence number小于已经出现过的user key，则表明这条数据已经被最新的数据所覆盖，则可以将其删除。<br>同时，对于当前的user key来说当一下条件成立后，这条数据就会被删除：</p>
+<ol>
+<li>它不存在level+1级别的文件中</li>
+<li>在level或者level-1级别的文件中有更大的sequenceNumber，表示文件存在新的记录，这条记录已过期</li>
+<li>这条记录将在接下来的循环中被删除</li>
+</ol>
+<p>后面是对文件的操作。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (compact-&gt;builder == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    status = OpenCompactionOutputFile(compact);</span><br><span class="line">    <span class="keyword">if</span> (!status.ok()) &#123;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (compact-&gt;builder-&gt;NumEntries() == <span class="number">0</span>) &#123;</span><br><span class="line">    compact-&gt;current_output()-&gt;smallest.DecodeFrom(key);</span><br><span class="line">&#125;</span><br><span class="line">compact-&gt;current_output()-&gt;largest.DecodeFrom(key);</span><br><span class="line">compact-&gt;builder-&gt;Add(key, input-&gt;value());</span><br><span class="line"></span><br><span class="line"><span class="comment">// Close output file if it is big enough</span></span><br><span class="line"><span class="keyword">if</span> (compact-&gt;builder-&gt;FileSize() &gt;=</span><br><span class="line">    compact-&gt;compaction-&gt;MaxOutputFileSize()) &#123;</span><br><span class="line">    status = FinishCompactionOutputFile(compact, input);</span><br><span class="line">    <span class="keyword">if</span> (!status.ok()) &#123;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>根据Compaction创建的梳理，合并文件并写入的过程是将数据与level+1的sstable进行合并的过程。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://zhuanlan.zhihu.com/p/46718964" target="_blank" rel="noopener">LevelDB 之 Compaction</a><br><a href="https://github.com/google/leveldb" target="_blank" rel="noopener">Google LevelDB by Github</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/存储/" rel="tag"># 存储</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/26/LevelDB学习：增加-删除-查询/" rel="prev" title="LevelDB学习：增加/删除/查询">
+      <i class="fa fa-chevron-left"></i> LevelDB学习：增加/删除/查询
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#合并前的准备工作"><span class="nav-number">1.</span> <span class="nav-text">合并前的准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关概念"><span class="nav-number">2.</span> <span class="nav-text">相关概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Compaction介绍"><span class="nav-number">2.1.</span> <span class="nav-text">Compaction介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Minor-Compaction"><span class="nav-number">2.2.</span> <span class="nav-text">Minor Compaction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘Compaction"><span class="nav-number">2.3.</span> <span class="nav-text">磁盘Compaction</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Manual-Compaction"><span class="nav-number">2.3.1.</span> <span class="nav-text">Manual Compaction</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#关于InternalKey"><span class="nav-number">2.3.1.1.</span> <span class="nav-text">关于InternalKey</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Size-Compaction"><span class="nav-number">2.3.2.</span> <span class="nav-text">Size Compaction</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#执行流程"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">执行流程</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Seek-Compation"><span class="nav-number">2.3.3.</span> <span class="nav-text">Seek Compation</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#合并-DoCompactionWork"><span class="nav-number">3.</span> <span class="nav-text">合并 - DoCompactionWork</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">咸鱼回响</p>
+  <div class="site-description" itemprop="description">咸鱼回响的博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archive/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/dust1" title="GitHub → https://github.com/dust1" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">咸鱼回响</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 构建
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
